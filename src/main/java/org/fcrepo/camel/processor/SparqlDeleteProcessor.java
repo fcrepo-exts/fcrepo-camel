@@ -26,6 +26,7 @@ import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
 import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.hp.hpl.jena.graph.Node_URI;
@@ -34,6 +35,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -50,11 +52,9 @@ public class SparqlDeleteProcessor implements Processor {
     /**
      * Define how the message should be processed.
      */
-    public void process(final Exchange exchange) throws Exception {
+    public void process(final Exchange exchange) throws RuntimeCamelException {
 
         final Message in = exchange.getIn();
-        final Model model = createDefaultModel().read(in.getBody(InputStream.class), null);
-        final StmtIterator triples = model.listStatements();
         String subject = null;
 
         if (in.getHeader(FCREPO_BASE_URL) != null) {
@@ -62,7 +62,7 @@ public class SparqlDeleteProcessor implements Processor {
         } else if (in.getHeader(BASE_URL_HEADER_NAME) != null) {
             subject = in.getHeader(BASE_URL_HEADER_NAME, String.class);
         } else {
-            throw new Exception("No baseURL header available!");
+            throw new RuntimeCamelException("No baseURL header available!");
         }
 
         if (in.getHeader(FCREPO_IDENTIFIER) != null) {
@@ -70,6 +70,9 @@ public class SparqlDeleteProcessor implements Processor {
         } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
            subject += in.getHeader(IDENTIFIER_HEADER_NAME);
         }
+
+        final Model model = createDefaultModel().read(in.getBody(InputStream.class), null);
+        final StmtIterator triples = model.listStatements();
 
         // build list of triples to delete
         final Set<String> uris = new HashSet<String>();

@@ -30,6 +30,7 @@ import java.util.Map;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
@@ -48,6 +49,15 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
 
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
+
+    @Test(expected = RuntimeCamelException.class)
+    public void missingHeaders() throws IOException, InterruptedException {
+        final Map<String, Object> headers = new HashMap<>();
+        headers.put(FCREPO_IDENTIFIER, "/foo");
+        template.sendBodyAndHeaders(null, headers);
+        resultEndpoint.expectedMessageCount(0);
+        resultEndpoint.assertIsSatisfied();
+    }
 
     @Test
     public void testDescribe() throws IOException, InterruptedException {
@@ -80,9 +90,13 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         headers.put(FCREPO_BASE_URL, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
         template.sendBodyAndHeaders(null, headers);
+        
+        headers.clear();
+        headers.put(FCREPO_BASE_URL, base + path);
+        template.sendBodyAndHeaders(null, headers);
 
         // Confirm that assertions passed
-        resultEndpoint.expectedMessageCount(4);
+        resultEndpoint.expectedMessageCount(5);
         resultEndpoint.assertIsSatisfied();
     }
 

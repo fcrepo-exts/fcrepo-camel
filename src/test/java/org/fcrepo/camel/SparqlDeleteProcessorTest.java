@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
@@ -48,6 +49,15 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
 
+    @Test(expected = RuntimeCamelException.class)
+    public void missingHeaders() throws IOException, InterruptedException {
+        final Map<String, Object> headers = new HashMap<>();
+        headers.put(FCREPO_IDENTIFIER, "/foo");
+        template.sendBodyAndHeaders(null, headers);
+        resultEndpoint.expectedMessageCount(0);
+        resultEndpoint.assertIsSatisfied();
+    }
+
     @Test
     public void testDelete() throws IOException, InterruptedException {
         final String base = "http://localhost/rest";
@@ -58,9 +68,15 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
             "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"" +
             "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
             "    xmlns=\"" + base + path + "\">" +
+            "  <rdf:Description rdf:about=\"" + base + "\">" +
+            "    <dc:title>Silas Marner</dc:title>" +
+            "  </rdf:Description>" +
             "  <rdf:Description rdf:about=\"" + base + path + "\">" +
             "    <dc:title>Middlemarch</dc:title>" +
             "    <dc:relation rdf:resource=\"" + base + path + "/appendix\"/>" +
+            "    <dc:relation rdf:resource=\"" + base + path + "#appendix2\"/>" +
+            "    <dc:relation rdf:resource=\"http://some-other-uri/appendix3\"/>" +
+            "    <dc:relation rdf:resource=\"" + base + path + "\"/>" +
             "    <dc:creator rdf:parseType=\"Resource\">" +
             "      <vcard:FN>George Elliot</vcard:FN>" +
             "      <vcard:N rdf:parseType=\"Resource\">" +
@@ -74,7 +90,8 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
         // Assertions
         resultEndpoint.expectedBodiesReceived(
                 "DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
-                "DELETE WHERE { <" + base + path + "/appendix> ?p ?o }");
+                "DELETE WHERE { <" + base + path + "/appendix> ?p ?o };\n" +
+                "DELETE WHERE { <" + base + path + "#appendix2> ?p ?o }");
         resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/sparql-update");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
@@ -98,9 +115,14 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
         headers.put(FCREPO_BASE_URL, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
         template.sendBodyAndHeaders(incomingDoc, headers);
+        
+        headers.clear();
+        headers.put(FCREPO_BASE_URL, base + path);
+        template.sendBodyAndHeaders(incomingDoc, headers);
+
 
         // Confirm that assertions passed
-        resultEndpoint.expectedMessageCount(4);
+        resultEndpoint.expectedMessageCount(5);
         resultEndpoint.assertIsSatisfied();
     }
 
