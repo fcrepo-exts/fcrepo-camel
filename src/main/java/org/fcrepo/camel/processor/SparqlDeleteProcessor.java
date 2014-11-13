@@ -35,7 +35,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import java.io.InputStream;
-import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;

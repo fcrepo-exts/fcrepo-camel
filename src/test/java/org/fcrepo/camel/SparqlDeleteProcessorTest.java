@@ -115,7 +115,7 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
         headers.put(FCREPO_BASE_URL, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
         template.sendBodyAndHeaders(incomingDoc, headers);
-        
+
         headers.clear();
         headers.put(FCREPO_BASE_URL, base + path);
         template.sendBodyAndHeaders(incomingDoc, headers);

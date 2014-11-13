@@ -90,7 +90,7 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         headers.put(FCREPO_BASE_URL, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
         template.sendBodyAndHeaders(null, headers);
-        
+
         headers.clear();
         headers.put(FCREPO_BASE_URL, base + path);
         template.sendBodyAndHeaders(null, headers);
