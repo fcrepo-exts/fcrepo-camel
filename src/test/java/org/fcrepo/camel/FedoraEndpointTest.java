@@ -43,7 +43,7 @@ public class FedoraEndpointTest {
     private Processor mockProcessor;
 
     @Test(expected = RuntimeCamelException.class)
-    public void testNoConsumerCanBeCreated() {
+    public void testNoConsumerCanBeCreated() throws RuntimeCamelException {
         final FedoraEndpoint testEndpoint = new FedoraEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
         testEndpoint.createConsumer(mockProcessor);
     }

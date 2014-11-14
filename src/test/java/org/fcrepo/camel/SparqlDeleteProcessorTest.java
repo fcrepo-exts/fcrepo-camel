@@ -49,8 +49,9 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
 
-    @Test(expected = RuntimeCamelException.class)
-    public void missingHeaders() throws IOException, InterruptedException {
+    @Test
+    public void missingHeaders() throws RuntimeCamelException, InterruptedException {
+
         final Map<String, Object> headers = new HashMap<>();
         headers.put(FCREPO_IDENTIFIER, "/foo");
         template.sendBodyAndHeaders(null, headers);
@@ -131,6 +132,9 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() throws IOException {
+                onException(RuntimeCamelException.class)
+                    .handled(true);
+
                 from("direct:start")
                     .process(new SparqlDeleteProcessor())
                     .to("mock:result");

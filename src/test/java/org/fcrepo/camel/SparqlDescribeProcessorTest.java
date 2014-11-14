@@ -50,7 +50,7 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
 
-    @Test(expected = RuntimeCamelException.class)
+    @Test
     public void missingHeaders() throws IOException, InterruptedException {
         final Map<String, Object> headers = new HashMap<>();
         headers.put(FCREPO_IDENTIFIER, "/foo");
@@ -105,6 +105,9 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() throws IOException {
+                onException(RuntimeCamelException.class)
+                    .handled(true);
+
                 from("direct:start")
                     .process(new SparqlDescribeProcessor())
                     .to("mock:result");
