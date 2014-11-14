@@ -26,7 +26,6 @@ import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
 import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.RuntimeCamelException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.hp.hpl.jena.graph.Node_URI;
@@ -35,6 +34,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +51,7 @@ public class SparqlDeleteProcessor implements Processor {
     /**
      * Define how the message should be processed.
      */
-    public void process(final Exchange exchange) throws RuntimeCamelException {
+    public void process(final Exchange exchange) throws IOException {
 
         final Message in = exchange.getIn();
         String subject = null;
@@ -61,7 +61,7 @@ public class SparqlDeleteProcessor implements Processor {
         } else if (in.getHeader(BASE_URL_HEADER_NAME) != null) {
             subject = in.getHeader(BASE_URL_HEADER_NAME, String.class);
         } else {
-            throw new RuntimeCamelException("No baseURL header available!");
+            throw new IOException("No baseURL header available!");
         }
 
         if (in.getHeader(FCREPO_IDENTIFIER) != null) {

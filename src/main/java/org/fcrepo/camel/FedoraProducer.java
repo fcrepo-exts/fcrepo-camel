@@ -30,6 +30,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -86,15 +87,15 @@ public class FedoraProducer extends DefaultProducer {
 
         switch (method) {
         case PATCH:
-            response = client.patch(getMetadataUri(client, url), in.getBody(String.class));
+            response = client.patch(getMetadataUri(client, url), in.getBody(InputStream.class));
             exchange.getIn().setBody(response.getBody());
             break;
         case PUT:
-            response = client.put(create(url), in.getBody(String.class), contentType);
+            response = client.put(create(url), in.getBody(InputStream.class), contentType);
             exchange.getIn().setBody(response.getBody());
             break;
         case POST:
-            response = client.post(create(url), in.getBody(String.class), contentType);
+            response = client.post(create(url), in.getBody(InputStream.class), contentType);
             exchange.getIn().setBody(response.getBody());
             break;
         case DELETE:
