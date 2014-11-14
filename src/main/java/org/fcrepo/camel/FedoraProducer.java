@@ -44,7 +44,7 @@ import org.slf4j.Logger;
  * The Fedora producer.
  *
  * @author Aaron Coburn
- * @since October 20, 201Create a FedoraProducer object
+ * @since October 20, 2014
  */
 public class FedoraProducer extends DefaultProducer {
     private static final Logger LOGGER = getLogger(FedoraProducer.class);
