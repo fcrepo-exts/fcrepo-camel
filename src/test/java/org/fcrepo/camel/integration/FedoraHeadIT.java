@@ -43,7 +43,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraPutIT extends CamelTestSupport {
+public class FedoraHeadIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
@@ -53,37 +53,28 @@ public class FedoraPutIT extends CamelTestSupport {
 
     @Test
     public void testPut() throws InterruptedException {
-        final String path1 = "/test/a/b/c/d";
-        final String path2 = "/test/a/b/c/e";
+        final String path = "/test/a/b/c/d";
 
         // Assertions
-        resultEndpoint.expectedMessageCount(2);
+        resultEndpoint.expectedMessageCount(1);
 
         // Setup
         final Map<String, Object> setupHeaders = new HashMap<>();
         setupHeaders.put(HTTP_METHOD, "PUT");
-        setupHeaders.put(FCREPO_IDENTIFIER, path1);
+        setupHeaders.put(FCREPO_IDENTIFIER, path);
         setupHeaders.put(CONTENT_TYPE, "text/turtle");
         template.sendBodyAndHeaders("direct:setup", getTurtleDocument(), setupHeaders);
 
-        setupHeaders.clear();
-        setupHeaders.put(HTTP_METHOD, "PUT");
-        setupHeaders.put(FCREPO_IDENTIFIER, path2);
-        template.sendBodyAndHeaders("direct:setup2", getTurtleDocument(), setupHeaders);
-
         // Test
-        template.sendBodyAndHeader(null, FCREPO_IDENTIFIER, path1);
-        template.sendBodyAndHeader(null, FCREPO_IDENTIFIER, path2);
+        final Map<String, Object> headers = new HashMap<>();
+        headers.put(HTTP_METHOD, "HEAD");
+        headers.put(FCREPO_IDENTIFIER, path);
+        template.sendBodyAndHeaders(null, headers);
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<>();
         teardownHeaders.put(HTTP_METHOD, "DELETE");
-        teardownHeaders.put(FCREPO_IDENTIFIER, path1);
-        template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
-
-        teardownHeaders.clear();
-        teardownHeaders.put(HTTP_METHOD, "DELETE");
-        teardownHeaders.put(FCREPO_IDENTIFIER, path2);
+        teardownHeaders.put(FCREPO_IDENTIFIER, path);
         template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
 
         // Confirm that assertions passed
@@ -102,14 +93,8 @@ public class FedoraPutIT extends CamelTestSupport {
                 from("direct:setup")
                     .to(fcrepo_uri);
 
-                from("direct:setup2")
-                    .to(fcrepo_uri + "?contentType=text/turtle");
-
                 from("direct:start")
                     .to(fcrepo_uri)
-                    .filter().xpath(
-                        "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
                     .to("mock:result");
 
                 from("direct:teardown")
