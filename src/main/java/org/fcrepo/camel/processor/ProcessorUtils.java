@@ -43,24 +43,22 @@ public final class ProcessorUtils {
      * @param in the incoming Message
      */
     public static String getSubjectUri(final Message in) throws IOException {
-        String base = null;
+        final StringBuilder base = new StringBuilder("");
 
         if (in.getHeader(FCREPO_BASE_URL) != null) {
-            base = in.getHeader(FCREPO_BASE_URL, String.class);
+            base.append(in.getHeader(FCREPO_BASE_URL, String.class));
         } else if (in.getHeader(BASE_URL_HEADER_NAME) != null) {
-            base = in.getHeader(BASE_URL_HEADER_NAME, String.class);
+            base.append(in.getHeader(BASE_URL_HEADER_NAME, String.class));
         } else {
             throw new IOException("No baseURL header available!");
         }
 
         if (in.getHeader(FCREPO_IDENTIFIER) != null) {
-           return base + in.getHeader(FCREPO_IDENTIFIER);
+           base.append(in.getHeader(FCREPO_IDENTIFIER));
         } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
-           return base + in.getHeader(IDENTIFIER_HEADER_NAME);
-        } else {
-            return base;
+           base.append(in.getHeader(IDENTIFIER_HEADER_NAME));
         }
+        return base.toString();
     }
 }
-
 
