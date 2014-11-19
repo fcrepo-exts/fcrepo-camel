@@ -18,6 +18,7 @@ package org.fcrepo.camel;
 
 import static java.net.URI.create;
 import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.component.http4.HttpMethods.DELETE;
@@ -44,12 +45,12 @@ import org.slf4j.Logger;
  * The Fedora producer.
  *
  * @author Aaron Coburn
- * @since October 20, 201Create a FedoraProducer object
+ * @since October 20, 2014
  */
 public class FedoraProducer extends DefaultProducer {
     private static final Logger LOGGER = getLogger(FedoraProducer.class);
 
-    private volatile FedoraEndpoint endpoint;
+    private FedoraEndpoint endpoint;
 
     /**
      * Create a FedoraProducer object
@@ -81,7 +82,9 @@ public class FedoraProducer extends DefaultProducer {
         final String accept = getAccept(exchange);
         final String url = getUrl(exchange);
 
-        LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
+        }
 
         FedoraResponse response;
 
@@ -110,8 +113,8 @@ public class FedoraProducer extends DefaultProducer {
         default:
             response = client.get(endpoint.getMetadata() ? getMetadataUri(client, url) : create(url), accept);
             exchange.getIn().setBody(response.getBody());
-            exchange.getIn().setHeader("Content-Type", response.getContentType());
         }
+        exchange.getIn().setHeader(CONTENT_TYPE, response.getContentType());
         exchange.getIn().setHeader(HTTP_RESPONSE_CODE, response.getStatusCode());
         client.stop();
     }
@@ -194,21 +197,21 @@ public class FedoraProducer extends DefaultProducer {
         final Message in = exchange.getIn();
         final HttpMethods method = exchange.getIn().getHeader(HTTP_METHOD, HttpMethods.class);
         final URI baseUri = create(endpoint.getBaseUrl());
-        String url = "http://" + baseUri;
+        final StringBuilder url = new StringBuilder("http://" + baseUri);
         if (in.getHeader(FCREPO_IDENTIFIER) != null) {
-            url += in.getHeader(FCREPO_IDENTIFIER, String.class);
+            url.append(in.getHeader(FCREPO_IDENTIFIER, String.class));
         } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
-            url += in.getHeader(IDENTIFIER_HEADER_NAME, String.class);
+            url.append(in.getHeader(IDENTIFIER_HEADER_NAME, String.class));
         }
         if (endpoint.getTransform() != null) {
             if (method == POST) {
-                url += "/fcr:transform";
+                url.append("/fcr:transform");
             } else if (method == null || method == GET) {
-                url += "/fcr:transform/" + endpoint.getTransform();
+                url.append("/fcr:transform/" + endpoint.getTransform());
             }
         } else if (method == DELETE && endpoint.getTombstone()) {
-            url += "/fcr:tombstone";
+            url.append("/fcr:tombstone");
         }
-        return url;
+        return url.toString();
     }
 }
