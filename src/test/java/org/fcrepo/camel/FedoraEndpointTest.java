@@ -65,7 +65,7 @@ public class FedoraEndpointTest {
     public void testTombstone() {
         final FedoraEndpoint testEndpoint = new FedoraEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
         assertEquals(false, testEndpoint.getTombstone());
-        testEndpoint.setTombstone("true");
+        testEndpoint.setTombstone(true);
         assertEquals(true, testEndpoint.getTombstone());
     }
 
@@ -82,7 +82,7 @@ public class FedoraEndpointTest {
     public void testThrowExceptionOnFailure() {
         final FedoraEndpoint testEndpoint = new FedoraEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
         assertEquals(true, testEndpoint.getThrowExceptionOnFailure());
-        testEndpoint.setThrowExceptionOnFailure("false");
+        testEndpoint.setThrowExceptionOnFailure(false);
         assertEquals(false, testEndpoint.getThrowExceptionOnFailure());
     }
 
@@ -90,7 +90,7 @@ public class FedoraEndpointTest {
     public void testMetadata() {
         final FedoraEndpoint testEndpoint = new FedoraEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
         assertEquals(true, testEndpoint.getMetadata());
-        testEndpoint.setMetadata("false");
+        testEndpoint.setMetadata(false);
         assertEquals(false, testEndpoint.getMetadata());
     }
 

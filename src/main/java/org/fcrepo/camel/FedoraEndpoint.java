@@ -209,8 +209,8 @@ public class FedoraEndpoint extends DefaultEndpoint {
      * @param metadata whether to retrieve rdf metadata for non-rdf nodes
      */
     @ManagedAttribute(description = "Whether to retrieve the /fcr:metadata endpoint for Binary nodes")
-    public void setMetadata(final String metadata) {
-        this.metadata = Boolean.valueOf(metadata);
+    public void setMetadata(final Boolean metadata) {
+        this.metadata = metadata;
     }
 
     /**
@@ -226,8 +226,8 @@ public class FedoraEndpoint extends DefaultEndpoint {
      * @param throwOnFailure whether non-2xx HTTP response codes throw exceptions
      */
     @ManagedAttribute(description = "Whether non 2xx response codes should throw an exception")
-    public void setThrowExceptionOnFailure(final String throwOnFailure) {
-        this.throwExceptionOnFailure = Boolean.valueOf(throwOnFailure);
+    public void setThrowExceptionOnFailure(final Boolean throwOnFailure) {
+        this.throwExceptionOnFailure = throwOnFailure;
     }
 
     /**
@@ -260,8 +260,8 @@ public class FedoraEndpoint extends DefaultEndpoint {
      * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
      */
     @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
-    public void setTombstone(final String tombstone) {
-        this.tombstone = Boolean.valueOf(tombstone);
+    public void setTombstone(final Boolean tombstone) {
+        this.tombstone = tombstone;
     }
 
     /**
