@@ -15,22 +15,22 @@
  */
 package org.fcrepo.camel.processor;
 
-import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
+import static org.apache.camel.Exchange.HTTP_METHOD;
 
 import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.sparql.modify.request.QuadDataAcc;
-import com.hp.hpl.jena.sparql.modify.request.UpdateDataInsert;
-import com.hp.hpl.jena.update.UpdateRequest;
+import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
+import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 
 /**
  * Represents a processor for creating the sparql-update message to
@@ -46,15 +46,17 @@ public class SparqlInsertProcessor implements Processor {
     public void process(final Exchange exchange) throws IOException {
 
         final Message in = exchange.getIn();
-        final Model model = createDefaultModel().read(in.getBody(InputStream.class), null, "N-TRIPLE");
-        final StmtIterator triples = model.listStatements();
-        final QuadDataAcc add = new QuadDataAcc();
-        while (triples.hasNext()) {
-            add.addTriple(triples.nextStatement().asTriple());
-        }
-        final UpdateRequest request = new UpdateRequest(new UpdateDataInsert(add));
+        final ParsingProvider parser = new JenaParserProvider();
+        final SerializingProvider serializer = new JenaSerializerProvider();
+        final MGraph graph = new SimpleMGraph();
+        final String contentType = in.getHeader(Exchange.CONTENT_TYPE, String.class);
+        final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
 
-        exchange.getIn().setBody(request.toString());
+        parser.parse(graph, in.getBody(InputStream.class),
+                "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, null);
+        serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
+
+        exchange.getIn().setBody("INSERT DATA { " + serializedGraph.toString("UTF-8") + " }");
         exchange.getIn().setHeader(HTTP_METHOD, "POST");
         exchange.getIn().setHeader(CONTENT_TYPE, "application/sparql-update");
     }

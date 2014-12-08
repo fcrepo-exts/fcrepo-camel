@@ -26,11 +26,13 @@
     <grizzly.version>2.3.16</grizzly.version>
     <httpclient.version>4.3.5</httpclient.version>
     <jena.fuseki.version>1.1.0</jena.fuseki.version>
-    <jena.version>2.12.1</jena.version>
     <jersey.version>2.13</jersey.version>
     <logback.version>1.1.2</logback.version>
     <slf4j.version>1.7.7</slf4j.version>
     <spring.version>4.0.7.RELEASE</spring.version>
+    <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
+    <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
+    <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
     <!-- plugins -->
     <checkstyle.plugin.version>2.12.1</checkstyle.plugin.version>
     <!-- values -->
@@ -103,6 +105,25 @@
       <version>${camel.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.parser</artifactId>
+      <version>${clerezza.rdf.jena.parser.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.serializer</artifactId>
+      <version>${clerezza.rdf.jena.serializer.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+      <version>${clerezza.rdf.core.version}</version>
+    </dependency>
+
+
     <!-- fcrepo -->
     <dependency>
       <groupId>org.fcrepo</groupId>
@@ -162,34 +183,7 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons.lang3.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.jena</groupId>
-      <artifactId>apache-jena-libs</artifactId>
-      <type>pom</type>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.jena</groupId>
-      <artifactId>jena-arq</artifactId>
-      <version>${jena.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.jena</groupId>
-      <artifactId>jena-core</artifactId>
-      <version>${jena.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -202,6 +196,7 @@
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-common</artifactId>
       <version>${jersey.version}</version>
+      <scope>test></scope>
     </dependency>
 
     <!-- logging -->
@@ -554,8 +549,20 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.fcrepo.camel.fcrepo-camel</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Service>org.apache.camel.spi.ComponentResolver;component=fcrepo</Export-Service>
+            <Export-Package>
+              org.apache.clerezza.rdf.*,
+              org.apache.clerezza.utils.*,
+              com.hp.hpl.jena.*,
+              org.apache.commons.codec.*,
+              org.apache.jena.*,
+              com.fasterxml.jackson.*,
+              com.github.jsonldjava.*,
+              org.osgi.service.component,
+              org.wymiwyg.commons.util.*,
+              com.ibm.icu.*,
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

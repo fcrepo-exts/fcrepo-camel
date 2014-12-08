@@ -73,21 +73,25 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         final Map<String, Object> headers = new HashMap<>();
         headers.put(FCREPO_BASE_URL, base);
         headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         headers.clear();
         headers.put(BASE_URL_HEADER_NAME, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         headers.clear();
         headers.put(BASE_URL_HEADER_NAME, base);
         headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         headers.clear();
         headers.put(FCREPO_BASE_URL, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         // Confirm that assertions passed
