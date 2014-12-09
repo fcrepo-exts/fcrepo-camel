@@ -15,10 +15,10 @@
  */
 package org.fcrepo.camel;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,10 +28,10 @@ import java.util.Map;
 import javax.ws.rs.core.Link;
 
 import org.apache.camel.component.http4.HttpOperationFailedException;
-import org.apache.http.HttpStatus;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpStatus;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -47,7 +47,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
@@ -67,8 +66,6 @@ public class FedoraClient {
 
     private Boolean throwExceptionOnFailure = true;
 
-    private static final Logger LOGGER = getLogger(FedoraClient.class);
-
     /**
      * Create a FedoraClient with a set of authentication values.
      * @param username the username for the repository
@@ -84,14 +81,13 @@ public class FedoraClient {
 
         this.throwExceptionOnFailure = throwExceptionOnFailure;
 
-        if (username == null || username.isEmpty() ||
-                password == null || password.isEmpty()) {
+        if (isBlank(username) || isBlank(password)) {
             this.httpclient = HttpClients.createDefault();
         } else {
-            if (host != null) {
-                scope = new AuthScope(new HttpHost(host));
-            } else {
+            if (isBlank(host)) {
                 scope = new AuthScope(AuthScope.ANY);
+            } else {
+                scope = new AuthScope(new HttpHost(host));
             }
             credsProvider.setCredentials(
                     scope,
@@ -174,9 +170,7 @@ public class FedoraClient {
 
         final HttpPatch request = new HttpPatch(url);
         request.addHeader(CONTENT_TYPE, "application/sparql-update");
-        if (body != null) {
-            request.setEntity(new InputStreamEntity(body));
-        }
+        request.setEntity(new InputStreamEntity(body));
 
         final HttpResponse response = httpclient.execute(request);
         final int status = response.getStatusLine().getStatusCode();

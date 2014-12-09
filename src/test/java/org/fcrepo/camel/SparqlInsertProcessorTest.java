@@ -21,6 +21,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.ArrayUtils.reverse;
 import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FedoraTestUtils.getN3Document;
+import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
 import static org.fcrepo.jms.headers.DefaultMessageFactory.BASE_URL_HEADER_NAME;
@@ -85,8 +86,8 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         headers.clear();
         headers.put(BASE_URL_HEADER_NAME, base);
         headers.put(FCREPO_IDENTIFIER, path);
-        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
-        template.sendBodyAndHeaders(document, headers);
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+        template.sendBodyAndHeaders(getTurtleDocument(), headers);
 
         headers.clear();
         headers.put(FCREPO_BASE_URL, base);
