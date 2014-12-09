@@ -38,7 +38,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.fcrepo.camel.processor.SparqlInsertProcessor;
+import org.fcrepo.camel.processor.SparqlUpdateProcessor;
 import org.junit.Test;
 
 /**
@@ -46,7 +46,7 @@ import org.junit.Test;
  * @author Aaron Coburn
  * @since November 7, 2014
  */
-public class SparqlInsertProcessorTest extends CamelTestSupport {
+public class SparqlUpdateProcessorTest extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
@@ -65,7 +65,9 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         reverse(lines);
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("INSERT DATA { " + join(lines, " ") + " }");
+        resultEndpoint.expectedBodiesReceived("DELETE { <" + base + path + "> ?p ?o } " +
+                                              "INSERT { " + join(lines, " ") + " } " +
+                                              "WHERE { <" + base + path + "> ?p ?o }");
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/sparql-update");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
@@ -108,7 +110,7 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
                 final String fcrepo_uri = getFcrepoEndpointUri();
 
                 from("direct:start")
-                    .process(new SparqlInsertProcessor())
+                    .process(new SparqlUpdateProcessor())
                     // Normalize the whitespace to make it easier to compare
                     .process(new Processor() {
                         public void process(final Exchange exchange) throws Exception {

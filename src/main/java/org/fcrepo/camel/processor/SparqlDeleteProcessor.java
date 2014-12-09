@@ -17,24 +17,12 @@ package org.fcrepo.camel.processor;
 
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
 
 import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.commons.lang3.StringUtils;
 
-import com.hp.hpl.jena.graph.Node_URI;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-
-import java.io.InputStream;
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Represends a message processor that deletes objects from an
@@ -51,49 +39,10 @@ public class SparqlDeleteProcessor implements Processor {
 
         final Message in = exchange.getIn();
         final String subject = ProcessorUtils.getSubjectUri(in);
-        final Model model = createDefaultModel().read(in.getBody(InputStream.class), null);
-        final StmtIterator triples = model.listStatements();
 
-        // build list of triples to delete
-        final Set<String> uris = new HashSet<String>();
-        while ( triples.hasNext() ) {
-            final Triple triple = triples.next().asTriple();
+        in.setBody("DELETE WHERE { <" + subject + "> ?p ?o }");
+        in.setHeader(HTTP_METHOD, "POST");
+        in.setHeader(CONTENT_TYPE, "application/sparql-update");
 
-            // add subject uri, if it is part of this object
-            if ( triple.getSubject().isURI() ) {
-                final String uri = ((Node_URI)triple.getSubject()).getURI();
-
-                if (uriMatches(subject, uri) ) {
-                    uris.add(uri);
-                }
-            }
-
-            // add object uri, if it is part of this object
-            if ( triple.getObject().isURI() ) {
-                final String uri = ((Node_URI)triple.getObject()).getURI();
-                if (uriMatches(subject, uri) ) {
-                    uris.add(uri);
-                }
-            }
-        }
-
-        // build delete commands
-        final List<String> commands = new ArrayList<String>();
-        for (final String uri : uris) {
-            commands.add("DELETE WHERE { <" + uri + "> ?p ?o }");
-        }
-
-        exchange.getIn().setBody(StringUtils.join(commands, ";\n"));
-        exchange.getIn().setHeader(HTTP_METHOD, "POST");
-        exchange.getIn().setHeader(CONTENT_TYPE, "application/sparql-update");
-    }
-
-    private static boolean uriMatches(final String resource, final String candidate) {
-        // All triples that will match this logic are ones that:
-        // - have a candidate subject or object that equals the target resource of removal, or
-        // - have a candidate subject or object that is prefixed with the resource of removal
-        //    (therefore catching all children).
-        return resource.equals(candidate) || candidate.startsWith(resource + "/")
-            || candidate.startsWith(resource + "#");
-    }
+   }
 }

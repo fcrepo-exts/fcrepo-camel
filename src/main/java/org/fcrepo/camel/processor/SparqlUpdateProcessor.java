@@ -39,7 +39,7 @@ import java.io.ByteArrayOutputStream;
  * @author Aaron Coburn
  * @since Nov 8, 2014
  */
-public class SparqlInsertProcessor implements Processor {
+public class SparqlUpdateProcessor implements Processor {
     /**
      * Define how the message is processed.
      */
@@ -51,12 +51,15 @@ public class SparqlInsertProcessor implements Processor {
         final MGraph graph = new SimpleMGraph();
         final String contentType = in.getHeader(Exchange.CONTENT_TYPE, String.class);
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
+        final String subject = ProcessorUtils.getSubjectUri(in);
 
         parser.parse(graph, in.getBody(InputStream.class),
                 "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, null);
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
-        exchange.getIn().setBody("INSERT DATA { " + serializedGraph.toString("UTF-8") + " }");
+        exchange.getIn().setBody("DELETE { <" + subject + "> ?p ?o }\n" +
+                                 "INSERT { " + serializedGraph.toString("UTF-8") + " }\n" +
+                                 "WHERE { <" + subject + "> ?p ?o }");
         exchange.getIn().setHeader(HTTP_METHOD, "POST");
         exchange.getIn().setHeader(CONTENT_TYPE, "application/sparql-update");
     }
