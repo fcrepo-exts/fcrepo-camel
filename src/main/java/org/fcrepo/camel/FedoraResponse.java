@@ -16,6 +16,7 @@
 package org.fcrepo.camel;
 
 import java.net.URI;
+import java.io.InputStream;
 
 /**
  * Represents a response from a fedora repository using a {@link FedoraClient}.
@@ -33,7 +34,7 @@ public class FedoraResponse {
 
     private URI location;
 
-    private String body;
+    private InputStream body;
 
     private String contentType;
 
@@ -41,7 +42,7 @@ public class FedoraResponse {
      * Create a FedoraResponse object from the http response
      */
     public FedoraResponse(final URI url, final int statusCode,
-            final String contentType, final URI location, final String body) {
+            final String contentType, final URI location, final InputStream body) {
         this.setUrl(url);
         this.setStatusCode(statusCode);
         this.setLocation(location);
@@ -82,7 +83,7 @@ public class FedoraResponse {
     /**
      * body getter
      */
-    public String getBody() {
+    public InputStream getBody() {
         return body;
     }
 
@@ -90,7 +91,7 @@ public class FedoraResponse {
      * body setter
      * @param body the contents of the response body
      */
-    public void setBody(final String body) {
+    public void setBody(final InputStream body) {
         this.body = body;
     }
 

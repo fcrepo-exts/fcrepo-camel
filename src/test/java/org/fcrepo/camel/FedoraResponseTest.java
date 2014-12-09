@@ -18,11 +18,16 @@ package org.fcrepo.camel;
 
 import static org.junit.Assert.assertEquals;
 import static java.net.URI.create;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.net.URI;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.IOException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.apache.commons.io.IOUtils;
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -32,20 +37,20 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class FedoraResponseTest {
 
     @Test
-    public void testResponse() {
+    public void testResponse() throws IOException {
         final URI uri = create("http://localhost/path/a/b");
         final int status = 200;
         final String contentType = "text/plain";
         final URI location = create("http://localhost/path/a/b/c");
         final String body = "Text response";
-
-        final FedoraResponse response = new FedoraResponse(uri, status, contentType, location, body);
+        final InputStream bodyStream = new ByteArrayInputStream(body.getBytes(UTF_8));
+        final FedoraResponse response = new FedoraResponse(uri, status, contentType, location, bodyStream);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), contentType);
         assertEquals(response.getLocation(), location);
-        assertEquals(response.getBody(), body);
+        assertEquals(IOUtils.toString(response.getBody(), UTF_8), body);
 
         response.setUrl(create("http://example.org/path/a/b"));
         assertEquals(response.getUrl(), create("http://example.org/path/a/b"));
@@ -59,8 +64,10 @@ public class FedoraResponseTest {
         response.setLocation(create("http://example.org/path/a/b/c"));
         assertEquals(response.getLocation(), create("http://example.org/path/a/b/c"));
 
-        response.setBody("<http://example.org/book/3> <dc:title> \"Title\" .");
-        assertEquals(response.getBody(), "<http://example.org/book/3> <dc:title> \"Title\" .");
+        response.setBody(new ByteArrayInputStream(
+                    "<http://example.org/book/3> <dc:title> \"Title\" .".getBytes(UTF_8)));
+        assertEquals(IOUtils.toString(response.getBody(), UTF_8),
+                    "<http://example.org/book/3> <dc:title> \"Title\" .");
     }
 
 }
