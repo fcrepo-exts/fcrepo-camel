@@ -37,8 +37,10 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.component.http4.HttpMethods;
 import org.apache.camel.component.http4.HttpOperationFailedException;
+import org.apache.camel.converter.stream.CachedOutputStream;
 import org.apache.camel.impl.DefaultProducer;
 import org.apache.camel.util.ExchangeHelper;
+import org.apache.camel.util.IOHelper;
 import org.slf4j.Logger;
 
 /**
@@ -91,19 +93,19 @@ public class FedoraProducer extends DefaultProducer {
         switch (method) {
         case PATCH:
             response = client.patch(getMetadataUri(client, url), in.getBody(InputStream.class));
-            exchange.getIn().setBody(response.getBody());
+            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case PUT:
             response = client.put(create(url), in.getBody(InputStream.class), contentType);
-            exchange.getIn().setBody(response.getBody());
+            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case POST:
             response = client.post(create(url), in.getBody(InputStream.class), contentType);
-            exchange.getIn().setBody(response.getBody());
+            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case DELETE:
             response = client.delete(create(url));
-            exchange.getIn().setBody(response.getBody());
+            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case HEAD:
             response = client.head(create(url));
@@ -112,7 +114,7 @@ public class FedoraProducer extends DefaultProducer {
         case GET:
         default:
             response = client.get(endpoint.getMetadata() ? getMetadataUri(client, url) : create(url), accept);
-            exchange.getIn().setBody(response.getBody());
+            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
         exchange.getIn().setHeader(CONTENT_TYPE, response.getContentType());
         exchange.getIn().setHeader(HTTP_RESPONSE_CODE, response.getStatusCode());
@@ -215,5 +217,24 @@ public class FedoraProducer extends DefaultProducer {
             url.append("/fcr:tombstone");
         }
         return url.toString();
+    }
+
+    private static InputStream extractResponseBodyAsStream(final InputStream is, final Exchange exchange)
+            throws IOException {
+        // As httpclient is using a AutoCloseInputStream, it will be closed when the connection is closed
+        // we need to cache the stream for it.
+        if (is == null) {
+            return null;
+        } else {
+            try (final CachedOutputStream cos = new CachedOutputStream(exchange, false)) {
+                // This CachedOutputStream will not be closed when the exchange is onCompletion
+                IOHelper.copy(is, cos);
+                // When the InputStream is closed, the CachedOutputStream will be closed
+                return cos.getWrappedInputStream();
+
+            } finally {
+                IOHelper.close(is, "Extracting response body", LOGGER);
+            }
+        }
     }
 }

@@ -23,6 +23,7 @@
     <fcrepo.version>4.0.1-SNAPSHOT</fcrepo.version>
     <camel.version>2.14.0</camel.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
+    <commons.io.version>2.4</commons.io.version>
     <grizzly.version>2.3.16</grizzly.version>
     <httpclient.version>4.3.5</httpclient.version>
     <jena.fuseki.version>1.1.0</jena.fuseki.version>
@@ -191,6 +192,13 @@
       <artifactId>javax.ws.rs-api</artifactId>
       <version>2.0.1</version>
     </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons.io.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>

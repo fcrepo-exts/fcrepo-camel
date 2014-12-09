@@ -107,6 +107,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth1")
                     .to(fcrepo_uri + "?authUsername=foo")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -115,6 +116,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth2")
                     .to(fcrepo_uri + "?authPassword=foo")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -123,6 +125,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth3")
                     .to(fcrepo_uri + "?authPassword=foo&authUsername=")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -131,6 +134,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth4")
                     .to(fcrepo_uri + "?authPassword=&authUsername=")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -139,6 +143,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth5")
                     .to(fcrepo_uri + "?authPassword=")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -147,6 +152,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth6")
                     .to(fcrepo_uri + "?authUsername=")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -155,6 +161,7 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth7")
                     .to(fcrepo_uri + "?authUsername=foo&authPassword=bar&authHost=localhost")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
@@ -163,13 +170,12 @@ public class FedoraAuthTest extends CamelTestSupport {
 
                 from("direct:auth8")
                     .to(fcrepo_uri + "?authUsername=foo&authPassword=bar")
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
                     .split(titleXpath)
                     .to("mock:result");
-
-
 
                 from("direct:teardown")
                     .to(fcrepo_uri)

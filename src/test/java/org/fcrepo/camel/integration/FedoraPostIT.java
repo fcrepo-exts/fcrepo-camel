@@ -100,6 +100,7 @@ public class FedoraPostIT extends CamelTestSupport {
 
                 from("direct:start")
                     .to(fcrepo_uri)
+                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)

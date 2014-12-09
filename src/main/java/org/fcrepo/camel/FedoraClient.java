@@ -15,6 +15,8 @@
  */
 package org.fcrepo.camel;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -45,6 +47,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
@@ -63,6 +66,8 @@ public class FedoraClient {
     private CloseableHttpClient httpclient;
 
     private Boolean throwExceptionOnFailure = true;
+
+    private static final Logger LOGGER = getLogger(FedoraClient.class);
 
     /**
      * Create a FedoraClient with a set of authentication values.
@@ -152,7 +157,7 @@ public class FedoraClient {
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
             return new FedoraResponse(url, status, contentTypeHeader, null,
-                    entity != null ? EntityUtils.toString(entity) : null);
+                    entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -179,8 +184,7 @@ public class FedoraClient {
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
-            return new FedoraResponse(url, status, contentType, null,
-                    entity != null ? EntityUtils.toString(entity) : null);
+            return new FedoraResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -208,7 +212,7 @@ public class FedoraClient {
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
             return new FedoraResponse(url, status, contentTypeHeader, null,
-                    entity != null ? EntityUtils.toString(entity) : null);
+                    entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -228,8 +232,7 @@ public class FedoraClient {
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
-            return new FedoraResponse(url, status, contentType, null,
-                    entity != null ? EntityUtils.toString(entity) : null);
+            return new FedoraResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -261,7 +264,7 @@ public class FedoraClient {
                 describedBy = links.get(0);
             }
             return new FedoraResponse(url, status, contentType, describedBy,
-                    entity != null ? EntityUtils.toString(entity) : null);
+                    entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -334,4 +337,6 @@ public class FedoraClient {
         }
         return uris;
     }
+
+
  }
