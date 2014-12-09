@@ -231,7 +231,6 @@ public class FedoraProducer extends DefaultProducer {
                 IOHelper.copy(is, cos);
                 // When the InputStream is closed, the CachedOutputStream will be closed
                 return cos.getWrappedInputStream();
-
             } finally {
                 IOHelper.close(is, "Extracting response body", LOGGER);
             }
