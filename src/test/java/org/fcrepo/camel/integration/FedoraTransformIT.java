@@ -19,6 +19,7 @@ import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FedoraEndpoint.FCREPO_TRANSFORM;
 import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoBaseUrl;
 import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
 
@@ -73,6 +74,7 @@ public class FedoraTransformIT extends CamelTestSupport {
             "id      = . :: xsd:string ;\n" +
             "title = dc:title :: xsd:string;\n" +
             "uuid = fcrepo:uuid :: xsd:string;";
+
         headers.clear();
         headers.put(FCREPO_IDENTIFIER, identifier);
         headers.put(CONTENT_TYPE, "application/rdf+ldpath");
@@ -86,6 +88,22 @@ public class FedoraTransformIT extends CamelTestSupport {
         headers.put(ACCEPT_CONTENT_TYPE, "application/json");
         template.sendBodyAndHeaders("direct:get", null, headers);
 
+        headers.clear();
+        headers.put(FCREPO_IDENTIFIER, identifier);
+        headers.put(FCREPO_TRANSFORM, "default");
+        headers.put(HTTP_METHOD, "GET");
+        template.sendBodyAndHeaders("direct:get2", null, headers);
+
+        headers.clear();
+        headers.put(FCREPO_IDENTIFIER, identifier);
+        headers.put(FCREPO_TRANSFORM, "default");
+        template.sendBodyAndHeaders("direct:get2", null, headers);
+
+        headers.clear();
+        headers.put(FCREPO_IDENTIFIER, identifier);
+        headers.put(FCREPO_TRANSFORM, "");
+        template.sendBodyAndHeaders("direct:get", null, headers);
+
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<>();
@@ -93,9 +111,8 @@ public class FedoraTransformIT extends CamelTestSupport {
         teardownHeaders.put(FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
 
-
         // Assertions
-        resultEndpoint.expectedMessageCount(3);
+        resultEndpoint.expectedMessageCount(6);
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/json");
         resultEndpoint.assertIsSatisfied();
     }
@@ -117,6 +134,11 @@ public class FedoraTransformIT extends CamelTestSupport {
                 from("direct:get")
                     .to(fcrepo_uri + "?transform=default")
                     .to("mock:result");
+
+                from("direct:get2")
+                    .to(fcrepo_uri + "?transform=foo")
+                    .to("mock:result");
+
 
                 from("direct:post")
                     .to(fcrepo_uri + "?transform=true")

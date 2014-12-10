@@ -26,6 +26,7 @@ import static org.apache.camel.component.http4.HttpMethods.GET;
 import static org.apache.camel.component.http4.HttpMethods.POST;
 import static org.fcrepo.camel.FedoraEndpoint.DEFAULT_CONTENT_TYPE;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FedoraEndpoint.FCREPO_TRANSFORM;
 import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -177,7 +178,9 @@ public class FedoraProducer extends DefaultProducer {
      */
     protected String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
-        if (endpoint.getTransform() != null) {
+        final String fcrepoTransform = in.getHeader(FCREPO_TRANSFORM, String.class);
+
+        if (endpoint.getTransform() != null || (fcrepoTransform != null && !fcrepoTransform.isEmpty()) ) {
             return "application/json";
         } else if (endpoint.getAccept() != null) {
             return endpoint.getAccept();
@@ -201,17 +204,22 @@ public class FedoraProducer extends DefaultProducer {
         final Message in = exchange.getIn();
         final HttpMethods method = exchange.getIn().getHeader(HTTP_METHOD, HttpMethods.class);
         final URI baseUri = create(endpoint.getBaseUrl());
+        final String fcrepoTransform = in.getHeader(FCREPO_TRANSFORM, String.class);
         final StringBuilder url = new StringBuilder("http://" + baseUri);
         if (in.getHeader(FCREPO_IDENTIFIER) != null) {
             url.append(in.getHeader(FCREPO_IDENTIFIER, String.class));
         } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
             url.append(in.getHeader(IDENTIFIER_HEADER_NAME, String.class));
         }
-        if (endpoint.getTransform() != null) {
+        if (endpoint.getTransform() != null || (fcrepoTransform != null && !fcrepoTransform.isEmpty())) {
             if (method == POST) {
                 url.append("/fcr:transform");
             } else if (method == null || method == GET) {
-                url.append("/fcr:transform/" + endpoint.getTransform());
+                if (fcrepoTransform != null && !fcrepoTransform.isEmpty()) {
+                    url.append("/fcr:transform/" + fcrepoTransform);
+                } else {
+                    url.append("/fcr:transform/" + endpoint.getTransform());
+                }
             }
         } else if (method == DELETE && endpoint.getTombstone()) {
             url.append("/fcr:tombstone");
