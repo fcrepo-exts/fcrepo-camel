@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.HttpClient;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -63,7 +64,7 @@ public class FedoraClient {
 
     private static final String CONTENT_TYPE = "Content-Type";
 
-    private CloseableHttpClient httpclient;
+    private HttpClient httpclient;
 
     private Boolean throwExceptionOnFailure = true;
 
@@ -103,10 +104,20 @@ public class FedoraClient {
     }
 
     /**
+     * Create the FedoraClient with a pre-configured HTTP client.
+     * @param httpclient a preconfigured HTTP client
+     * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
+     */
+    public FedoraClient(final HttpClient httpclient, final Boolean throwExceptionOnFailure) {
+        this.throwExceptionOnFailure = throwExceptionOnFailure;
+        this.httpclient = httpclient;
+    }
+
+    /**
      * Stop the client
      */
     public void stop() throws IOException {
-        this.httpclient.close();
+        //this.httpclient.close();
     }
 
     /**
