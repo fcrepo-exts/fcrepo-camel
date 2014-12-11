@@ -226,21 +226,12 @@ public class FedoraProducer extends DefaultProducer {
         if (is == null) {
             return null;
         } else {
-            CachedOutputStream cos = null;
-            try {
+            try (final CachedOutputStream cos = new CachedOutputStream(exchange, false)) {
                 // This CachedOutputStream will not be closed when the exchange is onCompletion
-                cos = new CachedOutputStream(exchange, false);
                 IOHelper.copy(is, cos);
                 // When the InputStream is closed, the CachedOutputStream will be closed
                 return cos.getWrappedInputStream();
-            } catch (IOException ex) {
-                // try to close the CachedOutputStream when we get the IOException
-                try {
-                    cos.close();
-                } catch (IOException ignore) {
-                    //do nothing here
-                }
-                throw ex;
+
             } finally {
                 IOHelper.close(is, "Extracting response body", LOGGER);
             }
