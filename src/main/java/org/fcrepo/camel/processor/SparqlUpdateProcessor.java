@@ -57,9 +57,9 @@ public class SparqlUpdateProcessor implements Processor {
                 "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, null);
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
-        exchange.getIn().setBody("DELETE { <" + subject + "> ?p ?o }\n" +
+        exchange.getIn().setBody("DELETE WHERE { <" + subject + "> ?p ?o };\n" +
                                  "INSERT { " + serializedGraph.toString("UTF-8") + " }\n" +
-                                 "WHERE { <" + subject + "> ?p ?o }");
+                                 "WHERE { }");
         exchange.getIn().setHeader(HTTP_METHOD, "POST");
         exchange.getIn().setHeader(CONTENT_TYPE, "application/sparql-update");
     }

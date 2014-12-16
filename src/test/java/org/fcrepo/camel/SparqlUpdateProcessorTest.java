@@ -21,6 +21,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.ArrayUtils.reverse;
 import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FedoraTestUtils.getN3Document;
+import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
 import static org.fcrepo.jms.headers.DefaultMessageFactory.BASE_URL_HEADER_NAME;
@@ -65,9 +66,9 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         reverse(lines);
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("DELETE { <" + base + path + "> ?p ?o } " +
+        resultEndpoint.expectedBodiesReceived("DELETE WHERE { <" + base + path + "> ?p ?o }; " +
                                               "INSERT { " + join(lines, " ") + " } " +
-                                              "WHERE { <" + base + path + "> ?p ?o }");
+                                              "WHERE { }");
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/sparql-update");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
@@ -81,8 +82,8 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         headers.clear();
         headers.put(BASE_URL_HEADER_NAME, base);
         headers.put(IDENTIFIER_HEADER_NAME, path);
-        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
-        template.sendBodyAndHeaders(document, headers);
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+        template.sendBodyAndHeaders(getTurtleDocument(), headers);
 
         headers.clear();
         headers.put(BASE_URL_HEADER_NAME, base);

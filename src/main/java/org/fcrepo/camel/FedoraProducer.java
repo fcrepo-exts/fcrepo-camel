@@ -54,6 +54,8 @@ public class FedoraProducer extends DefaultProducer {
 
     private FedoraEndpoint endpoint;
 
+    private FedoraClient client;
+
     /**
      * Create a FedoraProducer object
      *
@@ -62,6 +64,11 @@ public class FedoraProducer extends DefaultProducer {
     public FedoraProducer(final FedoraEndpoint endpoint) {
         super(endpoint);
         this.endpoint = endpoint;
+        this.client = new FedoraClient(
+                endpoint.getAuthUsername(),
+                endpoint.getAuthPassword(),
+                endpoint.getAuthHost(),
+                endpoint.getThrowExceptionOnFailure());
     }
 
     /**
@@ -73,12 +80,6 @@ public class FedoraProducer extends DefaultProducer {
     @Override
     public void process(final Exchange exchange) throws HttpOperationFailedException, IOException {
         final Message in = exchange.getIn();
-        final FedoraClient client = new FedoraClient(
-                endpoint.getAuthUsername(),
-                endpoint.getAuthPassword(),
-                endpoint.getAuthHost(),
-                endpoint.getThrowExceptionOnFailure());
-
         final HttpMethods method = getMethod(exchange);
         final String contentType = getContentType(exchange);
         final String accept = getAccept(exchange);
@@ -92,7 +93,7 @@ public class FedoraProducer extends DefaultProducer {
 
         switch (method) {
         case PATCH:
-            response = client.patch(getMetadataUri(client, url), in.getBody(InputStream.class));
+            response = client.patch(getMetadataUri(url), in.getBody(InputStream.class));
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case PUT:
@@ -113,18 +114,17 @@ public class FedoraProducer extends DefaultProducer {
             break;
         case GET:
         default:
-            response = client.get(endpoint.getMetadata() ? getMetadataUri(client, url) : create(url), accept);
+            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : create(url), accept);
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
         exchange.getIn().setHeader(CONTENT_TYPE, response.getContentType());
         exchange.getIn().setHeader(HTTP_RESPONSE_CODE, response.getStatusCode());
-        client.stop();
     }
 
     /**
      *
      */
-    protected URI getMetadataUri(final FedoraClient client, final String url)
+    protected URI getMetadataUri(final String url)
             throws HttpOperationFailedException, IOException {
         final FedoraResponse headResponse = client.head(create(url));
         if (headResponse.getLocation() != null) {
@@ -207,6 +207,8 @@ public class FedoraProducer extends DefaultProducer {
         } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
             url.append(in.getHeader(IDENTIFIER_HEADER_NAME, String.class));
         }
+        LOGGER.debug("Transform: {}, Method: {}, Tombstone: {}", endpoint.getTransform(),
+                method, endpoint.getTombstone());
         if (endpoint.getTransform() != null) {
             if (method == POST) {
                 url.append("/fcr:transform");

@@ -15,7 +15,7 @@
  */
 package org.fcrepo.camel;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,13 +42,11 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.HttpClient;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
@@ -64,11 +62,9 @@ public class FedoraClient {
 
     private static final String CONTENT_TYPE = "Content-Type";
 
-    private HttpClient httpclient;
+    private CloseableHttpClient httpclient;
 
     private Boolean throwExceptionOnFailure = true;
-
-    private static final Logger LOGGER = getLogger(FedoraClient.class);
 
     /**
      * Create a FedoraClient with a set of authentication values.
@@ -85,14 +81,13 @@ public class FedoraClient {
 
         this.throwExceptionOnFailure = throwExceptionOnFailure;
 
-        if (username == null || username.isEmpty() ||
-                password == null || password.isEmpty()) {
+        if (isBlank(username) || isBlank(password)) {
             this.httpclient = HttpClients.createDefault();
         } else {
-            if (host != null) {
-                scope = new AuthScope(new HttpHost(host));
-            } else {
+            if (isBlank(host)) {
                 scope = new AuthScope(AuthScope.ANY);
+            } else {
+                scope = new AuthScope(new HttpHost(host));
             }
             credsProvider.setCredentials(
                     scope,
@@ -104,20 +99,10 @@ public class FedoraClient {
     }
 
     /**
-     * Create the FedoraClient with a pre-configured HTTP client.
-     * @param httpclient a preconfigured HTTP client
-     * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
-     */
-    public FedoraClient(final HttpClient httpclient, final Boolean throwExceptionOnFailure) {
-        this.throwExceptionOnFailure = throwExceptionOnFailure;
-        this.httpclient = httpclient;
-    }
-
-    /**
      * Stop the client
      */
     public void stop() throws IOException {
-        //this.httpclient.close();
+        this.httpclient.close();
     }
 
     /**
@@ -185,9 +170,7 @@ public class FedoraClient {
 
         final HttpPatch request = new HttpPatch(url);
         request.addHeader(CONTENT_TYPE, "application/sparql-update");
-        if (body != null) {
-            request.setEntity(new InputStreamEntity(body));
-        }
+        request.setEntity(new InputStreamEntity(body));
 
         final HttpResponse response = httpclient.execute(request);
         final int status = response.getStatusLine().getStatusCode();
