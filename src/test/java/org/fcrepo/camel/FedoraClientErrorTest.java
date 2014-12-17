@@ -16,6 +16,7 @@
 
 package org.fcrepo.camel;
 
+import static org.fcrepo.camel.TestUtils.setField;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -27,21 +28,20 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.lang.reflect.Field;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.camel.component.http4.HttpOperationFailedException;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.junit.Before;
 import org.mockito.Mock;
 
 /**
@@ -415,31 +415,4 @@ public class FedoraClientErrorTest {
         when(mockStatus.getStatusCode()).thenReturn(status);
         when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
     }
-
-    private static void setField(final Object parent, final String name,
-        final Object obj) {
-        /* check the parent class too if the field could not be found */
-        try {
-            final Field f = findField(parent.getClass(), name);
-            f.setAccessible(true);
-            f.set(parent, obj);
-        } catch (final Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static Field findField(final Class<?> clazz, final String name)
-            throws NoSuchFieldException {
-        for (final Field f : clazz.getDeclaredFields()) {
-            if (f.getName().equals(name)) {
-                return f;
-            }
-        }
-        if (clazz.getSuperclass() == null) {
-            throw new NoSuchFieldException("Field " + name +
-                                                   " could not be found");
-        }
-        return findField(clazz.getSuperclass(), name);
-    }
-
 }

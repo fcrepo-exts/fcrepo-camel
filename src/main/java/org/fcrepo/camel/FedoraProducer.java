@@ -30,8 +30,8 @@ import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAM
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
