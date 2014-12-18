@@ -16,12 +16,16 @@
 package org.fcrepo.camel;
 
 import static java.net.URI.create;
+import static org.fcrepo.camel.TestUtils.baseUrl;
+import static org.fcrepo.camel.TestUtils.rdfXml;
 import static org.fcrepo.camel.TestUtils.setField;
+import static org.fcrepo.camel.TestUtils.sparqlUpdate;
+import static org.fcrepo.camel.TestUtils.RDF_XML;
+import static org.fcrepo.camel.TestUtils.SPARQL_UPDATE;
+import static org.fcrepo.camel.TestUtils.TEXT_TURTLE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -55,175 +59,137 @@ public class FedoraClientTest {
     @Mock
     private CloseableHttpClient mockHttpclient;
 
+    @Mock
+    private CloseableHttpResponse mockResponse;
+
+    @Mock
+    private StatusLine mockStatus;
+
     @Before
     public void setUp() throws IOException {
-        initMocks(this);
-        mockHttpclient = mock(CloseableHttpClient.class);
         testClient = new FedoraClient(null, null, null, true);
         setField(testClient, "httpclient", mockHttpclient);
     }
 
     @Test
     public void testGet() throws IOException, HttpOperationFailedException {
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayEntity entity = new ByteArrayEntity(triples.getBytes());
-        entity.setContentType(accept);
-
         final int status = 200;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+        entity.setContentType(RDF_XML);
 
-        doSetupMockRequest(accept, entity, status);
+        doSetupMockRequest(RDF_XML, entity, status);
 
-        final FedoraResponse response = testClient.get(uri, accept);
+        final FedoraResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), accept);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), triples);
+        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
     @Test (expected = HttpOperationFailedException.class)
     public void testGetError() throws Exception {
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayEntity entity = new ByteArrayEntity(triples.getBytes());
-        entity.setContentType(accept);
-
         final int status = 400;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+        entity.setContentType(RDF_XML);
 
-        doSetupMockRequest(accept, entity, status);
-        testClient.get(uri, accept);
+        doSetupMockRequest(RDF_XML, entity, status);
+        testClient.get(uri, RDF_XML);
     }
 
     @Test (expected = HttpOperationFailedException.class)
     public void testGet100() throws Exception {
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayEntity entity = new ByteArrayEntity(triples.getBytes());
-        entity.setContentType(accept);
-
         final int status = 100;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+        entity.setContentType(RDF_XML);
 
-        doSetupMockRequest(accept, entity, status);
-        testClient.get(uri, accept);
+        doSetupMockRequest(RDF_XML, entity, status);
+        testClient.get(uri, RDF_XML);
     }
 
     @Test
     public void testGet300() throws Exception {
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-
-        final String redirect = "http://localhost:8080/rest/foo/bar";
         final int status = 300;
+        final URI uri = create(baseUrl);
+        final String redirect = baseUrl + "/bar";
         final Header linkHeader = new BasicHeader("Link", "<" + redirect + ">; rel=\"describedby\"");
         final Header[] headers = new Header[] { linkHeader };
-
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(accept, null, status);
+        final CloseableHttpResponse mockResponse = doSetupMockRequest(RDF_XML, null, status);
 
         when(mockResponse.getHeaders("Link")).thenReturn(headers);
 
-        final FedoraResponse response = testClient.get(uri, accept);
+        final FedoraResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), accept);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), create(redirect));
         assertEquals(response.getBody(), null);
     }
 
     @Test
     public void testGetNoAccept() throws Exception {
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/rdf+xml";
         final int status = 200;
+        final URI uri = create(baseUrl);
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(RDF_XML, null, status);
 
         final FedoraResponse response = testClient.get(uri, null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
         assertEquals(response.getBody(), null);
     }
 
-
-
     @Test
     public void testHead() throws IOException, HttpOperationFailedException {
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "text/turtle";
         final int status = 200;
+        final URI uri = create(baseUrl);
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(TEXT_TURTLE, null, status);
 
         final FedoraResponse response = testClient.head(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), TEXT_TURTLE);
         assertEquals(response.getLocation(), null);
         assertEquals(response.getBody(), null);
     }
 
     @Test (expected = HttpOperationFailedException.class)
     public void testHeadError() throws IOException, HttpOperationFailedException {
-        doSetupMockRequest("text/turtle", null, 404);
-        testClient.head(create("http://localhost:8080/rest/foo"));
+        doSetupMockRequest(TEXT_TURTLE, null, 404);
+        testClient.head(create(baseUrl));
     }
 
     @Test
     public void testPut() throws IOException, HttpOperationFailedException {
-        final URI uri = create("http://localhost:8080/rest/foo");
         final int status = 204;
-        final String contentType = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final InputStream body = new ByteArrayInputStream(triples.getBytes());
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(RDF_XML, null, status);
 
-        final FedoraResponse response = testClient.put(uri, body, contentType);
+        final FedoraResponse response = testClient.put(uri, body, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
         assertEquals(response.getBody(), null);
     }
 
     @Test
     public void testPutNoBody() throws IOException, HttpOperationFailedException {
-        final URI uri = create("http://localhost:8080/rest/foo");
         final int status = 204;
+        final URI uri = create(baseUrl);
 
         doSetupMockRequest(null, null, status);
 
@@ -238,8 +204,8 @@ public class FedoraClientTest {
 
     @Test
     public void testPutWithResponseBody() throws IOException, HttpOperationFailedException {
-        final URI uri = create("http://localhost:8080/rest/foo");
         final int status = 201;
+        final URI uri = create(baseUrl);
 
         doSetupMockRequest(null, new ByteArrayEntity(uri.toString().getBytes()), status);
 
@@ -252,204 +218,153 @@ public class FedoraClientTest {
         assertEquals(IOUtils.toString(response.getBody()), uri.toString());
     }
 
-
-
-
     @Test (expected = HttpOperationFailedException.class)
     public void testPutError() throws IOException, HttpOperationFailedException {
-        final URI uri = create("http://localhost:8080/rest/foo");
         final int status = 500;
-        final String contentType = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final InputStream body = new ByteArrayInputStream(triples.getBytes());
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
 
-        doSetupMockRequest(contentType, null, status);
-        testClient.put(uri, body, contentType);
+        doSetupMockRequest(RDF_XML, null, status);
+        testClient.put(uri, body, RDF_XML);
     }
 
     @Test
     public void testDelete() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 204;
+        final URI uri = create(baseUrl);
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
 
         final FedoraResponse response = testClient.delete(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), SPARQL_UPDATE);
         assertEquals(response.getLocation(), null);
         assertEquals(response.getBody(), null);
     }
 
     @Test
     public void testDeleteWithResponseBody() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
-        final String responseText = "tombstone found";
         final int status = 204;
+        final URI uri = create(baseUrl);
+        final String responseText = "tombstone found";
 
-        doSetupMockRequest(contentType, new ByteArrayEntity(responseText.getBytes()), status);
+        doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes()), status);
 
         final FedoraResponse response = testClient.delete(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), null);
         assertEquals(response.getLocation(), null);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
     @Test (expected = HttpOperationFailedException.class)
     public void testDeleteError() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 401;
+        final URI uri = create(baseUrl);
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
         testClient.delete(uri);
     }
 
     @Test
     public void testPatch() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 204;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
 
         final FedoraResponse response = testClient.patch(uri, body);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), SPARQL_UPDATE);
         assertEquals(response.getLocation(), null);
         assertEquals(response.getBody(), null);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void testPatchNoContent() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 204;
+        final URI uri = create(baseUrl);
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
         testClient.patch(uri, null);
     }
 
     @Test
     public void testPatchResponseBody() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 204;
+        final URI uri = create(baseUrl);
         final String responseText = "Sparql-update response";
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
+        doSetupMockRequest(SPARQL_UPDATE, new ByteArrayEntity(responseText.getBytes()), status);
 
-        doSetupMockRequest(contentType, new ByteArrayEntity(responseText.getBytes()), status);
         final FedoraResponse response = testClient.patch(uri, body);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), SPARQL_UPDATE);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
     @Test (expected = HttpOperationFailedException.class)
     public void testPatchError() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 415;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
         testClient.patch(uri, body);
     }
 
-
     @Test
     public void testPost() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 204;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(contentType, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FedoraResponse response = testClient.post(uri, body, contentType);
+        final FedoraResponse response = testClient.post(uri, body, SPARQL_UPDATE);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), SPARQL_UPDATE);
         assertEquals(response.getLocation(), null);
         assertEquals(response.getBody(), null);
     }
 
     @Test
     public void testPostResponseBody() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 204;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
-        final String responseText = "http://localhost:8080/rest/foo/bar";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final URI uri = create(baseUrl);
+        final String responseText = baseUrl + "/bar";
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(contentType, new ByteArrayEntity(responseText.getBytes()), status);
+        doSetupMockRequest(SPARQL_UPDATE, new ByteArrayEntity(responseText.getBytes()), status);
 
-        final FedoraResponse response = testClient.post(uri, body, contentType);
+        final FedoraResponse response = testClient.post(uri, body, SPARQL_UPDATE);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
+        assertEquals(response.getContentType(), SPARQL_UPDATE);
         assertEquals(response.getLocation(), null);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
     @Test
     public void testPostNoBody() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
         final int status = 204;
-        final String responseText = "http://localhost:8080/rest/foo/bar";
+        final URI uri = create(baseUrl);
+        final String responseText = baseUrl + "/bar";
 
-        doSetupMockRequest(null, null, status);
+        doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes()), status);
 
         final FedoraResponse response = testClient.post(uri, null, null);
 
@@ -457,47 +372,34 @@ public class FedoraClientTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), null);
         assertEquals(response.getLocation(), null);
-        assertEquals(response.getBody(), null);
+        assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
-
 
     @Test (expected = HttpOperationFailedException.class)
     public void testPostError() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 415;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(contentType, null, status);
-        testClient.post(uri, body, contentType);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
+        testClient.post(uri, body, SPARQL_UPDATE);
     }
 
     @Test
     public void testPostErrorContentTypeHeader() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 401;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
+        final URI uri = create(baseUrl);
         final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
-        final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final Header contentTypeHeader = new BasicHeader("Content-Type", SPARQL_UPDATE);
         final Header[] responseHeaders = new Header[]{ contentTypeHeader };
         final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(contentType, responseBody, status);
+        final CloseableHttpResponse mockResponse = doSetupMockRequest(SPARQL_UPDATE, responseBody, status);
 
         when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
 
         try {
-            testClient.post(uri, body, contentType);
+            testClient.post(uri, body, SPARQL_UPDATE);
         } catch (HttpOperationFailedException ex) {
             assertEquals(ex.getUri(), uri.toString());
             assertEquals(ex.getResponseBody(), response);
@@ -505,34 +407,28 @@ public class FedoraClientTest {
             assertEquals(ex.getStatusCode(), status);
             for (Map.Entry<String, String> entry : ex.getResponseHeaders().entrySet()) {
                 assertEquals(entry.getKey(), "Content-Type");
-                assertEquals(entry.getValue(), contentType);
+                assertEquals(entry.getValue(), SPARQL_UPDATE);
             }
         }
     }
 
     @Test
     public void testPostErrorLocationHeader() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 401;
-        final String redirect = "http://localhost:8080/rest/foo/bar";
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
+        final URI uri = create(baseUrl);
+        final String redirect = baseUrl + "/bar";
         final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
         final Header locationHeader = new BasicHeader("Location", redirect);
         final Header[] responseHeaders = new Header[]{ locationHeader };
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(contentType, responseBody, status);
+        final CloseableHttpResponse mockResponse = doSetupMockRequest(SPARQL_UPDATE, responseBody, status);
 
         when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
         when(mockResponse.getFirstHeader("location")).thenReturn(new BasicHeader("Location", redirect));
 
         try {
-            testClient.post(uri, body, contentType);
+            testClient.post(uri, body, SPARQL_UPDATE);
         } catch (HttpOperationFailedException ex) {
             assertEquals(ex.getUri(), uri.toString());
             assertEquals(ex.getResponseBody(), response);
@@ -547,25 +443,20 @@ public class FedoraClientTest {
 
     @Test
     public void testPostErrorNoResponseHeaders() throws IOException, HttpOperationFailedException {
-
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/sparql-update";
         final int status = 401;
-        final String sparql = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-            "INSERT {\n" +
-              "<> dc:title \"Foo\" .\n" +
-            "} WHERE {}";
+        final URI uri = create(baseUrl);
         final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparql.getBytes());
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-        final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
+        final Header contentTypeHeader = new BasicHeader("Content-Type", SPARQL_UPDATE);
         final Header[] responseHeaders = new Header[]{ contentTypeHeader };
 
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(contentType, responseBody, status);
+        final CloseableHttpResponse mockResponse = doSetupMockRequest(SPARQL_UPDATE, responseBody, status);
 
         when(mockResponse.getAllHeaders()).thenReturn(null);
+
         try {
-            testClient.post(uri, body, contentType);
+            testClient.post(uri, body, SPARQL_UPDATE);
         } catch (HttpOperationFailedException ex) {
             assertEquals(ex.getUri(), uri.toString());
             assertEquals(ex.getResponseBody(), response);
@@ -577,22 +468,19 @@ public class FedoraClientTest {
 
     private CloseableHttpResponse doSetupMockRequest(final String contentType, final ByteArrayEntity entity,
             final int status) throws IOException {
-        final StatusLine mockStatus = mock(StatusLine.class);
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
         final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{};
         final Header[] responseHeaders = new Header[]{ contentTypeHeader };
-        final CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-
         when(mockResponse.getFirstHeader("location")).thenReturn(null);
         when(mockResponse.getHeaders("Content-Type")).thenReturn(contentTypeHeaders);
         when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
+
         return mockResponse;
     }
-
 }

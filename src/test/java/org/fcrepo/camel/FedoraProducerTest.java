@@ -21,13 +21,24 @@ import static org.apache.camel.component.http4.HttpMethods.GET;
 import static org.apache.camel.component.http4.HttpMethods.HEAD;
 import static org.apache.camel.component.http4.HttpMethods.PATCH;
 import static org.apache.camel.component.http4.HttpMethods.POST;
+import static org.apache.camel.component.http4.HttpMethods.PUT;
+import static org.fcrepo.camel.TestUtils.baseUrl;
+import static org.fcrepo.camel.TestUtils.rdfTriples;
+import static org.fcrepo.camel.TestUtils.rdfXml;
+import static org.fcrepo.camel.TestUtils.serializedJson;
 import static org.fcrepo.camel.TestUtils.setField;
+import static org.fcrepo.camel.TestUtils.sparqlUpdate;
+import static org.fcrepo.camel.TestUtils.JSON;
+import static org.fcrepo.camel.TestUtils.N_TRIPLES;
+import static org.fcrepo.camel.TestUtils.RDF_LDPATH;
+import static org.fcrepo.camel.TestUtils.RDF_XML;
+import static org.fcrepo.camel.TestUtils.SPARQL_UPDATE;
+import static org.fcrepo.camel.TestUtils.TEXT_PLAIN;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -56,18 +67,14 @@ public class FedoraProducerTest {
     private Exchange testExchange;
 
     @Mock
-    private FedoraComponent mockComponent;
-
-    @Mock
     private FedoraClient mockClient;
 
     @Before
     public void setUp() throws IOException {
-        initMocks(this);
-        mockComponent = mock(FedoraComponent.class);
+        final FedoraComponent mockComponent = mock(FedoraComponent.class);
+
         testEndpoint = new FedoraEndpoint("fcrepo:localhost:8080", "/rest", mockComponent);
         testEndpoint.setBaseUrl("localhost:8080/rest");
-        mockClient = mock(FedoraClient.class);
         testExchange = new DefaultExchange(new DefaultCamelContext());
         testExchange.getIn().setBody(null);
     }
@@ -79,154 +86,120 @@ public class FedoraProducerTest {
 
     @Test
     public void testGetProducer() throws Exception {
+        final URI uri = create(baseUrl);
+        final int status = 200;
+        final ByteArrayInputStream body = new ByteArrayInputStream(rdfXml.getBytes());
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, status, RDF_XML, null, body);
+
         init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayInputStream body = new ByteArrayInputStream(triples.getBytes());
 
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, contentType, null, null);
-        final FedoraResponse getResponse = new FedoraResponse(uri, 200, contentType, null, body);
-
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(contentType))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(RDF_XML))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), triples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), contentType);
+        assertEquals(testExchange.getIn().getBody(String.class), rdfXml);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
     @Test
     public void testGetAcceptHeaderProducer() throws Exception {
+        final URI uri = create(baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(rdfTriples.getBytes());
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, 200, N_TRIPLES, null, body);
+
         init();
-        final String accept = "application/n-triples";
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String triples = "<http://localhost:8080/rest/foo> " +
-                               "<http://fedora.info/definitions/v4/repository#mixinTypes> " +
-                               "\"fedora:resource\"";
-        final ByteArrayInputStream body = new ByteArrayInputStream(triples.getBytes());
 
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, "application/rdf+xml", null, null);
-        final FedoraResponse getResponse = new FedoraResponse(uri, 200, accept, null, body);
-
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
-        testExchange.getIn().setHeader("Accept", accept);
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader("Accept", N_TRIPLES);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(accept))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(N_TRIPLES))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), triples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), accept);
+        assertEquals(testExchange.getIn().getBody(String.class), rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), N_TRIPLES);
     }
 
     @Test
     public void testGetAcceptEndpointProducer() throws Exception {
-        final String accept = "application/n-triples";
-        testEndpoint.setAccept(accept);
+        final URI uri = create(baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(rdfTriples.getBytes());
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, 200, N_TRIPLES, null, body);
+
+        testEndpoint.setAccept(N_TRIPLES);
+
         init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String triples = "<http://localhost:8080/rest/foo> " +
-                               "<http://fedora.info/definitions/v4/repository#mixinTypes> " +
-                               "\"fedora:resource\"";
-        final ByteArrayInputStream body = new ByteArrayInputStream(triples.getBytes());
 
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, "application/rdf+xml", null, null);
-        final FedoraResponse getResponse = new FedoraResponse(uri, 200, accept, null, body);
-
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(accept))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(N_TRIPLES))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), triples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), accept);
+        assertEquals(testExchange.getIn().getBody(String.class), rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), N_TRIPLES);
     }
-
 
     @Test
     public void testGetRootProducer() throws Exception {
-        init();
         final URI uri = create("http://localhost:8080/rest");
-        final String contentType = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayInputStream body = new ByteArrayInputStream(triples.getBytes());
+        final ByteArrayInputStream body = new ByteArrayInputStream(rdfXml.getBytes());
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, 200, RDF_XML, null, body);
 
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, contentType, null, null);
-        final FedoraResponse getResponse = new FedoraResponse(uri, 200, contentType, null, body);
+        init();
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(contentType))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(RDF_XML))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), triples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), contentType);
+        assertEquals(testExchange.getIn().getBody(String.class), rdfXml);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), RDF_XML);
     }
-
-
 
     @Test
     public void testGetBinaryProducer() throws Exception {
-        testEndpoint.setMetadata(false);
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String contentType = "text/plain";
+        final URI uri = create(baseUrl);
         final String content = "Foo";
         final ByteArrayInputStream body = new ByteArrayInputStream(content.getBytes());
+        final FedoraResponse getResponse = new FedoraResponse(uri, 200, TEXT_PLAIN, null, body);
 
-        final FedoraResponse getResponse = new FedoraResponse(uri, 200, contentType, null, body);
+        testEndpoint.setMetadata(false);
 
+        init();
 
         testExchange.getIn().setHeader("org.fcrepo.jms.identifier", "/foo");
-        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, contentType);
+        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TEXT_PLAIN);
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, GET);
 
-        when(mockClient.get(any(URI.class), eq(contentType))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(TEXT_PLAIN))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), content);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), contentType);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TEXT_PLAIN);
     }
 
     @Test
     public void testHeadProducer() throws Exception {
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final URI metadata = create("http://localhost:8080/rest/foo/bar");
-        final String contentType = "application/rdf+xml";
+        final URI uri = create(baseUrl);
+        final URI metadata = create(baseUrl + "/bar");
         final int status = 200;
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayInputStream body = new ByteArrayInputStream(triples.getBytes());
+        final FedoraResponse headResponse = new FedoraResponse(uri, status, N_TRIPLES, metadata, null);
 
-        final FedoraResponse headResponse = new FedoraResponse(uri, status, contentType, metadata, null);
+        init();
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HEAD);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
@@ -234,19 +207,19 @@ public class FedoraProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(), null);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), contentType);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), N_TRIPLES);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
     @Test
     public void testDeleteProducer() throws Exception {
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
+        final URI uri = create(baseUrl);
         final int status = 204;
-
         final FedoraResponse deleteResponse = new FedoraResponse(uri, status, null, null, null);
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, DELETE);
 
         when(mockClient.delete(any(URI.class))).thenReturn(deleteResponse);
@@ -260,18 +233,18 @@ public class FedoraProducerTest {
 
     @Test
     public void testDeleteTombstoneProducer() throws Exception {
-        testEndpoint.setTombstone(true);
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final URI tombstone = create("http://localhost:8080/rest/foo/fcr:tombstone");
+        final URI uri = create(baseUrl + "/fcr:tombstone");
         final int status = 204;
+        final FedoraResponse deleteResponse = new FedoraResponse(uri, status, null, null, null);
 
-        final FedoraResponse deleteResponse = new FedoraResponse(tombstone, status, null, null, null);
+        testEndpoint.setTombstone(true);
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, DELETE);
 
-        when(mockClient.delete(tombstone)).thenReturn(deleteResponse);
+        when(mockClient.delete(uri)).thenReturn(deleteResponse);
 
         testProducer.process(testExchange);
 
@@ -282,107 +255,94 @@ public class FedoraProducerTest {
 
     @Test
     public void testTransformGetProducer() throws Exception {
+        final URI uri = create(baseUrl);
+        final int status = 200;
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, status, JSON, null,
+                new ByteArrayInputStream(serializedJson.getBytes()));
+
         testEndpoint.setTransform("default");
+
         init();
 
-        final String url = "http://localhost:8080/rest/foo";
-        final URI uri = create(url);
-        final String contentType = "application/json";
-        final String responseText = "[{\"title\": \"Test title\"}]";
-        final int status = 200;
-
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, contentType, null, null);
-        final FedoraResponse getResponse = new FedoraResponse(uri, status, contentType, null,
-                new ByteArrayInputStream(responseText.getBytes()));
-
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, GET);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(url + "/fcr:transform/default"), contentType)).thenReturn(getResponse);
+        when(mockClient.get(create(baseUrl + "/fcr:transform/default"), JSON)).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), responseText);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), contentType);
+        assertEquals(testExchange.getIn().getBody(String.class), serializedJson);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), JSON);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
     @Test
     public void testTransformPostProducer() throws Exception {
-        testEndpoint.setTransform("default");
-        init();
-
-        final String url = "http://localhost:8080/rest/foo";
-        final URI uri = create(url);
-        final String contentType = "application/rdf+ldpath";
-        final String accept = "application/json";
+        final URI uri = create(baseUrl);
         final String ldpathText = "@prefix dc : <http://purl.org/dc/elements/1.1/>\n" +
                             "title = dc:title :: xsd:string;";
         final ByteArrayInputStream body = new ByteArrayInputStream(ldpathText.getBytes());
-        final String responseText = "[{\"title\": \"Test title\"}]";
         final int status = 200;
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse postResponse = new FedoraResponse(uri, status, JSON, null,
+                new ByteArrayInputStream(serializedJson.getBytes()));
 
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, accept, null, null);
-        final FedoraResponse postResponse = new FedoraResponse(uri, status, accept, null,
-                new ByteArrayInputStream(responseText.getBytes()));
+        testEndpoint.setTransform("default");
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, POST);
-        testExchange.getIn().setHeader(Exchange.CONTENT_TYPE, contentType);
+        testExchange.getIn().setHeader(Exchange.CONTENT_TYPE, RDF_LDPATH);
         testExchange.getIn().setBody(body);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.post(create(url + "/fcr:transform"), body, contentType)).thenReturn(postResponse);
+        when(mockClient.post(create(baseUrl + "/fcr:transform"), body, RDF_LDPATH)).thenReturn(postResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), responseText);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), accept);
+        assertEquals(testExchange.getIn().getBody(String.class), serializedJson);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), JSON);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
-
     @Test
     public void testTransformProducer() throws Exception {
+        final URI uri = create(baseUrl);
+        final int status = 200;
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, status, JSON, null,
+                new ByteArrayInputStream(serializedJson.getBytes()));
+
         testEndpoint.setTransform("default");
+
         init();
 
-        final String url = "http://localhost:8080/rest/foo";
-        final URI uri = create(url);
-        final String contentType = "application/json";
-        final String responseText = "[{\"title\": \"Test title\"}]";
-        final int status = 200;
-
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, contentType, null, null);
-        final FedoraResponse getResponse = new FedoraResponse(uri, status, contentType, null,
-                new ByteArrayInputStream(responseText.getBytes()));
-
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(url + "/fcr:transform/default"), contentType)).thenReturn(getResponse);
+        when(mockClient.get(create(baseUrl + "/fcr:transform/default"), JSON)).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), responseText);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), contentType);
+        assertEquals(testExchange.getIn().getBody(String.class), serializedJson);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), JSON);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
-
     }
 
     @Test
     public void testPostProducer() throws Exception {
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String responseText = "http://localhost:8080/fcrepo4/rest/foo/e8/0b/ab/e80bab60";
-        final String contentType = "text/plain";
+        final URI uri = create(baseUrl);
+        final String responseText = baseUrl + "/e8/0b/ab/e80bab60";
         final int status = 201;
-
-        final FedoraResponse postResponse = new FedoraResponse(uri, status, contentType, null,
+        final FedoraResponse postResponse = new FedoraResponse(uri, status, TEXT_PLAIN, null,
                 new ByteArrayInputStream(responseText.getBytes()));
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, POST);
 
         when(mockClient.post(any(URI.class), any(InputStream.class), any(String.class))).thenReturn(postResponse);
@@ -390,30 +350,27 @@ public class FedoraProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), responseText);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), contentType);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TEXT_PLAIN);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
     @Test
     public void testPostContentTypeEndpointProducer() throws Exception {
-        final String contentType = "application/sparql-update";
-        testEndpoint.setContentType(contentType);
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String sparqlUpdate = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n\n" +
-                "INSERT { <> dc:title \"test title\" }\n" +
-                "WHERE { }";
+        final URI uri = create(baseUrl);
         final int status = 204;
-
         final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
         final FedoraResponse postResponse = new FedoraResponse(uri, status, null, null, null);
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testEndpoint.setContentType(SPARQL_UPDATE);
+
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, POST);
         testExchange.getIn().setBody(new ByteArrayInputStream(sparqlUpdate.getBytes()));
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.post(any(URI.class), any(InputStream.class), eq(contentType))).thenReturn(postResponse);
+        when(mockClient.post(any(URI.class), any(InputStream.class), eq(SPARQL_UPDATE))).thenReturn(postResponse);
 
         testProducer.process(testExchange);
 
@@ -423,19 +380,15 @@ public class FedoraProducerTest {
 
     @Test
     public void testPatchProducer() throws Exception {
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final URI metadata = create("http://localhost:8080/rest/foo/bar");
-        final String contentType = "application/n-triples";
-        final String sparqlUpdate = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n\n" +
-                "INSERT { <> dc:title \"test title\" }\n" +
-                "WHERE { }";
+        final URI uri = create(baseUrl);
+        final URI metadata = create(baseUrl + "/bar");
         final int status = 204;
-
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, contentType, metadata, null);
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, metadata, null);
         final FedoraResponse patchResponse = new FedoraResponse(uri, status, null, null, null);
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, PATCH);
         testExchange.getIn().setBody(new ByteArrayInputStream(sparqlUpdate.getBytes()));
 
@@ -450,20 +403,17 @@ public class FedoraProducerTest {
 
     @Test
     public void testPatchTransformEnabledProducer() throws Exception {
-        testEndpoint.setTransform("default");
-        init();
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final URI metadata = create("http://localhost:8080/rest/foo/bar");
-        final String contentType = "application/n-triples";
-        final String sparqlUpdate = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n\n" +
-                "INSERT { <> dc:title \"test title\" }\n" +
-                "WHERE { }";
+        final URI uri = create(baseUrl);
+        final URI metadata = create(baseUrl + "/bar");
         final int status = 204;
-
-        final FedoraResponse headResponse = new FedoraResponse(uri, 200, contentType, metadata, null);
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, RDF_XML, metadata, null);
         final FedoraResponse patchResponse = new FedoraResponse(uri, status, null, null, null);
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
+        testEndpoint.setTransform("default");
+
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, PATCH);
         testExchange.getIn().setBody(new ByteArrayInputStream(sparqlUpdate.getBytes()));
 
@@ -476,31 +426,25 @@ public class FedoraProducerTest {
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
-
     @Test
     public void testPutProducer() throws Exception {
-        init();
-        final String url = "http://localhost:8080/rest/foo";
-        final URI uri = create(url);
-        final String contentType = "text/plain";
+        final URI uri = create(baseUrl);
         final int status = 201;
+        final FedoraResponse patchResponse = new FedoraResponse(uri, status, TEXT_PLAIN, null,
+                new ByteArrayInputStream(baseUrl.getBytes()));
 
-        final FedoraResponse patchResponse = new FedoraResponse(uri, status, contentType, null,
-                new ByteArrayInputStream(url.getBytes()));
+        init();
 
-        testExchange.getIn().setHeader("FCREPO_IDENTIFIER", "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, "PUT");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, PUT);
         testExchange.getIn().setBody(null);
 
         when(mockClient.put(any(URI.class), any(InputStream.class), any(String.class))).thenReturn(patchResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), url);
+        assertEquals(testExchange.getIn().getBody(String.class), baseUrl);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), contentType);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TEXT_PLAIN);
     }
-
-
-
 }

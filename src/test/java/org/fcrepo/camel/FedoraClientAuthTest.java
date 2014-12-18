@@ -16,12 +16,13 @@
 
 package org.fcrepo.camel;
 
+import static org.fcrepo.camel.TestUtils.baseUrl;
+import static org.fcrepo.camel.TestUtils.rdfXml;
 import static org.fcrepo.camel.TestUtils.setField;
+import static org.fcrepo.camel.TestUtils.RDF_XML;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static java.net.URI.create;
 
 import java.io.IOException;
@@ -36,7 +37,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -53,111 +53,77 @@ public class FedoraClientAuthTest {
     @Mock
     private CloseableHttpClient mockHttpclient;
 
-    @Before
-    public void setUp() throws IOException {
-        initMocks(this);
-    }
+    @Mock
+    private CloseableHttpResponse mockResponse;
+
+    @Mock
+    private StatusLine mockStatus;
 
     @Test
-    public void testAuth1() throws IOException, HttpOperationFailedException {
-        mockHttpclient = mock(CloseableHttpClient.class);
+    public void testAuthNoHost() throws IOException, HttpOperationFailedException {
+        final int status = 200;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+
         testClient = new FedoraClient("user", "pass", null, true);
         setField(testClient, "httpclient", mockHttpclient);
+        entity.setContentType(RDF_XML);
+        doSetupMockRequest(RDF_XML, entity, status);
 
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayEntity entity = new ByteArrayEntity(triples.getBytes());
-        entity.setContentType(accept);
-
-        final int status = 200;
-
-        doSetupMockRequest(accept, entity, status);
-
-        final FedoraResponse response = testClient.get(uri, accept);
+        final FedoraResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), accept);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), triples);
+        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
     @Test
-    public void testAuth2() throws IOException, HttpOperationFailedException {
-        mockHttpclient = mock(CloseableHttpClient.class);
+    public void testAuthWithHost() throws IOException, HttpOperationFailedException {
+        final int status = 200;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+
         testClient = new FedoraClient("user", "pass", "localhost", true);
         setField(testClient, "httpclient", mockHttpclient);
+        entity.setContentType(RDF_XML);
+        doSetupMockRequest(RDF_XML, entity, status);
 
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayEntity entity = new ByteArrayEntity(triples.getBytes());
-        entity.setContentType(accept);
-
-        final int status = 200;
-
-        doSetupMockRequest(accept, entity, status);
-
-        final FedoraResponse response = testClient.get(uri, accept);
+        final FedoraResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), accept);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), triples);
+        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
     @Test
-    public void testAuth3() throws IOException, HttpOperationFailedException {
-        mockHttpclient = mock(CloseableHttpClient.class);
+    public void testAuthNoPassword() throws IOException, HttpOperationFailedException {
+        final int status = 200;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+
         testClient = new FedoraClient("user", null, null, true);
         setField(testClient, "httpclient", mockHttpclient);
+        entity.setContentType(RDF_XML);
+        doSetupMockRequest(RDF_XML, entity, status);
 
-        final URI uri = create("http://localhost:8080/rest/foo");
-        final String accept = "application/rdf+xml";
-        final String triples = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-              "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +
-                "<mixinTypes xmlns=\"http://fedora.info/definitions/v4/repository#\" " +
-                    "rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">fedora:resource</mixinTypes>" +
-              "</rdf:Description>" +
-            "</rdf:RDF>";
-        final ByteArrayEntity entity = new ByteArrayEntity(triples.getBytes());
-        entity.setContentType(accept);
-
-        final int status = 200;
-
-        doSetupMockRequest(accept, entity, status);
-
-        final FedoraResponse response = testClient.get(uri, accept);
+        final FedoraResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), accept);
+        assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), triples);
+        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
     private void doSetupMockRequest(final String contentType, final ByteArrayEntity entity, final int status)
             throws IOException {
-        final StatusLine mockStatus = mock(StatusLine.class);
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
         final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{};
-        final CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
         when(mockResponse.getFirstHeader("location")).thenReturn(null);

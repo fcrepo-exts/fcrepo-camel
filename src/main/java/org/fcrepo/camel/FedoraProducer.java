@@ -207,8 +207,6 @@ public class FedoraProducer extends DefaultProducer {
         } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
             url.append(in.getHeader(IDENTIFIER_HEADER_NAME, String.class));
         }
-        LOGGER.debug("Transform: {}, Method: {}, Tombstone: {}", endpoint.getTransform(),
-                method, endpoint.getTombstone());
         if (endpoint.getTransform() != null) {
             if (method == POST) {
                 url.append("/fcr:transform");
