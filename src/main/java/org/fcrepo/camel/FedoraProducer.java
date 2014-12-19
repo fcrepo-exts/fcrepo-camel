@@ -24,10 +24,10 @@ import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.component.http4.HttpMethods.DELETE;
 import static org.apache.camel.component.http4.HttpMethods.GET;
 import static org.apache.camel.component.http4.HttpMethods.POST;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.fcrepo.camel.FedoraEndpoint.DEFAULT_CONTENT_TYPE;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FedoraEndpoint.FCREPO_TRANSFORM;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -160,9 +160,9 @@ public class FedoraProducer extends DefaultProducer {
      */
     protected String getContentType(final Exchange exchange) {
         final String contentTypeString = ExchangeHelper.getContentType(exchange);
-        if (! isEmpty(endpoint.getContentType())) {
+        if (!isBlank(endpoint.getContentType())) {
             return endpoint.getContentType();
-        } else if (! isEmpty(contentTypeString)) {
+        } else if (!isBlank(contentTypeString)) {
             return contentTypeString;
         } else {
             return null;
@@ -181,13 +181,13 @@ public class FedoraProducer extends DefaultProducer {
         final Message in = exchange.getIn();
         final String fcrepoTransform = in.getHeader(FCREPO_TRANSFORM, String.class);
 
-        if (! isEmpty(endpoint.getTransform()) || ! isEmpty(fcrepoTransform)) {
+        if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
             return "application/json";
-        } else if (! isEmpty(endpoint.getAccept())) {
+        } else if (!isBlank(endpoint.getAccept())) {
             return endpoint.getAccept();
-        } else if (! isEmpty(in.getHeader(ACCEPT_CONTENT_TYPE, String.class))) {
+        } else if (!isBlank(in.getHeader(ACCEPT_CONTENT_TYPE, String.class))) {
             return in.getHeader(ACCEPT_CONTENT_TYPE, String.class);
-        } else if (! isEmpty(in.getHeader("Accept", String.class))) {
+        } else if (!isBlank(in.getHeader("Accept", String.class))) {
             return in.getHeader("Accept", String.class);
         } else {
             return DEFAULT_CONTENT_TYPE;
@@ -207,16 +207,16 @@ public class FedoraProducer extends DefaultProducer {
         final URI baseUri = create(endpoint.getBaseUrl());
         final String fcrepoTransform = in.getHeader(FCREPO_TRANSFORM, String.class);
         final StringBuilder url = new StringBuilder("http://" + baseUri);
-        if (! isEmpty(in.getHeader(FCREPO_IDENTIFIER, String.class))) {
+        if (!isBlank(in.getHeader(FCREPO_IDENTIFIER, String.class))) {
             url.append(in.getHeader(FCREPO_IDENTIFIER, String.class));
-        } else if (! isEmpty(in.getHeader(IDENTIFIER_HEADER_NAME, String.class))) {
+        } else if (!isBlank(in.getHeader(IDENTIFIER_HEADER_NAME, String.class))) {
             url.append(in.getHeader(IDENTIFIER_HEADER_NAME, String.class));
         }
-        if (! isEmpty(endpoint.getTransform()) || ! isEmpty(fcrepoTransform)) {
+        if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
             if (method == POST) {
                 url.append("/fcr:transform");
             } else if (method == null || method == GET) {
-                if (! isEmpty(fcrepoTransform)) {
+                if (!isBlank(fcrepoTransform)) {
                     url.append("/fcr:transform/" + fcrepoTransform);
                 } else {
                     url.append("/fcr:transform/" + endpoint.getTransform());
