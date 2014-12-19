@@ -309,6 +309,58 @@ public class FedoraProducerTest {
     }
 
     @Test
+    public void testTransformHeaderProducer() throws Exception {
+        final URI uri = create(baseUrl);
+        final int status = 200;
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, status, JSON, null,
+                new ByteArrayInputStream(serializedJson.getBytes()));
+
+        testEndpoint.setTransform("true");
+
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_TRANSFORM, "default");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(create(baseUrl + "/fcr:transform/default"), JSON)).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), serializedJson);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), JSON);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+    @Test
+    public void testTransformHeaderOnlyProducer() throws Exception {
+        final URI uri = create(baseUrl);
+        final int status = 200;
+        final FedoraResponse headResponse = new FedoraResponse(uri, 200, null, null, null);
+        final FedoraResponse getResponse = new FedoraResponse(uri, status, JSON, null,
+                new ByteArrayInputStream(serializedJson.getBytes()));
+
+        testEndpoint.setTransform("");
+
+        init();
+
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FedoraEndpoint.FCREPO_TRANSFORM, "default");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(create(baseUrl + "/fcr:transform/default"), JSON)).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), serializedJson);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), JSON);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+
+
+    @Test
     public void testTransformProducer() throws Exception {
         final URI uri = create(baseUrl);
         final int status = 200;

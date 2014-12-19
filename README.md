@@ -74,6 +74,8 @@ Message headers
 | `Exchange.CONTENT_TYPE` | `String` | The ContentType of the resource. This sets the `Content-Type` header, but this value can be overridden directly on the endpoint. |
 | `Exchange.ACCEPT_CONTENT_TYPE` | `String` | This sets the `Accept` header, but this value can be overridden directly on the endpoint. |
 | `FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
+| `FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
+| `FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
 
 The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `FEDORA_IDENTIFIER` is not defined.
 
