@@ -44,6 +44,10 @@
     <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
     <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.unit.file}</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
+    <!-- osgi -->
+    <camel.osgi.import.before.defaults>org.apache.camel.spi;${camel.osgi.import.strict.version}</camel.osgi.import.before.defaults>
+    <camel.osgi.export.pkg>org.fcrepo.camel.*</camel.osgi.export.pkg>
+    <camel.osgi.export.service>org.apache.camel.spi.ComponentResolver;component=fcrepo</camel.osgi.export.service>
   </properties>
 
   <licenses>
@@ -557,18 +561,18 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Service>org.apache.camel.spi.ComponentResolver;component=fcrepo</Export-Service>
             <Export-Package>
-              org.apache.clerezza.rdf.*,
-              org.apache.clerezza.utils.*,
-              com.hp.hpl.jena.*,
-              org.apache.commons.codec.*,
-              org.apache.jena.*,
               com.fasterxml.jackson.*,
               com.github.jsonldjava.*,
+              com.hp.hpl.jena.*,
+              com.ibm.icu.*,
+              org.apache.clerezza.rdf.*,
+              org.apache.clerezza.utils.*,
+              org.apache.commons.codec.*,
+              org.apache.commons.lang.*,
+              org.apache.jena.*,
               org.osgi.service.component,
               org.wymiwyg.commons.util.*,
-              com.ibm.icu.*,
             </Export-Package>
           </instructions>
         </configuration>
