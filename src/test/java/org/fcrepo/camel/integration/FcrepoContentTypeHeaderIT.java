@@ -15,11 +15,10 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
-import static org.fcrepo.camel.FedoraEndpoint.DEFAULT_CONTENT_TYPE;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
+import static org.fcrepo.camel.FcrepoProducer.DEFAULT_CONTENT_TYPE;
 
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -38,7 +37,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraContentTypeHeaderIT extends CamelTestSupport {
+public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
@@ -52,7 +51,7 @@ public class FedoraContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "application/ld+json");
-        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "application/ld+json");
+        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "application/ld+json");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -63,7 +62,7 @@ public class FedoraContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "application/rdf+xml");
-        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "application/rdf+xml");
+        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "application/rdf+xml");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -74,7 +73,7 @@ public class FedoraContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "application/n-triples");
-        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "application/n-triples");
+        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "application/n-triples");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -85,7 +84,7 @@ public class FedoraContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "text/turtle");
-        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "text/turtle");
+        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "text/turtle");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -96,7 +95,7 @@ public class FedoraContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "text/rdf+n3");
-        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "text/rdf+n3");
+        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "text/rdf+n3");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -118,7 +117,7 @@ public class FedoraContentTypeHeaderIT extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() {
-                final String fcrepo_uri = getFcrepoEndpointUri();
+                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
                 from("direct:start")
                     .to(fcrepo_uri)

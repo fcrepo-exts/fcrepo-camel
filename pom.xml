@@ -4,12 +4,18 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>9</version>
+  </parent>
+
   <groupId>org.fcrepo.camel</groupId>
   <artifactId>fcrepo-camel</artifactId>
   <packaging>bundle</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>4.0.1-SNAPSHOT</version>
 
-  <name>Camel Fedora Component</name>
+  <name>Fcrepo Camel Component</name>
   <url>http://fcrepo.org</url>
 
   <organization>
@@ -20,16 +26,17 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <fcrepo.version>4.0.1-SNAPSHOT</fcrepo.version>
     <camel.version>2.14.0</camel.version>
-    <commons.lang3.version>3.3.2</commons.lang3.version>
     <commons.io.version>2.4</commons.io.version>
+    <commons.lang3.version>3.3.2</commons.lang3.version>
+    <project.version>${project.version}</project.version>
     <grizzly.version>2.3.16</grizzly.version>
     <httpclient.version>4.3.5</httpclient.version>
     <jena.fuseki.version>1.1.0</jena.fuseki.version>
     <jersey.version>2.13</jersey.version>
-    <logback.version>1.1.2</logback.version>
-    <slf4j.version>1.7.7</slf4j.version>
+    <mockito.version>1.10.8</mockito.version>
+    <slf4j.version>1.7.9</slf4j.version>
+    <javax.ws.rs.version>2.0.1</javax.ws.rs.version>
     <spring.version>4.0.7.RELEASE</spring.version>
     <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
     <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
@@ -37,7 +44,6 @@
     <!-- plugins -->
     <checkstyle.plugin.version>2.12.1</checkstyle.plugin.version>
     <!-- values -->
-    <test.context.path>/</test.context.path>
     <project.copyrightYear>2014</project.copyrightYear>
     <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
     <jacoco.out.unit.file>jacoco-ut.exec</jacoco.out.unit.file>
@@ -85,18 +91,6 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.fcrepo</groupId>
-        <artifactId>fcrepo4-bom</artifactId>
-        <version>${fcrepo.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.camel</groupId>
@@ -112,6 +106,12 @@
 
     <dependency>
       <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+      <version>${clerezza.rdf.core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
       <version>${clerezza.rdf.jena.parser.version}</version>
     </dependency>
@@ -123,65 +123,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-      <version>${clerezza.rdf.core.version}</version>
-    </dependency>
-
-
-    <!-- fcrepo -->
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-jms</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-http-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-configs</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-transform</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-auth-common</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-http-commons</artifactId>
-      <scope>test</scope>
-      <type>test-jar</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-metrics</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>${httpclient.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -191,36 +135,30 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons.io.version}</version>
     </dependency>
 
-
     <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-common</artifactId>
-      <version>${jersey.version}</version>
-      <scope>test</scope>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <version>${javax.ws.rs.version}</version>
     </dependency>
 
     <!-- logging -->
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
-
+    
     <!-- testing -->
-
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -240,24 +178,21 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-aop</artifactId>
+      <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -269,28 +204,15 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.jcr</groupId>
-      <artifactId>jcr</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.grizzly</groupId>
-      <artifactId>grizzly-http-server</artifactId>
-      <scope>test</scope>
-      <version>${grizzly.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.glassfish.grizzly</groupId>
       <artifactId>grizzly-http-servlet</artifactId>
-      <scope>test</scope>
       <version>${grizzly.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-      <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
       <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
@@ -302,10 +224,66 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+      <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+      <version>${jersey.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+     <!--fcrepo testing -->
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-jms</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-http-api</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-configs</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-transform</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-auth-common</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-http-commons</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-metrics</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
-
     <pluginManagement>
       <plugins>
         <plugin>
@@ -338,7 +316,7 @@
             <dependency>
               <groupId>org.fcrepo</groupId>
               <artifactId>fcrepo-build-tools</artifactId>
-              <version>${fcrepo.version}</version>
+              <version>${project.version}</version>
             </dependency>
           </dependencies>
           <executions>
@@ -348,6 +326,22 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.4.1</version>
+          <configuration>
+            <!-- see http://jira.codehaus.org/browse/MRELEASE-424 -->
+            <mavenExecutorId>forked-path</mavenExecutorId>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.maven.scm</groupId>
+              <artifactId>maven-scm-provider-gitexe</artifactId>
+              <version>1.8.1</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <plugin>
@@ -400,7 +394,6 @@
             <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=512m</argLine>
           </configuration>
         </plugin>
-
       </plugins>
     </pluginManagement>
 
@@ -408,34 +401,6 @@
     <defaultGoal>install</defaultGoal>
 
     <plugins>
-      <!--Bring in F4 webapp for integration testing -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.fcrepo</groupId>
-                  <artifactId>fcrepo-webapp</artifactId>
-                  <version>${fcrepo.version}</version>
-                  <type>war</type>
-                  <outputDirectory>${project.build.directory}</outputDirectory>
-                  <destFileName>f4.war</destFileName>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -443,9 +408,7 @@
         <configuration>
           <portNames>
             <portName>test.port</portName>
-            <!-- reserves the stop port for jetty-maven-plugin -->
             <portName>test.fuseki.port</portName>
-            <portName>test.mgt.port</portName>
           </portNames>
         </configuration>
         <executions>
@@ -468,8 +431,6 @@
           <systemPropertyVariables>
             <test.port>${test.port}</test.port>
             <test.fuseki.port>${test.fuseki.port}</test.fuseki.port>
-            <test.mgt.port>${test.mgt.port}</test.mgt.port>
-            <test.context.path>${test.context.path}</test.context.path>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -506,7 +467,7 @@
           <dependency>
             <groupId>org.fcrepo</groupId>
             <artifactId>fcrepo-build-tools</artifactId>
-            <version>${fcrepo.version}</version>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -562,14 +523,12 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              com.fasterxml.jackson.*,
-              com.github.jsonldjava.*,
               com.hp.hpl.jena.*,
               com.ibm.icu.*,
               org.apache.clerezza.rdf.*,
               org.apache.clerezza.utils.*,
               org.apache.commons.codec.*,
-              org.apache.commons.lang.*,
+              org.apache.commons.lang3.*,
               org.apache.jena.*,
               org.osgi.service.component,
               org.wymiwyg.commons.util.*,
@@ -605,4 +564,70 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <useAgent>true</useAgent>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+     <profile>
+      <id>graph-dependencies</id>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>mvnplugins.fusesource.org</id>
+          <url>http://mvnplugins.fusesource.org/repo/release</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.fusesource.mvnplugins</groupId>
+            <artifactId>maven-graph-plugin</artifactId>
+            <version>1.4</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

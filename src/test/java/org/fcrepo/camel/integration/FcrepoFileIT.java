@@ -15,71 +15,83 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoBaseUrl;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
-import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Test adding a new resource with POST
+ * Test adding a non-RDF resource
  * @author Aaron Coburn
  * @since November 7, 2014
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraPostIT extends CamelTestSupport {
+public class FcrepoFileIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
+
+    @EndpointInject(uri = "mock:file")
+    protected MockEndpoint fileEndpoint;
 
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
 
     @Test
-    public void testPost() throws InterruptedException {
+    public void testFile() throws InterruptedException {
         // Assertions
-        resultEndpoint.expectedMessageCount(1);
-        resultEndpoint.expectedBodiesReceived("some title");
+        fileEndpoint.expectedBodiesReceived(FcrepoTestUtils.getTextDocument());
+        fileEndpoint.expectedMessageCount(1);
+        fileEndpoint.expectedHeaderReceived("Content-Type", "text/plain");
 
-        // Setup
+        resultEndpoint.expectedMessageCount(1);
+        resultEndpoint.expectedHeaderReceived("Content-Type", "application/rdf+xml");
+
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(HTTP_METHOD, "POST");
-        headers.put(CONTENT_TYPE, "text/turtle");
+        headers.put(Exchange.HTTP_METHOD, "POST");
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
 
         final String fullPath = template.requestBodyAndHeaders(
-                "direct:setup", getTurtleDocument(), headers, String.class);
+                "direct:setup",
+                FcrepoTestUtils.getTurtleDocument(),
+                headers, String.class);
 
-        final String identifier = fullPath.replaceAll(getFcrepoBaseUrl(), "");
+        // Strip off the baseUri to get the resource path
+        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
 
-        // Test
-        template.sendBodyAndHeader(null, FCREPO_IDENTIFIER, identifier);
+        final Map<String, Object> fileHeaders = new HashMap<>();
+        fileHeaders.put(Exchange.HTTP_METHOD, "PUT");
+        fileHeaders.put(Exchange.CONTENT_TYPE, "text/plain");
+        fileHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier + "/file");
+        template.sendBodyAndHeaders("direct:setup", FcrepoTestUtils.getTextDocument(), fileHeaders);
 
-        // Teardown
+        template.sendBodyAndHeader(null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + "/file");
+        template.sendBodyAndHeader("direct:file", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + "/file");
+
+
         final Map<String, Object> teardownHeaders = new HashMap<>();
-        teardownHeaders.put(HTTP_METHOD, "DELETE");
-        teardownHeaders.put(FCREPO_IDENTIFIER, identifier);
+        teardownHeaders.put(Exchange.HTTP_METHOD, "DELETE");
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier + "/file");
+        template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
 
-        // Confirm that the assertions passed
+        // Confirm that assertions passed
         resultEndpoint.assertIsSatisfied();
+        fileEndpoint.assertIsSatisfied();
     }
 
     @Override
@@ -87,25 +99,24 @@ public class FedoraPostIT extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() {
-                final String fcrepo_uri = getFcrepoEndpointUri();
+
+                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
                 final Namespaces ns = new Namespaces("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-
-                final XPathBuilder titleXpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
-                titleXpath.namespaces(ns);
-                titleXpath.namespace("dc", "http://purl.org/dc/elements/1.1/");
 
                 from("direct:setup")
                     .to(fcrepo_uri);
 
                 from("direct:start")
                     .to(fcrepo_uri)
-                    .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
-                    .split(titleXpath)
+                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Binary']", ns)
                     .to("mock:result");
+
+                from("direct:file")
+                    .to(fcrepo_uri + "?metadata=false")
+                    .to("mock:file");
 
                 from("direct:teardown")
                     .to(fcrepo_uri)

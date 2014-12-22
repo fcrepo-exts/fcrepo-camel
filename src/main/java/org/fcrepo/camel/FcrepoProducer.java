@@ -16,19 +16,7 @@
 
 package org.fcrepo.camel;
 
-import static java.net.URI.create;
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
-import static org.apache.camel.component.http4.HttpMethods.DELETE;
-import static org.apache.camel.component.http4.HttpMethods.GET;
-import static org.apache.camel.component.http4.HttpMethods.POST;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.fcrepo.camel.FedoraEndpoint.DEFAULT_CONTENT_TYPE;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_TRANSFORM;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAME;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
@@ -51,22 +39,25 @@ import org.slf4j.Logger;
  * @author Aaron Coburn
  * @since October 20, 2014
  */
-public class FedoraProducer extends DefaultProducer {
-    private static final Logger LOGGER = getLogger(FedoraProducer.class);
+public class FcrepoProducer extends DefaultProducer {
 
-    private FedoraEndpoint endpoint;
+    public static final String DEFAULT_CONTENT_TYPE = "application/rdf+xml";
 
-    private FedoraClient client;
+    private static final Logger LOGGER = getLogger(FcrepoProducer.class);
+
+    private FcrepoEndpoint endpoint;
+
+    private FcrepoClient client;
 
     /**
-     * Create a FedoraProducer object
+     * Create a FcrepoProducer object
      *
-     * @param endpoint the FedoraEndpoint corresponding to the exchange.
+     * @param endpoint the FcrepoEndpoint corresponding to the exchange.
      */
-    public FedoraProducer(final FedoraEndpoint endpoint) {
+    public FcrepoProducer(final FcrepoEndpoint endpoint) {
         super(endpoint);
         this.endpoint = endpoint;
-        this.client = new FedoraClient(
+        this.client = new FcrepoClient(
                 endpoint.getAuthUsername(),
                 endpoint.getAuthPassword(),
                 endpoint.getAuthHost(),
@@ -91,7 +82,7 @@ public class FedoraProducer extends DefaultProducer {
             LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
         }
 
-        FedoraResponse response;
+        FcrepoResponse response;
 
         switch (method) {
         case PATCH:
@@ -99,28 +90,28 @@ public class FedoraProducer extends DefaultProducer {
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case PUT:
-            response = client.put(create(url), in.getBody(InputStream.class), contentType);
+            response = client.put(URI.create(url), in.getBody(InputStream.class), contentType);
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case POST:
-            response = client.post(create(url), in.getBody(InputStream.class), contentType);
+            response = client.post(URI.create(url), in.getBody(InputStream.class), contentType);
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case DELETE:
-            response = client.delete(create(url));
+            response = client.delete(URI.create(url));
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case HEAD:
-            response = client.head(create(url));
+            response = client.head(URI.create(url));
             exchange.getIn().setBody(null);
             break;
         case GET:
         default:
-            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : create(url), accept);
+            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url), accept);
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
-        exchange.getIn().setHeader(CONTENT_TYPE, response.getContentType());
-        exchange.getIn().setHeader(HTTP_RESPONSE_CODE, response.getStatusCode());
+        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
+        exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
 
     /**
@@ -128,11 +119,11 @@ public class FedoraProducer extends DefaultProducer {
      */
     protected URI getMetadataUri(final String url)
             throws HttpOperationFailedException, IOException {
-        final FedoraResponse headResponse = client.head(create(url));
+        final FcrepoResponse headResponse = client.head(URI.create(url));
         if (headResponse.getLocation() != null) {
             return headResponse.getLocation();
         } else {
-            return create(url);
+            return URI.create(url);
         }
     }
 
@@ -144,7 +135,7 @@ public class FedoraProducer extends DefaultProducer {
      * @param exchange the incoming message exchange
      */
     protected HttpMethods getMethod(final Exchange exchange) {
-        final HttpMethods method = exchange.getIn().getHeader(HTTP_METHOD, HttpMethods.class);
+        final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
         if (method == null) {
             return HttpMethods.GET;
         } else {
@@ -179,14 +170,14 @@ public class FedoraProducer extends DefaultProducer {
      */
     protected String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
-        final String fcrepoTransform = in.getHeader(FCREPO_TRANSFORM, String.class);
+        final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
 
         if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
             return "application/json";
         } else if (!isBlank(endpoint.getAccept())) {
             return endpoint.getAccept();
-        } else if (!isBlank(in.getHeader(ACCEPT_CONTENT_TYPE, String.class))) {
-            return in.getHeader(ACCEPT_CONTENT_TYPE, String.class);
+        } else if (!isBlank(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))) {
+            return in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class);
         } else if (!isBlank(in.getHeader("Accept", String.class))) {
             return in.getHeader("Accept", String.class);
         } else {
@@ -203,26 +194,26 @@ public class FedoraProducer extends DefaultProducer {
      */
     protected String getUrl(final Exchange exchange) {
         final Message in = exchange.getIn();
-        final HttpMethods method = exchange.getIn().getHeader(HTTP_METHOD, HttpMethods.class);
-        final URI baseUri = create(endpoint.getBaseUrl());
-        final String fcrepoTransform = in.getHeader(FCREPO_TRANSFORM, String.class);
+        final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
+        final URI baseUri = URI.create(endpoint.getBaseUrl());
+        final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
         final StringBuilder url = new StringBuilder("http://" + baseUri);
-        if (!isBlank(in.getHeader(FCREPO_IDENTIFIER, String.class))) {
-            url.append(in.getHeader(FCREPO_IDENTIFIER, String.class));
-        } else if (!isBlank(in.getHeader(IDENTIFIER_HEADER_NAME, String.class))) {
-            url.append(in.getHeader(IDENTIFIER_HEADER_NAME, String.class));
+        if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
+            url.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class));
+        } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
+            url.append(in.getHeader(JmsHeaders.IDENTIFIER, String.class));
         }
         if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
-            if (method == POST) {
+            if (method == HttpMethods.POST) {
                 url.append("/fcr:transform");
-            } else if (method == null || method == GET) {
+            } else if (method == null || method == HttpMethods.GET) {
                 if (!isBlank(fcrepoTransform)) {
                     url.append("/fcr:transform/" + fcrepoTransform);
                 } else {
                     url.append("/fcr:transform/" + endpoint.getTransform());
                 }
             }
-        } else if (method == DELETE && endpoint.getTombstone()) {
+        } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
             url.append("/fcr:tombstone");
         }
         return url.toString();

@@ -15,18 +15,12 @@
  */
 package org.fcrepo.camel;
 
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAME;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.BASE_URL_HEADER_NAME;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_BASE_URL;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -52,7 +46,7 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
     public void missingHeaders() throws IOException, InterruptedException {
 
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_IDENTIFIER, "/foo");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
         template.sendBodyAndHeaders(null, headers);
         resultEndpoint.expectedMessageCount(0);
         resultEndpoint.assertIsSatisfied();
@@ -90,32 +84,32 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
         // Assertions
         resultEndpoint.expectedBodiesReceived(
                 "DELETE WHERE { <" + base + path + "> ?p ?o }");
-        resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/sparql-update");
-        resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
+        resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/sparql-update");
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
         template.sendBodyAndHeaders(incomingDoc, headers);
 
         headers.clear();
-        headers.put(BASE_URL_HEADER_NAME, base);
-        headers.put(IDENTIFIER_HEADER_NAME, path);
+        headers.put(JmsHeaders.BASE_URL, base);
+        headers.put(JmsHeaders.IDENTIFIER, path);
         template.sendBodyAndHeaders(incomingDoc, headers);
 
         headers.clear();
-        headers.put(BASE_URL_HEADER_NAME, base);
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(JmsHeaders.BASE_URL, base);
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
         template.sendBodyAndHeaders(incomingDoc, headers);
 
         headers.clear();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(IDENTIFIER_HEADER_NAME, path);
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
+        headers.put(JmsHeaders.IDENTIFIER, path);
         template.sendBodyAndHeaders(incomingDoc, headers);
 
         headers.clear();
-        headers.put(FCREPO_BASE_URL, base + path);
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base + path);
         template.sendBodyAndHeaders(incomingDoc, headers);
 
 

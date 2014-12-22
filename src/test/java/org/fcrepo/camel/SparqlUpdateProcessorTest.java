@@ -15,17 +15,12 @@
  */
 package org.fcrepo.camel;
 
-import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.commons.lang3.StringUtils.normalizeSpace;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.ArrayUtils.reverse;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getN3Document;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_BASE_URL;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.BASE_URL_HEADER_NAME;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAME;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -70,30 +65,30 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
                                               "INSERT { " + join(lines, " ") + " } " +
                                               "WHERE { }");
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/sparql-update");
-        resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
         headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         headers.clear();
-        headers.put(BASE_URL_HEADER_NAME, base);
-        headers.put(IDENTIFIER_HEADER_NAME, path);
+        headers.put(JmsHeaders.BASE_URL, base);
+        headers.put(JmsHeaders.IDENTIFIER, path);
         headers.put(Exchange.CONTENT_TYPE, "text/turtle");
         template.sendBodyAndHeaders(getTurtleDocument(), headers);
 
         headers.clear();
-        headers.put(BASE_URL_HEADER_NAME, base);
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(JmsHeaders.BASE_URL, base);
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
         headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         headers.clear();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(IDENTIFIER_HEADER_NAME, path);
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
+        headers.put(JmsHeaders.IDENTIFIER, path);
         headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 

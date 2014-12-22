@@ -23,7 +23,7 @@ import static java.lang.System.getProperty;
  * @author Aaron Coburn
  * @since November 7, 2014
  */
-public final class FedoraTestUtils {
+public final class FcrepoTestUtils {
 
     private static final int FCREPO_PORT = parseInt(getProperty(
                 "test.port", "8080"));
@@ -31,7 +31,7 @@ public final class FedoraTestUtils {
     /**
      * This is a utility class; the constructor is off-limits
      */
-    private FedoraTestUtils() {
+    private FcrepoTestUtils() {
     }
 
     /**

@@ -32,7 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @author ajs6f
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FedoraComponentTest {
+public class FcrepoComponentTest {
 
     private static final String TEST_ENDPOINT_URI = "fcrepo:foo";
 
@@ -43,7 +43,7 @@ public class FedoraComponentTest {
 
     @Test
     public void testCreateEndpoint() {
-        final FedoraComponent testComponent = new FedoraComponent(mockContext);
+        final FcrepoComponent testComponent = new FcrepoComponent(mockContext);
         final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
         assertEquals(mockContext, testEndpoint.getCamelContext());
         assertEquals(TEST_ENDPOINT_URI, testEndpoint.getEndpointUri());
@@ -51,7 +51,7 @@ public class FedoraComponentTest {
 
     @Test
     public void testCreateEndpointFromDefaultConstructor() {
-        final FedoraComponent testComponent = new FedoraComponent();
+        final FcrepoComponent testComponent = new FcrepoComponent();
         final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
         assertEquals(TEST_ENDPOINT_URI, testEndpoint.getEndpointUri());
     }

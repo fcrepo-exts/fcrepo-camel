@@ -46,9 +46,9 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @author acoburn
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FedoraClientAuthTest {
+public class FcrepoClientAuthTest {
 
-    private FedoraClient testClient;
+    private FcrepoClient testClient;
 
     @Mock
     private CloseableHttpClient mockHttpclient;
@@ -65,12 +65,12 @@ public class FedoraClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FedoraClient("user", "pass", null, true);
+        testClient = new FcrepoClient("user", "pass", null, true);
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FedoraResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -85,12 +85,12 @@ public class FedoraClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FedoraClient("user", "pass", "localhost", true);
+        testClient = new FcrepoClient("user", "pass", "localhost", true);
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FedoraResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -105,12 +105,12 @@ public class FedoraClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FedoraClient("user", null, null, true);
+        testClient = new FcrepoClient("user", null, null, true);
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FedoraResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);

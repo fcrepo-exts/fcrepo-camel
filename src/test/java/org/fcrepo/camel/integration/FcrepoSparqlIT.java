@@ -15,17 +15,11 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static java.lang.System.getProperty;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
-
-import org.fcrepo.camel.processor.SparqlInsertProcessor;
-import org.fcrepo.camel.processor.SparqlDescribeProcessor;
-import org.fcrepo.camel.processor.SparqlDeleteProcessor;
 
 import org.apache.camel.Produce;
 import org.apache.camel.Exchange;
@@ -36,10 +30,19 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.fuseki.EmbeddedFusekiServer;
+import org.fcrepo.camel.FcrepoHeaders;
+import org.fcrepo.camel.JmsHeaders;
+import org.fcrepo.camel.processor.SparqlInsertProcessor;
+import org.fcrepo.camel.processor.SparqlDescribeProcessor;
+import org.fcrepo.camel.processor.SparqlDeleteProcessor;
 import org.junit.runner.RunWith;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.slf4j.Logger;
 
 /**
  * Represents an integration test for interacting with an external triplestore.
@@ -49,13 +52,33 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraSparqlIT extends CamelTestSupport {
+public class FcrepoSparqlIT extends CamelTestSupport {
+
+    final private Logger logger = getLogger(FcrepoSparqlIT.class);
+
+    private static final int FUSEKI_PORT = Integer.parseInt(System.getProperty(
+            "test.fuseki.port", "3030"));
+
+    private static EmbeddedFusekiServer server = null;
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
 
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
+
+    @Before
+    public void setup() throws Exception {
+        server = EmbeddedFusekiServer.mem(FUSEKI_PORT, "/test") ;
+        logger.info("Starting EmbeddedFusekiServer on port {}", FUSEKI_PORT);
+        server.start();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        logger.info("Stopping EmbeddedFusekiServer");
+        server.stop();
+    }
 
     @Test
     public void testSparql() throws Exception {
@@ -64,29 +87,29 @@ public class FedoraSparqlIT extends CamelTestSupport {
 
         // Setup
         final Map<String, Object> headers = new HashMap<String, Object>();
-        headers.put(HTTP_METHOD, "POST");
-        headers.put(CONTENT_TYPE, "text/turtle");
+        headers.put(Exchange.HTTP_METHOD, "POST");
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
 
         final String fullPath = template.requestBodyAndHeaders(
-                "direct:setup", FedoraTestUtils.getTurtleDocument(), headers, String.class);
+                "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
 
-        final String identifier = fullPath.replaceAll(FedoraTestUtils.getFcrepoBaseUrl(), "");
+        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
 
         // Test
         final Map<String, Object> testHeaders = new HashMap<String, Object>();
-        testHeaders.put("FCREPO_IDENTIFIER", identifier);
-        testHeaders.put("org.fcrepo.jms.baseURL", "http://localhost:8080/fcrepo4/rest");
+        testHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        testHeaders.put(JmsHeaders.BASE_URL, "http://localhost:8080/fcrepo4/rest");
         template.sendBodyAndHeaders(null, testHeaders);
 
         testHeaders.clear();
-        testHeaders.put("org.fcrepo.jms.identifier", identifier);
-        testHeaders.put("FCREPO_BASE_URL", "http://localhost:8080/fcrepo4/rest");
+        testHeaders.put(JmsHeaders.IDENTIFIER, identifier);
+        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, "http://localhost:8080/fcrepo4/rest");
         template.sendBodyAndHeaders(null, testHeaders);
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<String, Object>();
         teardownHeaders.put(Exchange.HTTP_METHOD, "DELETE");
-        teardownHeaders.put("FCREPO_IDENTIFIER", identifier);
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
 
         // Confirm that the assertions passed
@@ -98,8 +121,8 @@ public class FedoraSparqlIT extends CamelTestSupport {
         return new RouteBuilder() {
             public void configure() throws IOException {
 
-                final String fcrepo_uri = FedoraTestUtils.getFcrepoEndpointUri();
-                final String fuseki_url = "localhost:" + getProperty("test.fuseki.port", "3030");
+                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
+                final String fuseki_url = "localhost:" + System.getProperty("test.fuseki.port", "3030");
                 final Processor sparqlInsert = new SparqlInsertProcessor();
                 final XPathBuilder titleXpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
                 titleXpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");

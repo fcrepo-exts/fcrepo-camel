@@ -25,25 +25,25 @@ import org.apache.camel.impl.DefaultComponent;
 import org.slf4j.Logger;
 
 /**
- * Represents the component that manages {@link FedoraEndpoint}.
+ * Represents the component that manages {@link FcrepoEndpoint}.
  * @author Aaron Coburn
  * @since October 20, 2014
  */
-public class FedoraComponent extends DefaultComponent {
+public class FcrepoComponent extends DefaultComponent {
 
-    private static final Logger LOGGER  = getLogger(FedoraComponent.class);
+    private static final Logger LOGGER  = getLogger(FcrepoComponent.class);
 
     /**
-     * Create a FedoraComponent independent of a CamelContext.
+     * Create a FcrepoComponent independent of a CamelContext.
      */
-    public FedoraComponent() {
+    public FcrepoComponent() {
     }
 
     /**
-     * Given a CamelContext, create a FedoraComponent instance.
+     * Given a CamelContext, create a FcrepoComponent instance.
      * @param context the CamelContext
      */
-    public FedoraComponent(final CamelContext context) {
+    public FcrepoComponent(final CamelContext context) {
         super(context);
     }
 
@@ -55,9 +55,9 @@ public class FedoraComponent extends DefaultComponent {
      */
     @Override
     protected Endpoint createEndpoint(final String uri, final String remaining, final Map<String, Object> parameters) {
-        final Endpoint endpoint = new FedoraEndpoint(uri, remaining, this);
+        final Endpoint endpoint = new FcrepoEndpoint(uri, remaining, this);
         endpoint.configureProperties(parameters);
-        LOGGER.info("Created Fedora Endpoint [{}]", endpoint);
+        LOGGER.info("Created Fcrepo Endpoint [{}]", endpoint);
         return endpoint;
     }
 }

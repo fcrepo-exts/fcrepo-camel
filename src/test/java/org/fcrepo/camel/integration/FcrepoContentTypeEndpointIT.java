@@ -16,7 +16,7 @@
 package org.fcrepo.camel.integration;
 
 import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
@@ -37,7 +37,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraContentTypeEndpointIT extends CamelTestSupport {
+public class FcrepoContentTypeEndpointIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
