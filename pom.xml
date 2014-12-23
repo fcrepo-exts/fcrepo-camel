@@ -36,6 +36,7 @@
     <jersey.version>2.13</jersey.version>
     <mockito.version>1.10.8</mockito.version>
     <slf4j.version>1.7.9</slf4j.version>
+    <solr.version>4.10.2</solr.version>
     <javax.ws.rs.version>2.0.1</javax.ws.rs.version>
     <spring.version>4.0.7.RELEASE</spring.version>
     <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
@@ -281,6 +282,7 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -397,10 +399,92 @@
       </plugins>
     </pluginManagement>
 
-
     <defaultGoal>install</defaultGoal>
 
     <plugins>
+      <!-- Launch jetty for unit testing with Solr -->
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.2.6.v20141205</version>
+        <configuration>
+          <systemProperties>
+            <systemProperty>
+              <name>solr.solr.home</name>
+              <value>${project.build.directory}/test-classes/solr</value>
+            </systemProperty>
+          </systemProperties>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <stopKey>STOP</stopKey>
+          <stopPort>${jetty.port.stop}</stopPort>
+          <daemon>true</daemon>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>start-jetty</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <httpConnector>
+                <port>${test.solr.port}</port>
+              </httpConnector>
+              <scanIntervalSeconds>0</scanIntervalSeconds>
+              <daemon>true</daemon>
+              <contextHandlers>
+                  <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+                    <war>${project.build.directory}/solr.war</war>
+                    <contextPath>/solr</contextPath>
+                  </contextHandler>
+              </contextHandlers>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <phase>post-integration-test</phase>
+             <goals>
+               <goal>stop</goal>
+             </goals>
+           </execution>
+        </executions>
+      </plugin>
+
+      <!--Bring in solr webapp for integration testing-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.solr</groupId>
+                  <artifactId>solr</artifactId>
+                  <version>${solr.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>solr.war</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -409,12 +493,14 @@
           <portNames>
             <portName>test.port</portName>
             <portName>test.fuseki.port</portName>
+            <portName>test.solr.port</portName>
+            <portName>jetty.port.stop</portName>
           </portNames>
         </configuration>
         <executions>
           <execution>
             <id>reserve-port</id>
-            <phase>pre-integration-test</phase>
+            <phase>package</phase>
             <goals>
               <goal>reserve-network-port</goal>
             </goals>
@@ -431,6 +517,7 @@
           <systemPropertyVariables>
             <test.port>${test.port}</test.port>
             <test.fuseki.port>${test.fuseki.port}</test.fuseki.port>
+            <test.solr.port>${test.solr.port}</test.solr.port>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -557,6 +644,10 @@
                   <name>integration-test</name>
                   <value>true</value>
                 </property>
+                <!--<property>-->
+                  <!--<name>test.solr.port</name>-->
+                  <!--<value>${test.solr.port}</value>-->
+                <!--</property>-->
               </properties>
             </configuration>
           </execution>

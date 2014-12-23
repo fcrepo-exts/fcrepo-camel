@@ -61,21 +61,23 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         reverse(lines);
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("DELETE WHERE { <" + base + path + "> ?p ?o }; " +
-                                              "INSERT { " + join(lines, " ") + " } " +
-                                              "WHERE { }");
+        resultEndpoint.expectedBodiesReceived(
+                  "DELETE WHERE { <" + base + path + "> ?p ?o }; " +
+                  "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }; " +
+                  "INSERT { " + join(lines, " ") + " } " +
+                  "WHERE { }");
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/sparql-update");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base + "/");
         headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
         headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
+        headers.put(JmsHeaders.BASE_URL, base + "/");
         headers.put(JmsHeaders.IDENTIFIER, path);
         headers.put(Exchange.CONTENT_TYPE, "text/turtle");
         template.sendBodyAndHeaders(getTurtleDocument(), headers);

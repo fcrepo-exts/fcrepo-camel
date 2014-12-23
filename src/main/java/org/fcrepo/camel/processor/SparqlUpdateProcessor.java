@@ -58,6 +58,7 @@ public class SparqlUpdateProcessor implements Processor {
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
         exchange.getIn().setBody("DELETE WHERE { <" + subject + "> ?p ?o };\n" +
+                                 "DELETE WHERE { <" + subject + "/fcr:export?format=jcr/xml> ?p ?o };\n" +
                                  "INSERT { " + serializedGraph.toString("UTF-8") + " }\n" +
                                  "WHERE { }");
         exchange.getIn().setHeader(HTTP_METHOD, "POST");

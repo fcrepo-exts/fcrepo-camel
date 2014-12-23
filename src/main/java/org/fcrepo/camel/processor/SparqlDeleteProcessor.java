@@ -40,7 +40,8 @@ public class SparqlDeleteProcessor implements Processor {
         final Message in = exchange.getIn();
         final String subject = ProcessorUtils.getSubjectUri(in);
 
-        in.setBody("DELETE WHERE { <" + subject + "> ?p ?o }");
+        in.setBody("DELETE WHERE { <" + subject + "> ?p ?o };\n" +
+                   "DELETE WHERE { <" + subject + "/fcr:export?format=jcr/xml> ?p ?o }");
         in.setHeader(HTTP_METHOD, "POST");
         in.setHeader(CONTENT_TYPE, "application/sparql-update");
 
