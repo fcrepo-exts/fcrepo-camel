@@ -28,14 +28,17 @@ import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.XPathBuilder;
+import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.fuseki.EmbeddedFusekiServer;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.JmsHeaders;
+import org.fcrepo.camel.RdfNamespaces;
 import org.fcrepo.camel.processor.SparqlInsertProcessor;
 import org.fcrepo.camel.processor.SparqlDescribeProcessor;
 import org.fcrepo.camel.processor.SparqlDeleteProcessor;
+import org.fcrepo.camel.processor.SparqlUpdateProcessor;
 import org.junit.runner.RunWith;
 import org.junit.After;
 import org.junit.Before;
@@ -61,10 +64,19 @@ public class FcrepoSparqlIT extends CamelTestSupport {
 
     private static EmbeddedFusekiServer server = null;
 
+    @EndpointInject(uri = "mock:sparql.query")
+    protected MockEndpoint sparqlQueryEndpoint;
+
+    @EndpointInject(uri = "mock:sparql.update")
+    protected MockEndpoint sparqlUpdateEndpoint;
+
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "direct:start")
+    @EndpointInject(uri = "mock:deleted")
+    protected MockEndpoint deletedEndpoint;
+
+    @Produce(uri = "direct:describe.delete.insert")
     protected ProducerTemplate template;
 
     @Before
@@ -81,9 +93,17 @@ public class FcrepoSparqlIT extends CamelTestSupport {
     }
 
     @Test
-    public void testSparql() throws Exception {
+    public void testUpdateSparql() throws Exception {
         // Assertions
-        resultEndpoint.expectedMessageCount(2);
+        sparqlQueryEndpoint.expectedMessageCount(3);
+        sparqlQueryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
+        sparqlUpdateEndpoint.expectedMessageCount(1);
+        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedBodiesReceived(null, null);
+        deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         // Setup
         final Map<String, Object> headers = new HashMap<String, Object>();
@@ -94,17 +114,15 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                 "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
 
         final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
+        final String base_url = "http://localhost:" + System.getProperty("test.port", "8080") + "/rest";
 
         // Test
         final Map<String, Object> testHeaders = new HashMap<String, Object>();
         testHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
-        testHeaders.put(JmsHeaders.BASE_URL, "http://localhost:8080/fcrepo4/rest");
-        template.sendBodyAndHeaders(null, testHeaders);
+        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, base_url);
 
-        testHeaders.clear();
-        testHeaders.put(JmsHeaders.IDENTIFIER, identifier);
-        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, "http://localhost:8080/fcrepo4/rest");
-        template.sendBodyAndHeaders(null, testHeaders);
+        template.sendBodyAndHeaders("direct:update", null, testHeaders);
+        template.sendBodyAndHeaders("direct:count.triples", null, testHeaders);
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<String, Object>();
@@ -114,6 +132,64 @@ public class FcrepoSparqlIT extends CamelTestSupport {
 
         // Confirm that the assertions passed
         resultEndpoint.assertIsSatisfied();
+        sparqlQueryEndpoint.assertIsSatisfied();
+        sparqlUpdateEndpoint.assertIsSatisfied();
+        deletedEndpoint.assertIsSatisfied();
+
+    }
+
+    @Test
+    public void testInsertDeleteSparql() throws Exception {
+        // Assertions
+        resultEndpoint.expectedMessageCount(1);
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+
+        sparqlQueryEndpoint.expectedMessageCount(6);
+        sparqlQueryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
+        sparqlUpdateEndpoint.expectedMessageCount(4);
+        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedBodiesReceived(null, null);
+        deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+
+        // Setup
+        final Map<String, Object> headers = new HashMap<String, Object>();
+        headers.put(Exchange.HTTP_METHOD, "POST");
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+
+        final String fullPath = template.requestBodyAndHeaders(
+                "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
+
+        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
+        final String base_url = "http://localhost:" + System.getProperty("test.port", "8080") + "/rest";
+
+        // Test
+        final Map<String, Object> testHeaders = new HashMap<String, Object>();
+        testHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, base_url);
+
+        template.sendBodyAndHeaders("direct:insert", null, testHeaders);
+        template.sendBodyAndHeaders("direct:delete", null, testHeaders);
+        template.sendBodyAndHeaders("direct:count.triples", null, testHeaders);
+
+        testHeaders.clear();
+        testHeaders.put(JmsHeaders.IDENTIFIER, identifier);
+        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, base_url);
+        template.sendBodyAndHeaders("direct:describe.delete.insert", null, testHeaders);
+
+        // Teardown
+        final Map<String, Object> teardownHeaders = new HashMap<String, Object>();
+        teardownHeaders.put(Exchange.HTTP_METHOD, "DELETE");
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
+
+        // Confirm that the assertions passed
+        resultEndpoint.assertIsSatisfied();
+        sparqlQueryEndpoint.assertIsSatisfied();
+        sparqlUpdateEndpoint.assertIsSatisfied();
+        deletedEndpoint.assertIsSatisfied();
     }
 
     @Override
@@ -124,28 +200,110 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
                 final String fuseki_url = "localhost:" + System.getProperty("test.fuseki.port", "3030");
                 final Processor sparqlInsert = new SparqlInsertProcessor();
-                final XPathBuilder titleXpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
-                titleXpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-                titleXpath.namespace("dc", "http://purl.org/dc/elements/1.1/");
+                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                ns.add("dc", "http://purl.org/dc/elements/1.1/");
+                ns.add("sparql", "http://www.w3.org/2005/sparql-results#");
+
+                final XPathBuilder titleXpath = new XPathBuilder(
+                        "//sparql:literal[text() = 'some title']");
+                titleXpath.namespaces(ns);
+                final XPathBuilder resourceXpath = new XPathBuilder(
+                        "//sparql:uri[text() = '" + RdfNamespaces.REPOSITORY + "Resource']");
+                resourceXpath.namespaces(ns);
+                final XPathBuilder containerXpath = new XPathBuilder(
+                        "//sparql:uri[text() = '" + RdfNamespaces.REPOSITORY + "Container']");
+                containerXpath.namespaces(ns);
 
                 from("direct:setup")
-                    .to(fcrepo_uri);
+                    .to(fcrepo_uri)
+                    .to("mock:created");
 
-                from("direct:start")
+                from("direct:check.TypeResource")
+                    .removeHeaders("CamelHttp*")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT * WHERE { " +
+                                "<${headers.FCREPO_BASE_URL}${headers.FCREPO_IDENTIFIER}> " +
+                                "<" + RdfNamespaces.RDF + "type> ?o }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .filter(resourceXpath)
+                        .to("mock:sparql.query");
+
+                 from("direct:check.TypeContainer")
+                    .removeHeaders("CamelHttp*")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT * WHERE { " +
+                                "<${headers.FCREPO_BASE_URL}${headers.FCREPO_IDENTIFIER}> " +
+                                "<" + RdfNamespaces.RDF + "type> ?o }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .filter(containerXpath)
+                        .to("mock:sparql.query");
+
+                from("direct:check.DcTitle")
+                    .removeHeaders("CamelHttp*")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT * WHERE { " +
+                                "<${headers.FCREPO_BASE_URL}${headers.FCREPO_IDENTIFIER}> " +
+                                "<http://purl.org/dc/elements/1.1/title> ?o }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .filter(titleXpath)
+                        .to("mock:sparql.query");
+
+                from("direct:count.triples")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT ?s WHERE { ?s ?p ?o }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .setHeader("ItemCount").xpath("count(//sparql:result)", String.class, ns)
+                    .filter().simple("${header.ItemCount} <= 1")
+                    .to("mock:sparql.query");
+
+                from("direct:update")
+                    .to(fcrepo_uri)
+                    .process(new SparqlUpdateProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .to("direct:check.DcTitle")
+                    .to("direct:check.TypeResource")
+                    .to("direct:check.TypeContainer");
+
+                from("direct:insert")
+                    .to(fcrepo_uri)
+                    .process(new SparqlInsertProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .to("direct:check.DcTitle")
+                    .to("direct:check.TypeResource")
+                    .to("direct:check.TypeContainer");
+
+                from("direct:delete")
                     .process(new SparqlDescribeProcessor())
                     .to("http4:" + fuseki_url + "/test/query")
-                    //.log("${body}")
+                    .to("mock:sparql.query")
                     .process(new SparqlDeleteProcessor())
                     .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .to("direct:check.DcTitle")
+                    .to("direct:check.TypeResource")
+                    .to("direct:check.TypeContainer");
+
+                from("direct:describe.delete.insert")
+                    .process(new SparqlDescribeProcessor())
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .to("mock:sparql.query")
+                    .process(new SparqlDeleteProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(fcrepo_uri + "?accept=application/n-triples")
                     .process(new SparqlInsertProcessor())
                     .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
                     .to("mock:result");
 
                 from("direct:teardown")
                     .to(fcrepo_uri)
-                    .to(fcrepo_uri + "?tombstone=true");
+                    .to("mock:deleted")
+                    .to(fcrepo_uri + "?tombstone=true")
+                    .to("mock:deleted");
             }
         };
     }

@@ -18,7 +18,7 @@ package org.fcrepo.camel.integration;
 import static org.junit.Assert.assertEquals;
 
 import org.fcrepo.camel.JmsHeaders;
-import org.fcrepo.camel.Namespaces;
+import org.fcrepo.camel.RdfNamespaces;
 import org.fcrepo.jms.headers.DefaultMessageFactory;
 import org.fcrepo.kernel.RdfLexicon;
 import org.junit.Test;
@@ -43,10 +43,9 @@ public class FcrepoConstantsIT {
 
     @Test
     public void testRdfLexicon() {
-        assertEquals(Namespaces.REPOSITORY, RdfLexicon.REPOSITORY_NAMESPACE);
-        assertEquals(Namespaces.INDEXING, RdfLexicon.INDEXING_NAMESPACE);
-        assertEquals(Namespaces.RDF, RdfLexicon.RDF_NAMESPACE);
-        assertEquals(Namespaces.LDP, RdfLexicon.LDP_NAMESPACE);
+        assertEquals(RdfNamespaces.REPOSITORY, RdfLexicon.REPOSITORY_NAMESPACE);
+        assertEquals(RdfNamespaces.INDEXING, RdfLexicon.INDEXING_NAMESPACE);
+        assertEquals(RdfNamespaces.RDF, RdfLexicon.RDF_NAMESPACE);
+        assertEquals(RdfNamespaces.LDP, RdfLexicon.LDP_NAMESPACE);
     }
-
 }

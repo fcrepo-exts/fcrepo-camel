@@ -19,7 +19,7 @@ package org.fcrepo.camel;
 /**
  * @author acoburn
  */
-public final class Namespaces {
+public final class RdfNamespaces {
 
     public static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
@@ -29,7 +29,7 @@ public final class Namespaces {
 
     public static final String LDP = "http://www.w3.org/ns/ldp#";
 
-    private Namespaces() {
+    private RdfNamespaces() {
         // Prevent instantiation
     }
 

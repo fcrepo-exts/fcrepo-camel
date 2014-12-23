@@ -3,7 +3,7 @@ Fcrepo Component
 
 The **fcrepo:** component provides access to an external
 [Fedora4](http://fcrepo.org) Object
-[API](https://wiki.duraspace.org/display/FF/RESTful+HTTP+API+-+Objects)
+[API](https://wiki.duraspace.org/display/FF/RESTful+HTTP+API+-+Containers)
 for use with [Apache Camel](https://camel.apache.org).
 
 [![Build Status](https://travis-ci.org/fcrepo4-labs/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4-labs/fcrepo-camel)

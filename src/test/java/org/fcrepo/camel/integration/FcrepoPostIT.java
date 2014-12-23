@@ -28,6 +28,7 @@ import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
+import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,8 +43,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration({"/spring-test/test-container.xml"})
 public class FcrepoPostIT extends CamelTestSupport {
 
+    @EndpointInject(uri = "mock:created")
+    protected MockEndpoint createdEndpoint;
+
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
+
+    @EndpointInject(uri = "mock:deleted")
+    protected MockEndpoint deletedEndpoint;
 
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
@@ -53,6 +60,12 @@ public class FcrepoPostIT extends CamelTestSupport {
         // Assertions
         resultEndpoint.expectedMessageCount(1);
         resultEndpoint.expectedBodiesReceived("some title");
+
+        createdEndpoint.expectedMessageCount(1);
+        createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
+
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         // Setup
         final Map<String, Object> headers = new HashMap<>();
@@ -75,6 +88,8 @@ public class FcrepoPostIT extends CamelTestSupport {
 
         // Confirm that the assertions passed
         resultEndpoint.assertIsSatisfied();
+        deletedEndpoint.assertIsSatisfied();
+        createdEndpoint.assertIsSatisfied();
     }
 
     @Override
@@ -84,27 +99,30 @@ public class FcrepoPostIT extends CamelTestSupport {
             public void configure() {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
 
                 final XPathBuilder titleXpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
                 titleXpath.namespaces(ns);
                 titleXpath.namespace("dc", "http://purl.org/dc/elements/1.1/");
 
                 from("direct:setup")
-                    .to(fcrepo_uri);
+                    .to(fcrepo_uri)
+                    .to("mock:created");
 
                 from("direct:start")
                     .to(fcrepo_uri)
                     .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
+                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Resource']", ns)
                     .split(titleXpath)
                     .to("mock:result");
 
                 from("direct:teardown")
                     .to(fcrepo_uri)
-                    .to(fcrepo_uri + "?tombstone=true");
+                    .to("mock:deleted")
+                    .to(fcrepo_uri + "?tombstone=true")
+                    .to("mock:deleted");
             }
         };
     }

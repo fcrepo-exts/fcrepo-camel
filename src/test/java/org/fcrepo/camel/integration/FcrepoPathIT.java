@@ -28,6 +28,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.JmsHeaders;
+import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,10 +43,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration({"/spring-test/test-container.xml"})
 public class FcrepoPathIT extends CamelTestSupport {
 
+    @EndpointInject(uri = "mock:deleted")
+    protected MockEndpoint deletedEndpoint;
+
+    @EndpointInject(uri = "mock:created")
+    protected MockEndpoint createdEndpoint;
+
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "direct:start")
+    @Produce(uri = "direct:check")
     protected ProducerTemplate template;
 
     @Test
@@ -54,6 +61,14 @@ public class FcrepoPathIT extends CamelTestSupport {
 
         // Assertions
         resultEndpoint.expectedMessageCount(3);
+        resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
+        createdEndpoint.expectedMessageCount(1);
+        createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
+
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         // Setup
         final Map<String, Object> setupHeaders = new HashMap<>();
@@ -65,7 +80,7 @@ public class FcrepoPathIT extends CamelTestSupport {
         // Test
         template.sendBodyAndHeader(null, JmsHeaders.IDENTIFIER, path);
         template.sendBodyAndHeader(null, FcrepoHeaders.FCREPO_IDENTIFIER, path);
-        template.sendBody("direct:start2", null);
+        template.sendBody("direct:checkPath", null);
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<>();
@@ -75,6 +90,8 @@ public class FcrepoPathIT extends CamelTestSupport {
 
         // Confirm that assertions passed
         resultEndpoint.assertIsSatisfied();
+        createdEndpoint.assertIsSatisfied();
+        deletedEndpoint.assertIsSatisfied();
     }
 
     @Override
@@ -85,28 +102,31 @@ public class FcrepoPathIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
 
                 from("direct:setup")
-                    .to(fcrepo_uri);
+                    .to(fcrepo_uri)
+                    .to("mock:created");
 
-                from("direct:start")
+                from("direct:check")
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
+                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Resource']", ns)
                     .to("mock:result");
 
-                from("direct:start2")
+                from("direct:checkPath")
                     .to(fcrepo_uri + "/test/a/b/c/d")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Resource']", ns)
+                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Resource']", ns)
                     .to("mock:result");
 
                 from("direct:teardown")
                     .to(fcrepo_uri)
-                    .to(fcrepo_uri + "?tombstone=true");
+                    .to("mock:deleted")
+                    .to(fcrepo_uri + "?tombstone=true")
+                    .to("mock:deleted");
             }
         };
     }
