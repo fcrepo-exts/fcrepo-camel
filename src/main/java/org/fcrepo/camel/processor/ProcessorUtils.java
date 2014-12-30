@@ -15,14 +15,11 @@
  */
 package org.fcrepo.camel.processor;
 
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_BASE_URL;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.BASE_URL_HEADER_NAME;
-import static org.fcrepo.jms.headers.DefaultMessageFactory.IDENTIFIER_HEADER_NAME;
-
 import java.io.IOException;
 
 import org.apache.camel.Message;
+import org.fcrepo.camel.JmsHeaders;
+import org.fcrepo.camel.FcrepoHeaders;
 
 /**
  * Utility functions for fcrepo processor classes
@@ -45,18 +42,18 @@ public final class ProcessorUtils {
     public static String getSubjectUri(final Message in) throws IOException {
         final StringBuilder base = new StringBuilder("");
 
-        if (in.getHeader(FCREPO_BASE_URL) != null) {
-            base.append(in.getHeader(FCREPO_BASE_URL, String.class));
-        } else if (in.getHeader(BASE_URL_HEADER_NAME) != null) {
-            base.append(in.getHeader(BASE_URL_HEADER_NAME, String.class));
+        if (in.getHeader(FcrepoHeaders.FCREPO_BASE_URL) != null) {
+            base.append(in.getHeader(FcrepoHeaders.FCREPO_BASE_URL, String.class));
+        } else if (in.getHeader(JmsHeaders.BASE_URL) != null) {
+            base.append(in.getHeader(JmsHeaders.BASE_URL, String.class));
         } else {
             throw new IOException("No baseURL header available!");
         }
 
-        if (in.getHeader(FCREPO_IDENTIFIER) != null) {
-           base.append(in.getHeader(FCREPO_IDENTIFIER));
-        } else if (in.getHeader(IDENTIFIER_HEADER_NAME) != null) {
-           base.append(in.getHeader(IDENTIFIER_HEADER_NAME));
+        if (in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER) != null) {
+           base.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER));
+        } else if (in.getHeader(JmsHeaders.IDENTIFIER) != null) {
+           base.append(in.getHeader(JmsHeaders.IDENTIFIER));
         }
         return base.toString();
     }

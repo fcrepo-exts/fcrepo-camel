@@ -15,7 +15,7 @@
  */
 package org.fcrepo.camel;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -51,12 +51,10 @@ import org.apache.http.util.EntityUtils;
 /**
  * Represents a client to interact with Fedora's HTTP API.
  *
- * Note: This should be swapped out to use https://github.com/fcrepo4-labs/fcrepo4-client
- *
  * @author Aaron Coburn
  * @since October 20, 2014
  */
-public class FedoraClient {
+public class FcrepoClient {
 
     private static final String DESCRIBED_BY = "describedby";
 
@@ -67,13 +65,13 @@ public class FedoraClient {
     private Boolean throwExceptionOnFailure = true;
 
     /**
-     * Create a FedoraClient with a set of authentication values.
+     * Create a FcrepoClient with a set of authentication values.
      * @param username the username for the repository
      * @param password the password for the repository
      * @param host the authentication hostname (realm) for the repository
      * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
      */
-    public FedoraClient(final String username, final String password, final String host,
+    public FcrepoClient(final String username, final String password, final String host,
             final Boolean throwExceptionOnFailure) {
 
         final CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -109,7 +107,7 @@ public class FedoraClient {
      * Make a HEAD response
      * @param url the URL of the resource to check
      */
-    public FedoraResponse head(final URI url)
+    public FcrepoResponse head(final URI url)
             throws IOException, HttpOperationFailedException {
 
         final HttpHead request = new HttpHead(url);
@@ -123,7 +121,7 @@ public class FedoraClient {
             if (links.size() == 1) {
                 describedBy = links.get(0);
             }
-            return new FedoraResponse(url, status, contentType, describedBy, null);
+            return new FcrepoResponse(url, status, contentType, describedBy, null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -135,7 +133,7 @@ public class FedoraClient {
      * @param body the contents of the resource to send
      * @param contentType the MIMEType of the resource
      */
-    public FedoraResponse put(final URI url, final InputStream body, final String contentType)
+    public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
             throws IOException, HttpOperationFailedException {
 
         final HttpPut request = new HttpPut(url);
@@ -152,7 +150,7 @@ public class FedoraClient {
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
-            return new FedoraResponse(url, status, contentTypeHeader, null,
+            return new FcrepoResponse(url, status, contentTypeHeader, null,
                     entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
@@ -165,7 +163,7 @@ public class FedoraClient {
      * @param url the URL of the resource to PATCH
      * @param body the body to be sent to the repository
      */
-    public FedoraResponse patch(final URI url, final InputStream body)
+    public FcrepoResponse patch(final URI url, final InputStream body)
             throws IOException, HttpOperationFailedException {
 
         final HttpPatch request = new HttpPatch(url);
@@ -178,7 +176,7 @@ public class FedoraClient {
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
-            return new FedoraResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
+            return new FcrepoResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -190,7 +188,7 @@ public class FedoraClient {
      * @param body the content to be sent to the server
      * @param contentType the Content-Type of the body
      */
-    public FedoraResponse post(final URI url, final InputStream body, final String contentType)
+    public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
             throws IOException, HttpOperationFailedException {
 
         final HttpPost request = new HttpPost(url);
@@ -205,7 +203,7 @@ public class FedoraClient {
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
-            return new FedoraResponse(url, status, contentTypeHeader, null,
+            return new FcrepoResponse(url, status, contentTypeHeader, null,
                     entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
@@ -216,7 +214,7 @@ public class FedoraClient {
      * Make a DELETE request
      * @param url the URL of the resource to delete
      */
-    public FedoraResponse delete(final URI url)
+    public FcrepoResponse delete(final URI url)
             throws IOException, HttpOperationFailedException {
 
         final HttpDelete request = new HttpDelete(url);
@@ -226,7 +224,7 @@ public class FedoraClient {
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             final HttpEntity entity = response.getEntity();
-            return new FedoraResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
+            return new FcrepoResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);
         }
@@ -237,7 +235,7 @@ public class FedoraClient {
      * @param url the URL of the resource to fetch
      * @param accept the requested MIMEType of the resource to be retrieved
      */
-    public FedoraResponse get(final URI url, final String accept)
+    public FcrepoResponse get(final URI url, final String accept)
             throws IOException, HttpOperationFailedException {
 
         final HttpGet request = new HttpGet(url);
@@ -257,7 +255,7 @@ public class FedoraClient {
             if (links.size() == 1) {
                 describedBy = links.get(0);
             }
-            return new FedoraResponse(url, status, contentType, describedBy,
+            return new FcrepoResponse(url, status, contentType, describedBy,
                     entity != null ? entity.getContent() : null);
         } else {
             throw buildHttpOperationFailedException(url, response);

@@ -15,70 +15,83 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoEndpointUri;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getPatchDocument;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.xml.Namespaces;
+import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Test adding an RDF resource with PUT
+ * Test updating a fedora object with sparql-update
  * @author Aaron Coburn
  * @since November 7, 2014
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraHeadIT extends CamelTestSupport {
+public class FcrepoPatchIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
+
+    @EndpointInject(uri = "mock:titles")
+    protected MockEndpoint titleEndpoint;
 
     @Produce(uri = "direct:start")
     protected ProducerTemplate template;
 
     @Test
-    public void testHead() throws InterruptedException {
-        final String path = "/test/a/b/c/d";
-
+    public void testPatch() throws InterruptedException {
         // Assertions
         resultEndpoint.expectedMessageCount(1);
+        titleEndpoint.expectedMessageCount(2);
+        titleEndpoint.expectedBodiesReceivedInAnyOrder("some title", "another title");
 
         // Setup
-        final Map<String, Object> setupHeaders = new HashMap<>();
-        setupHeaders.put(HTTP_METHOD, "PUT");
-        setupHeaders.put(FCREPO_IDENTIFIER, path);
-        setupHeaders.put(CONTENT_TYPE, "text/turtle");
-        template.sendBodyAndHeaders("direct:setup", getTurtleDocument(), setupHeaders);
+        final Map<String, Object> headers = new HashMap<>();
+        headers.put(Exchange.HTTP_METHOD, "POST");
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+
+        final String fullPath = template.requestBodyAndHeaders(
+                "direct:setup", getTurtleDocument(), headers, String.class);
+
+        final String identifier = fullPath.replaceAll(getFcrepoBaseUrl(), "");
 
         // Test
-        final Map<String, Object> headers = new HashMap<>();
-        headers.put(HTTP_METHOD, "HEAD");
-        headers.put(FCREPO_IDENTIFIER, path);
-        template.sendBodyAndHeaders(null, headers);
+        final Map<String, Object> patchHeaders = new HashMap<>();
+        patchHeaders.put(Exchange.HTTP_METHOD, "PATCH");
+        patchHeaders.put(Exchange.CONTENT_TYPE, "text/turtle");
+        patchHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+
+        template.sendBodyAndHeaders(getPatchDocument(), patchHeaders);
+
+        template.sendBodyAndHeader("direct:test", null,
+                FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<>();
-        teardownHeaders.put(HTTP_METHOD, "DELETE");
-        teardownHeaders.put(FCREPO_IDENTIFIER, path);
+        teardownHeaders.put(Exchange.HTTP_METHOD, "DELETE");
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
 
-        // Confirm that assertions passed
+        // Confirm that the assertions passed
         resultEndpoint.assertIsSatisfied();
+        titleEndpoint.assertIsSatisfied();
     }
 
     @Override
@@ -86,9 +99,12 @@ public class FedoraHeadIT extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() {
+
                 final String fcrepo_uri = getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+                final XPathBuilder xpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
+                xpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+                xpath.namespace("dc", "http://purl.org/dc/elements/1.1/");
 
                 from("direct:setup")
                     .to(fcrepo_uri);
@@ -96,6 +112,11 @@ public class FedoraHeadIT extends CamelTestSupport {
                 from("direct:start")
                     .to(fcrepo_uri)
                     .to("mock:result");
+
+                from("direct:test")
+                    .to(fcrepo_uri)
+                    .split(xpath)
+                    .to("mock:titles");
 
                 from("direct:teardown")
                     .to(fcrepo_uri)

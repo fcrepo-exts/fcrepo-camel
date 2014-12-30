@@ -19,14 +19,14 @@ import java.net.URI;
 import java.io.InputStream;
 
 /**
- * Represents a response from a fedora repository using a {@link FedoraClient}.
+ * Represents a response from a fedora repository using a {@link FcrepoClient}.
  *
  * Note: This should be swapped out to use https://github.com/fcrepo4-labs/fcrepo4-client
  *
  * @author Aaron Coburn
  * @since October 20, 2014
  */
-public class FedoraResponse {
+public class FcrepoResponse {
 
     private URI url;
 
@@ -39,9 +39,9 @@ public class FedoraResponse {
     private String contentType;
 
     /**
-     * Create a FedoraResponse object from the http response
+     * Create a FcrepoResponse object from the http response
      */
-    public FedoraResponse(final URI url, final int statusCode,
+    public FcrepoResponse(final URI url, final int statusCode,
             final String contentType, final URI location, final InputStream body) {
         this.setUrl(url);
         this.setStatusCode(statusCode);

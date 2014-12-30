@@ -34,7 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @author ajs6f
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FedoraResponseTest {
+public class FcrepoResponseTest {
 
     @Test
     public void testResponse() throws IOException {
@@ -44,7 +44,7 @@ public class FedoraResponseTest {
         final URI location = create("http://localhost/path/a/b/c");
         final String body = "Text response";
         final InputStream bodyStream = new ByteArrayInputStream(body.getBytes(UTF_8));
-        final FedoraResponse response = new FedoraResponse(uri, status, contentType, location, bodyStream);
+        final FcrepoResponse response = new FcrepoResponse(uri, status, contentType, location, bodyStream);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);

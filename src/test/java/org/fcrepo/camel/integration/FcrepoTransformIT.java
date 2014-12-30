@@ -15,14 +15,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.FedoraEndpoint.FCREPO_TRANSFORM;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getFcrepoBaseUrl;
-import static org.fcrepo.camel.integration.FedoraTestUtils.getTurtleDocument;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +25,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,7 +38,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/spring-test/test-container.xml"})
-public class FedoraTransformIT extends CamelTestSupport {
+public class FcrepoTransformIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
@@ -62,12 +55,12 @@ public class FedoraTransformIT extends CamelTestSupport {
         headers.put(Exchange.CONTENT_TYPE, "text/turtle");
 
         final String fullPath = template.requestBodyAndHeaders(
-                "direct:setup", getTurtleDocument(), headers, String.class);
+                "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
 
-        final String identifier = fullPath.replaceAll(getFcrepoBaseUrl(), "");
+        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
 
         // Test
-        template.sendBodyAndHeader(null, FCREPO_IDENTIFIER,
+        template.sendBodyAndHeader(null, FcrepoHeaders.FCREPO_IDENTIFIER,
                 identifier);
 
         final String ldpath = "@prefix fcrepo : <http://fedora.info/definitions/v4/repository#>\n" +
@@ -76,39 +69,39 @@ public class FedoraTransformIT extends CamelTestSupport {
             "uuid = fcrepo:uuid :: xsd:string;";
 
         headers.clear();
-        headers.put(FCREPO_IDENTIFIER, identifier);
-        headers.put(CONTENT_TYPE, "application/rdf+ldpath");
-        headers.put(HTTP_METHOD, "POST");
-        headers.put(ACCEPT_CONTENT_TYPE, "application/json");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        headers.put(Exchange.CONTENT_TYPE, "application/rdf+ldpath");
+        headers.put(Exchange.HTTP_METHOD, "POST");
+        headers.put(Exchange.ACCEPT_CONTENT_TYPE, "application/json");
         template.sendBodyAndHeaders("direct:post", ldpath, headers);
 
         headers.clear();
-        headers.put(FCREPO_IDENTIFIER, identifier);
-        headers.put(HTTP_METHOD, "GET");
-        headers.put(ACCEPT_CONTENT_TYPE, "application/json");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        headers.put(Exchange.HTTP_METHOD, "GET");
+        headers.put(Exchange.ACCEPT_CONTENT_TYPE, "application/json");
         template.sendBodyAndHeaders("direct:get", null, headers);
 
         headers.clear();
-        headers.put(FCREPO_IDENTIFIER, identifier);
-        headers.put(FCREPO_TRANSFORM, "default");
-        headers.put(HTTP_METHOD, "GET");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        headers.put(FcrepoHeaders.FCREPO_TRANSFORM, "default");
+        headers.put(Exchange.HTTP_METHOD, "GET");
         template.sendBodyAndHeaders("direct:get2", null, headers);
 
         headers.clear();
-        headers.put(FCREPO_IDENTIFIER, identifier);
-        headers.put(FCREPO_TRANSFORM, "default");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        headers.put(FcrepoHeaders.FCREPO_TRANSFORM, "default");
         template.sendBodyAndHeaders("direct:get2", null, headers);
 
         headers.clear();
-        headers.put(FCREPO_IDENTIFIER, identifier);
-        headers.put(FCREPO_TRANSFORM, "");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        headers.put(FcrepoHeaders.FCREPO_TRANSFORM, "");
         template.sendBodyAndHeaders("direct:get", null, headers);
 
 
         // Teardown
         final Map<String, Object> teardownHeaders = new HashMap<>();
-        teardownHeaders.put(HTTP_METHOD, "DELETE");
-        teardownHeaders.put(FCREPO_IDENTIFIER, identifier);
+        teardownHeaders.put(Exchange.HTTP_METHOD, "DELETE");
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
 
         // Assertions
@@ -122,7 +115,7 @@ public class FedoraTransformIT extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() {
-                final String fcrepo_uri = FedoraTestUtils.getFcrepoEndpointUri();
+                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
                 from("direct:setup")
                     .to(fcrepo_uri);

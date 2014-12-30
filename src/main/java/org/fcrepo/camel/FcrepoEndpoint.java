@@ -26,21 +26,13 @@ import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 
 /**
- * Represents a Fedora endpoint.
+ * Represents a Fcrepo endpoint.
  * @author Aaron Coburn
  * @since October 20, 2014
  */
 @ManagedResource(description = "Managed FcrepoEndpoint")
 @UriEndpoint(scheme = "fcrepo")
-public class FedoraEndpoint extends DefaultEndpoint {
-
-    public static final String FCREPO_BASE_URL = "FCREPO_BASE_URL";
-
-    public static final String FCREPO_IDENTIFIER = "FCREPO_IDENTIFIER";
-
-    public static final String FCREPO_TRANSFORM = "FCREPO_TRANSFORM";
-
-    public static final String DEFAULT_CONTENT_TYPE = "application/rdf+xml";
+public class FcrepoEndpoint extends DefaultEndpoint {
 
     private String baseUrl = "";
 
@@ -72,12 +64,12 @@ public class FedoraEndpoint extends DefaultEndpoint {
     private Boolean throwExceptionOnFailure = true;
 
     /**
-     * Create a FedoraEndpoint with a uri, path and component
+     * Create a FcrepoEndpoint with a uri, path and component
      * @param uri the endpoint uri (without path values)
      * @param remaining any path values on the endpoint uri
      * @param component an existing component value
      */
-    public FedoraEndpoint(final String uri, final String remaining, final FedoraComponent component) {
+    public FcrepoEndpoint(final String uri, final String remaining, final FcrepoComponent component) {
         super(uri, component);
         this.setBaseUrl(remaining);
     }
@@ -87,7 +79,7 @@ public class FedoraEndpoint extends DefaultEndpoint {
      */
     @Override
     public Producer createProducer() {
-        return new FedoraProducer(this);
+        return new FcrepoProducer(this);
     }
 
     /**
@@ -95,7 +87,7 @@ public class FedoraEndpoint extends DefaultEndpoint {
      */
     @Override
     public Consumer createConsumer(final Processor processor) {
-        throw new RuntimeCamelException("Cannot produce to a FedoraEndpoint: " + getEndpointUri());
+        throw new RuntimeCamelException("Cannot produce to a FcrepoEndpoint: " + getEndpointUri());
     }
 
     /**

@@ -52,9 +52,9 @@ import org.mockito.Mock;
  * @author acoburn
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FedoraClientErrorTest {
+public class FcrepoClientErrorTest {
 
-    private FedoraClient testClient;
+    private FcrepoClient testClient;
 
     @Mock
     private CloseableHttpClient mockHttpclient;
@@ -67,7 +67,7 @@ public class FedoraClientErrorTest {
 
     @Before
     public void setUp() throws IOException {
-        testClient = new FedoraClient(null, null, null, false);
+        testClient = new FcrepoClient(null, null, null, false);
         setField(testClient, "httpclient", mockHttpclient);
     }
 
@@ -80,7 +80,7 @@ public class FedoraClientErrorTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FedoraResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -98,7 +98,7 @@ public class FedoraClientErrorTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FedoraResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -114,7 +114,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(TEXT_TURTLE, null, status);
 
-        final FedoraResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -130,7 +130,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(TEXT_TURTLE, null, status);
 
-        final FedoraResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -147,7 +147,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(RDF_XML, null, status);
 
-        final FedoraResponse response = testClient.put(uri, body, RDF_XML);
+        final FcrepoResponse response = testClient.put(uri, body, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -164,7 +164,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(RDF_XML, null, status);
 
-        final FedoraResponse response = testClient.put(uri, body, RDF_XML);
+        final FcrepoResponse response = testClient.put(uri, body, RDF_XML);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -180,7 +180,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(null, null, status);
 
-        final FedoraResponse response = testClient.delete(uri);
+        final FcrepoResponse response = testClient.delete(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -196,7 +196,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(null, null, status);
 
-        final FedoraResponse response = testClient.delete(uri);
+        final FcrepoResponse response = testClient.delete(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -213,7 +213,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FedoraResponse response = testClient.patch(uri, body);
+        final FcrepoResponse response = testClient.patch(uri, body);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -230,7 +230,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FedoraResponse response = testClient.patch(uri, body);
+        final FcrepoResponse response = testClient.patch(uri, body);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -247,7 +247,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FedoraResponse response = testClient.post(uri, body, SPARQL_UPDATE);
+        final FcrepoResponse response = testClient.post(uri, body, SPARQL_UPDATE);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -264,7 +264,7 @@ public class FedoraClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FedoraResponse response = testClient.post(uri, body, SPARQL_UPDATE);
+        final FcrepoResponse response = testClient.post(uri, body, SPARQL_UPDATE);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -290,7 +290,7 @@ public class FedoraClientErrorTest {
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
 
-        final FedoraResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -314,7 +314,7 @@ public class FedoraClientErrorTest {
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
 
-        final FedoraResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
