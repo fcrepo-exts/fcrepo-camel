@@ -56,8 +56,8 @@ public class SparqlInsertProcessor implements Processor {
                 "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, null);
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
-        exchange.getIn().setBody("INSERT DATA { " + serializedGraph.toString("UTF-8") + " }");
+        exchange.getIn().setBody("update=INSERT DATA { " + serializedGraph.toString("UTF-8") + " }");
         exchange.getIn().setHeader(HTTP_METHOD, "POST");
-        exchange.getIn().setHeader(CONTENT_TYPE, "application/sparql-update");
+        exchange.getIn().setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
     }
 }
