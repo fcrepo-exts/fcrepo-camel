@@ -26,6 +26,8 @@ public final class FcrepoHeaders {
 
     public static final String FCREPO_TRANSFORM = "FCREPO_TRANSFORM";
 
+    public static final String HTTP_PREFER = "CamelHttpPrefer";
+
     private FcrepoHeaders() {
         // prevent instantiation
     }

@@ -235,13 +235,17 @@ public class FcrepoClient {
      * @param url the URL of the resource to fetch
      * @param accept the requested MIMEType of the resource to be retrieved
      */
-    public FcrepoResponse get(final URI url, final String accept)
+    public FcrepoResponse get(final URI url, final String accept, final String prefer)
             throws IOException, HttpOperationFailedException {
 
         final HttpGet request = new HttpGet(url);
 
         if (accept != null) {
             request.setHeader("Accept", accept);
+        }
+
+        if (prefer != null) {
+            request.setHeader("Prefer", prefer);
         }
 
         final HttpResponse response = httpclient.execute(request);

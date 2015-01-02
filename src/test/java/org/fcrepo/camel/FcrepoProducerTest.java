@@ -80,7 +80,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(TestUtils.RDF_XML))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
@@ -102,7 +102,123 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader("Accept", TestUtils.N_TRIPLES);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(TestUtils.N_TRIPLES))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(TestUtils.N_TRIPLES), any(String.class))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferHeaderProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final String prefer = "return=representation; omit=\"http://www.w3.org/ns/ldp#PreferContainment\";";
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FcrepoHeaders.HTTP_PREFER, prefer);
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferIncludeLongEndpointProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final String prefer = "return=representation; " +
+                    "include=\"http://fedora.info/definitions/v4/repository#ServerManaged\";";
+
+        testEndpoint.setPreferInclude("http://fedora.info/definitions/v4/repository#ServerManaged");
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferIncludeShortEndpointProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final String prefer = "return=representation; include=\"http://www.w3.org/ns/ldp#PreferMembership\";";
+
+        testEndpoint.setPreferInclude("PreferMembership");
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferOmitLongEndpointProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final String prefer = "return=representation; " +
+                    "omit=\"http://fedora.info/definitions/v4/repository#EmbedResources\";";
+
+        testEndpoint.setPreferOmit("http://fedora.info/definitions/v4/repository#EmbedResources");
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferOmitShortEndpointProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final String prefer = "return=representation; omit=\"http://www.w3.org/ns/ldp#PreferContainment\";";
+
+        testEndpoint.setPreferOmit("PreferContainment");
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
@@ -124,7 +240,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(TestUtils.N_TRIPLES))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(TestUtils.N_TRIPLES), any(String.class))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
@@ -142,7 +258,7 @@ public class FcrepoProducerTest {
         init();
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(any(URI.class), eq(TestUtils.RDF_XML))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
@@ -165,7 +281,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TestUtils.TEXT_PLAIN);
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.GET);
 
-        when(mockClient.get(any(URI.class), eq(TestUtils.TEXT_PLAIN))).thenReturn(getResponse);
+        when(mockClient.get(any(URI.class), eq(TestUtils.TEXT_PLAIN), any(String.class))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
@@ -252,7 +368,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.GET);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON))
+        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -309,7 +425,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_TRANSFORM, "default");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON))
+        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -335,7 +451,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_TRANSFORM, "default");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON))
+        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -362,7 +478,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON))
+        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -487,5 +603,20 @@ public class FcrepoProducerTest {
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.baseUrl);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
         assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TestUtils.TEXT_PLAIN);
+    }
+
+    @Test
+    public void testPreferProperties() throws Exception {
+        testProducer = new FcrepoProducer(testEndpoint);
+
+        assertEquals(6, RdfNamespaces.PREFER_PROPERTIES.size());
+        assertEquals(RdfNamespaces.SERVER_MANAGED, RdfNamespaces.PREFER_PROPERTIES.get("ServerManaged"));
+        assertEquals(RdfNamespaces.EMBED_RESOURCES, RdfNamespaces.PREFER_PROPERTIES.get("EmbedResources"));
+        assertEquals(RdfNamespaces.INBOUND_REFERENCES, RdfNamespaces.PREFER_PROPERTIES.get("InboundReferences"));
+        final String[] ldpPrefer = new String[] { "PreferContainment", "PreferMembership",
+            "PreferMinimalContainer" };
+        for (final String s : ldpPrefer ) {
+            assertEquals(RdfNamespaces.LDP + s, RdfNamespaces.PREFER_PROPERTIES.get(s));
+        }
     }
 }

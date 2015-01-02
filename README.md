@@ -25,15 +25,16 @@ FcrepoEndpoint options
 | `accept` | `null` | Set the `Accept` header for content negotiation |
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
 | `transform` | `null` | If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
+| `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA40/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
+| `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA40/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
-
 
 Examples
 --------
 
 A simple example for sending messages to an external Solr service:
 
-    XPathBuilder xpath = new XPathBuilder("/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/repository#Indexable']");
+    XPathBuilder xpath = new XPathBuilder("/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#indexable']");
     xpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
     from("activemq:topic:fedora")
@@ -48,7 +49,7 @@ Or, using the Spring DSL:
       <from uri="activemq:topic:fedora"/>
       <to uri="fcrepo:localhost:8080/rest"/>
       <filter>
-        <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/repository#Indexable']</xpath>
+        <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#indexable']</xpath>
         <to uri="fcrepo:localhost:8080/rest?transform=mytransform"/>
         <to uri="http4:solr-host:8080/solr/core/update"/>
       </filter>
@@ -73,9 +74,10 @@ Message headers
 | `Exchange.HTTP_METHOD` | `String` | The HTTP method to use |
 | `Exchange.CONTENT_TYPE` | `String` | The ContentType of the resource. This sets the `Content-Type` header, but this value can be overridden directly on the endpoint. |
 | `Exchange.ACCEPT_CONTENT_TYPE` | `String` | This sets the `Accept` header, but this value can be overridden directly on the endpoint. |
-| `FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
-| `FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
-| `FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
+| `FcrepoHeaders.HTTP_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
+| `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
+| `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
+| `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
 
 The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `FEDORA_IDENTIFIER` is not defined.
 

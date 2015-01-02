@@ -63,6 +63,12 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     @UriParam
     private Boolean throwExceptionOnFailure = true;
 
+    @UriParam
+    private String preferInclude = null;
+
+    @UriParam
+    private String preferOmit = null;
+
     /**
      * Create a FcrepoEndpoint with a uri, path and component
      * @param uri the endpoint uri (without path values)
@@ -264,5 +270,37 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
     public Boolean getTombstone() {
         return tombstone;
+    }
+
+    /**
+     * preferInclude setter
+     */
+    @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
+    public void setPreferInclude(final String include) {
+        this.preferInclude = include;
+    }
+
+    /**
+     * preferOmit getter
+     */
+    @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
+    public String getPreferInclude() {
+        return preferInclude;
+    }
+
+    /**
+     * preferOmit setter
+     */
+    @ManagedAttribute(description = "Whether to include a Prefer: return=representation; omit=\"URI\" header")
+    public void setPreferOmit(final String omit) {
+        this.preferOmit = omit;
+    }
+
+    /**
+     * preferOmit getter
+     */
+    @ManagedAttribute(description = "Whether to include a Prefer: return=representation; omit=\"URI\" header")
+    public String getPreferOmit() {
+        return preferOmit;
     }
 }

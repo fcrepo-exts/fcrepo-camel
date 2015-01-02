@@ -80,7 +80,7 @@ public class FcrepoClientTest {
 
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML, "return=minimal");
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -97,7 +97,7 @@ public class FcrepoClientTest {
         entity.setContentType(RDF_XML);
 
         doSetupMockRequest(RDF_XML, entity, status);
-        testClient.get(uri, RDF_XML);
+        testClient.get(uri, RDF_XML, "return=representation");
     }
 
     @Test (expected = HttpOperationFailedException.class)
@@ -108,7 +108,7 @@ public class FcrepoClientTest {
         entity.setContentType(RDF_XML);
 
         doSetupMockRequest(RDF_XML, entity, status);
-        testClient.get(uri, RDF_XML);
+        testClient.get(uri, RDF_XML, null);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class FcrepoClientTest {
 
         when(mockResponse.getHeaders("Link")).thenReturn(headers);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -138,7 +138,7 @@ public class FcrepoClientTest {
 
         doSetupMockRequest(RDF_XML, null, status);
 
-        final FcrepoResponse response = testClient.get(uri, null);
+        final FcrepoResponse response = testClient.get(uri, null, null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
