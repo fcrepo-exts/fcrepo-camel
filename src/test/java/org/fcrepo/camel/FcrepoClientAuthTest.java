@@ -70,7 +70,7 @@ public class FcrepoClientAuthTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -90,7 +90,7 @@ public class FcrepoClientAuthTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -110,7 +110,7 @@ public class FcrepoClientAuthTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML);
+        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);

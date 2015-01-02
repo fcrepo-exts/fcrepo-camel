@@ -158,6 +158,39 @@ public class FcrepoEndpointTest {
     }
 
     @Test
+    public void testPreferOmit() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final String omit1 = "PreferContainment";
+        final String omit2 = "http://www.w3.org/ns/ldp#PreferMembership";
+        final String omit3 = "http://www.w3.org/ns/ldp#PreferMinimalContainer " +
+                             "http://www.w3.org/ns/ldp#PreferContainment";
+        assertEquals(null, testEndpoint.getPreferOmit());
+        testEndpoint.setPreferOmit(omit1);
+        assertEquals(omit1, testEndpoint.getPreferOmit());
+        testEndpoint.setPreferOmit(omit2);
+        assertEquals(omit2, testEndpoint.getPreferOmit());
+        testEndpoint.setPreferOmit(omit3);
+        assertEquals(omit3, testEndpoint.getPreferOmit());
+    }
+
+    @Test
+    public void testPreferInclude() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final String include1 = "PreferContainment";
+        final String include2 = "http://www.w3.org/ns/ldp#PreferMembership";
+        final String include3 = "http://www.w3.org/ns/ldp#PreferMinimalContainer " +
+                                "http://www.w3.org/ns/ldp#PreferContainment";
+        assertEquals(null, testEndpoint.getPreferInclude());
+        testEndpoint.setPreferInclude(include1);
+        assertEquals(include1, testEndpoint.getPreferInclude());
+        testEndpoint.setPreferInclude(include2);
+        assertEquals(include2, testEndpoint.getPreferInclude());
+        testEndpoint.setPreferInclude(include3);
+        assertEquals(include3, testEndpoint.getPreferInclude());
+    }
+
+
+    @Test
     public void testSingleton() {
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
         assertEquals(true, testEndpoint.isSingleton());

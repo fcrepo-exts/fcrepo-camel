@@ -44,9 +44,10 @@ public class FcrepoConstantsTest {
 
     @Test
     public void testFcrepoHeaders() {
-        assertEquals(FcrepoHeaders.FCREPO_BASE_URL, "FCREPO_BASE_URL");
-        assertEquals(FcrepoHeaders.FCREPO_IDENTIFIER, "FCREPO_IDENTIFIER");
-        assertEquals(FcrepoHeaders.FCREPO_TRANSFORM, "FCREPO_TRANSFORM");
+        assertEquals(FcrepoHeaders.FCREPO_BASE_URL, "CamelFcrepoBaseUrl");
+        assertEquals(FcrepoHeaders.FCREPO_IDENTIFIER, "CamelFcrepoIdentifier");
+        assertEquals(FcrepoHeaders.FCREPO_TRANSFORM, "CamelFcrepoTransform");
+        assertEquals(FcrepoHeaders.FCREPO_PREFER, "CamelFcrepoPrefer");
     }
 
     @Test

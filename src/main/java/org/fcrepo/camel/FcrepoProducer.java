@@ -77,6 +77,7 @@ public class FcrepoProducer extends DefaultProducer {
         final String contentType = getContentType(exchange);
         final String accept = getAccept(exchange);
         final String url = getUrl(exchange);
+        final String prefer = getPrefer(exchange);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
@@ -107,7 +108,7 @@ public class FcrepoProducer extends DefaultProducer {
             break;
         case GET:
         default:
-            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url), accept);
+            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url), accept, prefer);
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
         exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
@@ -115,9 +116,9 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
-     *
+     * Retrieve the resource location from a HEAD request.
      */
-    protected URI getMetadataUri(final String url)
+    private URI getMetadataUri(final String url)
             throws HttpOperationFailedException, IOException {
         final FcrepoResponse headResponse = client.head(URI.create(url));
         if (headResponse.getLocation() != null) {
@@ -134,7 +135,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected HttpMethods getMethod(final Exchange exchange) {
+    private HttpMethods getMethod(final Exchange exchange) {
         final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
         if (method == null) {
             return HttpMethods.GET;
@@ -149,7 +150,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected String getContentType(final Exchange exchange) {
+    private String getContentType(final Exchange exchange) {
         final String contentTypeString = ExchangeHelper.getContentType(exchange);
         if (!isBlank(endpoint.getContentType())) {
             return endpoint.getContentType();
@@ -168,7 +169,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected String getAccept(final Exchange exchange) {
+    private String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
 
@@ -192,21 +193,23 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected String getUrl(final Exchange exchange) {
+    private String getUrl(final Exchange exchange) {
         final Message in = exchange.getIn();
-        final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
+        final HttpMethods method = getMethod(exchange);
         final URI baseUri = URI.create(endpoint.getBaseUrl());
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
         final StringBuilder url = new StringBuilder("http://" + baseUri);
+
         if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
             url.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class));
         } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
             url.append(in.getHeader(JmsHeaders.IDENTIFIER, String.class));
         }
+
         if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
             if (method == HttpMethods.POST) {
                 url.append("/fcr:transform");
-            } else if (method == null || method == HttpMethods.GET) {
+            } else if (method == HttpMethods.GET) {
                 if (!isBlank(fcrepoTransform)) {
                     url.append("/fcr:transform/" + fcrepoTransform);
                 } else {
@@ -216,7 +219,58 @@ public class FcrepoProducer extends DefaultProducer {
         } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
             url.append("/fcr:tombstone");
         }
+
         return url.toString();
+    }
+
+    /**
+     *  Given an exchange, extract the Prefer headers, if any.
+     *
+     *  @param exchange the incoming message exchange
+     */
+    private String getPrefer(final Exchange exchange) {
+        final Message in = exchange.getIn();
+
+        if (getMethod(exchange) == HttpMethods.GET) {
+            if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class))) {
+                return in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class);
+            } else {
+                return buildPreferHeader(endpoint.getPreferInclude(), endpoint.getPreferOmit());
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     *  Build the prefer header from include and/or omit endpoint values
+     */
+    private String buildPreferHeader(final String include, final String omit) {
+        if (isBlank(include) && isBlank(omit)) {
+            return null;
+        } else {
+            String prefer = "return=representation;";
+            if (!isBlank(include)) {
+                prefer += " include=\"" + addPreferNamespace(include) + "\";";
+            }
+            if (!isBlank(omit)) {
+                prefer += " omit=\"" + addPreferNamespace(omit) + "\";";
+            }
+            return prefer;
+        }
+    }
+
+    /**
+     *  Add the appropriate namespace to the prefer header in case the
+     *  short form was supplied.
+     */
+    private String addPreferNamespace(final String property) {
+        final String prefer = RdfNamespaces.PREFER_PROPERTIES.get(property);
+        if (!isBlank(prefer)) {
+            return prefer;
+        } else {
+            return property;
+        }
     }
 
     private static InputStream extractResponseBodyAsStream(final InputStream is, final Exchange exchange)

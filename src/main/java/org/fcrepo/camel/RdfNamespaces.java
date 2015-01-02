@@ -16,6 +16,10 @@
 
 package org.fcrepo.camel;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+
 /**
  * @author acoburn
  */
@@ -28,6 +32,14 @@ public final class RdfNamespaces {
     public static final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
     public static final String LDP = "http://www.w3.org/ns/ldp#";
+
+    public static final Map<String, String> PREFER_PROPERTIES = ImmutableMap.<String, String>builder()
+        .put("PreferContainment", LDP + "PreferContainment")
+        .put("PreferMembership", LDP + "PreferMembership")
+        .put("PreferMinimalContainer", LDP + "PreferMinimalContainer")
+        .put("ServerManaged", REPOSITORY + "ServerManaged")
+        .put("EmbedResources", REPOSITORY + "EmbedResources")
+        .put("InboundReferences", REPOSITORY + "InboundReferences").build();
 
     private RdfNamespaces() {
         // Prevent instantiation
