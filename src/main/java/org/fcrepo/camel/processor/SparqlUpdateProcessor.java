@@ -57,6 +57,22 @@ public class SparqlUpdateProcessor implements Processor {
                 "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, null);
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
+        /*
+         * Before inserting updated triples, the Sparql update command
+         * below deletes all triples with the defined subject uri
+         * (coming from the FCREPO_IDENTIFIER and FCREPO_BASE_URL headers).
+         * It also deletes triples that have a subject corresponding to
+         * that Fcrepo URI plus the "/fcr:export?format=jcr/xml" string
+         * appended to it. This makes it possible to more completely
+         * remove any triples for a given resource that were added
+         * earlier. If fcrepo ever stops producing triples that are
+         * appended with /fcr:export?format..., then that extra line
+         * can be removed. It would also be possible to recursively delete
+         * triples (by removing any triple whose subject is also an object
+         * of the starting (or context) URI, but that approach tends to
+         * delete too many triples from the triplestore. This command does
+         * not delete blank nodes.
+         */
         exchange.getIn().setBody("DELETE WHERE { <" + subject + "> ?p ?o };\n" +
                                  "DELETE WHERE { <" + subject + "/fcr:export?format=jcr/xml> ?p ?o };\n" +
                                  "INSERT { " + serializedGraph.toString("UTF-8") + " }\n" +

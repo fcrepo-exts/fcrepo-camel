@@ -402,7 +402,7 @@
     <defaultGoal>install</defaultGoal>
 
     <plugins>
-      <!-- Launch jetty for unit testing with Solr -->
+      <!-- Launch jetty for integration testing with Solr -->
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
@@ -649,10 +649,6 @@
                   <name>integration-test</name>
                   <value>true</value>
                 </property>
-                <!--<property>-->
-                  <!--<name>test.solr.port</name>-->
-                  <!--<value>${test.solr.port}</value>-->
-                <!--</property>-->
               </properties>
             </configuration>
           </execution>
