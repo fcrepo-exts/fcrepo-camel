@@ -56,10 +56,10 @@ public class SparqlDeleteProcessor implements Processor {
          * too many triples from the triplestore. This command does
          * not remove blank nodes.
          */
-        in.setBody("DELETE WHERE { <" + subject + "> ?p ?o };\n" +
+        in.setBody("update=DELETE WHERE { <" + subject + "> ?p ?o };\n" +
                    "DELETE WHERE { <" + subject + "/fcr:export?format=jcr/xml> ?p ?o }");
         in.setHeader(HTTP_METHOD, "POST");
-        in.setHeader(CONTENT_TYPE, "application/sparql-update");
+        in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
 
    }
 }

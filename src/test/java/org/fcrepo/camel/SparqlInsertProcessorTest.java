@@ -61,8 +61,8 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         reverse(lines);
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("INSERT DATA { " + join(lines, " ") + " }");
-        resultEndpoint.expectedHeaderReceived("Content-Type", "application/sparql-update");
+        resultEndpoint.expectedBodiesReceived("update=INSERT DATA { " + join(lines, " ") + " }");
+        resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test

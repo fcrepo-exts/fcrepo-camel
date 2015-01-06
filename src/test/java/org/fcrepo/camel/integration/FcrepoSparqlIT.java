@@ -99,7 +99,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
         sparqlQueryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         sparqlUpdateEndpoint.expectedMessageCount(1);
-        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedBodiesReceived(null, null);
@@ -142,13 +142,13 @@ public class FcrepoSparqlIT extends CamelTestSupport {
     public void testInsertDeleteSparql() throws Exception {
         // Assertions
         resultEndpoint.expectedMessageCount(1);
-        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         sparqlQueryEndpoint.expectedMessageCount(6);
         sparqlQueryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         sparqlUpdateEndpoint.expectedMessageCount(4);
-        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedBodiesReceived(null, null);

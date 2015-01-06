@@ -83,9 +83,9 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
 
         // Assertions
         resultEndpoint.expectedBodiesReceived(
-                "DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
+                "update=DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
                 "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }");
-        resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/sparql-update");
+        resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test
