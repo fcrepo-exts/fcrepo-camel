@@ -33,19 +33,13 @@ public final class RdfNamespaces {
 
     public static final String LDP = "http://www.w3.org/ns/ldp#";
 
-    public static final String SERVER_MANAGED = REPOSITORY + "ServerManaged";
-
-    public static final String EMBED_RESOURCES = REPOSITORY + "EmbedResources";
-
-    public static final String INBOUND_REFERENCES = REPOSITORY + "InboundReferences";
-
     public static final Map<String, String> PREFER_PROPERTIES = ImmutableMap.<String, String>builder()
         .put("PreferContainment", LDP + "PreferContainment")
         .put("PreferMembership", LDP + "PreferMembership")
         .put("PreferMinimalContainer", LDP + "PreferMinimalContainer")
-        .put("ServerManaged", SERVER_MANAGED)
-        .put("EmbedResources", EMBED_RESOURCES)
-        .put("InboundReferences", INBOUND_REFERENCES).build();
+        .put("ServerManaged", REPOSITORY + "ServerManaged")
+        .put("EmbedResources", REPOSITORY + "EmbedResources")
+        .put("InboundReferences", REPOSITORY + "InboundReferences").build();
 
     private RdfNamespaces() {
         // Prevent instantiation

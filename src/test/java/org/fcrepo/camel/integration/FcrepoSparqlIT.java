@@ -222,7 +222,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .removeHeaders("CamelHttp*")
                     .setHeader(Exchange.HTTP_QUERY, simple(
                             "query=SELECT * WHERE { " +
-                                "<${headers.FCREPO_BASE_URL}${headers.FCREPO_IDENTIFIER}> " +
+                                "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
                                 "<" + RdfNamespaces.RDF + "type> ?o }"))
                     .to("http4:" + fuseki_url + "/test/query")
                     .filter(resourceXpath)
@@ -232,7 +232,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .removeHeaders("CamelHttp*")
                     .setHeader(Exchange.HTTP_QUERY, simple(
                             "query=SELECT * WHERE { " +
-                                "<${headers.FCREPO_BASE_URL}${headers.FCREPO_IDENTIFIER}> " +
+                                "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
                                 "<" + RdfNamespaces.RDF + "type> ?o }"))
                     .to("http4:" + fuseki_url + "/test/query")
                     .filter(containerXpath)
@@ -242,9 +242,10 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .removeHeaders("CamelHttp*")
                     .setHeader(Exchange.HTTP_QUERY, simple(
                             "query=SELECT * WHERE { " +
-                                "<${headers.FCREPO_BASE_URL}${headers.FCREPO_IDENTIFIER}> " +
+                                "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
                                 "<http://purl.org/dc/elements/1.1/title> ?o }"))
                     .to("http4:" + fuseki_url + "/test/query")
+                    .convertBodyTo(String.class)
                     .filter(titleXpath)
                         .to("mock:sparql.query");
 

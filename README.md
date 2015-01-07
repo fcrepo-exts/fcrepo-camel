@@ -3,7 +3,7 @@ Fcrepo Component
 
 The **fcrepo:** component provides access to an external
 [Fedora4](http://fcrepo.org) Object
-[API](https://wiki.duraspace.org/display/FF/RESTful+HTTP+API+-+Containers)
+[API](https://wiki.duraspace.org/display/FEDORA40/RESTful+HTTP+API+-+Containers)
 for use with [Apache Camel](https://camel.apache.org).
 
 [![Build Status](https://travis-ci.org/fcrepo4-labs/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4-labs/fcrepo-camel)
@@ -74,12 +74,23 @@ Message headers
 | `Exchange.HTTP_METHOD` | `String` | The HTTP method to use |
 | `Exchange.CONTENT_TYPE` | `String` | The ContentType of the resource. This sets the `Content-Type` header, but this value can be overridden directly on the endpoint. |
 | `Exchange.ACCEPT_CONTENT_TYPE` | `String` | This sets the `Accept` header, but this value can be overridden directly on the endpoint. |
-| `FcrepoHeaders.HTTP_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
+| `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
 | `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
 | `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
 | `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
 
-The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `FEDORA_IDENTIFIER` is not defined.
+The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `CamelFcrepoIdentifier` is not defined.
+
+If these headers are used with the Spring DSL or with the Simple language, the header values can be used directly with the following values:
+
+| Name    | Value |
+| ------- | ----- |
+| `FcrepoHeaders.FCREPO_BASE_URL` | `CamelFcrepoBaseUrl` |
+| `FcrepoHeaders.FCREPO_IDENTIFIER` | `CamelFcrepoIdentifier` |
+| `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` |
+| `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
+
+These headers can be removed as a group like this in the Java DSL: `removeHeaders("CamelFcrepo*")`
 
 Message body
 ------------

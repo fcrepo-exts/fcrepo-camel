@@ -20,13 +20,13 @@ package org.fcrepo.camel;
  */
 public final class FcrepoHeaders {
 
-    public static final String FCREPO_BASE_URL = "FCREPO_BASE_URL";
+    public static final String FCREPO_BASE_URL = "CamelFcrepoBaseUrl";
 
-    public static final String FCREPO_IDENTIFIER = "FCREPO_IDENTIFIER";
+    public static final String FCREPO_IDENTIFIER = "CamelFcrepoIdentifier";
 
-    public static final String FCREPO_TRANSFORM = "FCREPO_TRANSFORM";
+    public static final String FCREPO_TRANSFORM = "CamelFcrepoTransform";
 
-    public static final String HTTP_PREFER = "CamelHttpPrefer";
+    public static final String FCREPO_PREFER = "CamelFcrepoPrefer";
 
     private FcrepoHeaders() {
         // prevent instantiation

@@ -118,7 +118,7 @@ public class FcrepoProducer extends DefaultProducer {
     /**
      * Retrieve the resource location from a HEAD request.
      */
-    protected URI getMetadataUri(final String url)
+    private URI getMetadataUri(final String url)
             throws HttpOperationFailedException, IOException {
         final FcrepoResponse headResponse = client.head(URI.create(url));
         if (headResponse.getLocation() != null) {
@@ -135,7 +135,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected HttpMethods getMethod(final Exchange exchange) {
+    private HttpMethods getMethod(final Exchange exchange) {
         final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
         if (method == null) {
             return HttpMethods.GET;
@@ -150,7 +150,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected String getContentType(final Exchange exchange) {
+    private String getContentType(final Exchange exchange) {
         final String contentTypeString = ExchangeHelper.getContentType(exchange);
         if (!isBlank(endpoint.getContentType())) {
             return endpoint.getContentType();
@@ -169,7 +169,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected String getAccept(final Exchange exchange) {
+    private String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
 
@@ -193,7 +193,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    protected String getUrl(final Exchange exchange) {
+    private String getUrl(final Exchange exchange) {
         final Message in = exchange.getIn();
         final HttpMethods method = getMethod(exchange);
         final URI baseUri = URI.create(endpoint.getBaseUrl());
@@ -228,12 +228,12 @@ public class FcrepoProducer extends DefaultProducer {
      *
      *  @param exchange the incoming message exchange
      */
-    protected String getPrefer(final Exchange exchange) {
+    private String getPrefer(final Exchange exchange) {
         final Message in = exchange.getIn();
 
         if (getMethod(exchange) == HttpMethods.GET) {
-            if (!isBlank(in.getHeader(FcrepoHeaders.HTTP_PREFER, String.class))) {
-                return in.getHeader(FcrepoHeaders.HTTP_PREFER, String.class);
+            if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class))) {
+                return in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class);
             } else {
                 return buildPreferHeader(endpoint.getPreferInclude(), endpoint.getPreferOmit());
             }

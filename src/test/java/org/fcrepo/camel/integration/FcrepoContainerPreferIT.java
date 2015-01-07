@@ -127,13 +127,13 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
 
         headers.clear();
         headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
-        headers.put(FcrepoHeaders.HTTP_PREFER, "return=representation; " +
+        headers.put(FcrepoHeaders.FCREPO_PREFER, "return=representation; " +
                     "omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"; " +
                     "include=\"http://www.w3.org/ns/ldp#PreferContainment\";");
         template.sendBodyAndHeaders("direct:preferHeadersCheckContainment", null, headers);
         template.sendBodyAndHeaders("direct:preferHeadersCheckServerManaged", null, headers);
 
-        headers.put(FcrepoHeaders.HTTP_PREFER, "return=representation; " +
+        headers.put(FcrepoHeaders.FCREPO_PREFER, "return=representation; " +
                     "omit=\"http://fedora.info/definitions/v4/repository#ServerManaged " +
                     "http://www.w3.org/ns/ldp#PreferContainment\"");
         template.sendBodyAndHeaders("direct:preferHeadersCheckContainment", null, headers);

@@ -121,7 +121,7 @@ public class FcrepoProducerTest {
         init();
 
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(FcrepoHeaders.HTTP_PREFER, prefer);
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_PREFER, prefer);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
@@ -610,12 +610,14 @@ public class FcrepoProducerTest {
         testProducer = new FcrepoProducer(testEndpoint);
 
         assertEquals(6, RdfNamespaces.PREFER_PROPERTIES.size());
-        assertEquals(RdfNamespaces.SERVER_MANAGED, RdfNamespaces.PREFER_PROPERTIES.get("ServerManaged"));
-        assertEquals(RdfNamespaces.EMBED_RESOURCES, RdfNamespaces.PREFER_PROPERTIES.get("EmbedResources"));
-        assertEquals(RdfNamespaces.INBOUND_REFERENCES, RdfNamespaces.PREFER_PROPERTIES.get("InboundReferences"));
+        final String[] fcrepoPrefer = new String[] { "ServerManaged", "EmbedResources", "InboundReferences" };
+        for (final String s : fcrepoPrefer) {
+            assertEquals(RdfNamespaces.REPOSITORY + s, RdfNamespaces.PREFER_PROPERTIES.get(s));
+        }
+
         final String[] ldpPrefer = new String[] { "PreferContainment", "PreferMembership",
             "PreferMinimalContainer" };
-        for (final String s : ldpPrefer ) {
+        for (final String s : ldpPrefer) {
             assertEquals(RdfNamespaces.LDP + s, RdfNamespaces.PREFER_PROPERTIES.get(s));
         }
     }
