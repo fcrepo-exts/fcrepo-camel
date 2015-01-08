@@ -28,7 +28,6 @@ import static java.net.URI.create;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.StatusLine;
@@ -60,7 +59,7 @@ public class FcrepoClientAuthTest {
     private StatusLine mockStatus;
 
     @Test
-    public void testAuthNoHost() throws IOException, HttpOperationFailedException {
+    public void testAuthNoHost() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
@@ -80,7 +79,7 @@ public class FcrepoClientAuthTest {
     }
 
     @Test
-    public void testAuthWithHost() throws IOException, HttpOperationFailedException {
+    public void testAuthWithHost() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
@@ -100,7 +99,7 @@ public class FcrepoClientAuthTest {
     }
 
     @Test
-    public void testAuthNoPassword() throws IOException, HttpOperationFailedException {
+    public void testAuthNoPassword() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());

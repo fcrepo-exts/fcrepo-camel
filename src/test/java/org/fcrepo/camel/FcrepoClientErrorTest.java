@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.StatusLine;
@@ -72,7 +71,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testGet() throws IOException, HttpOperationFailedException {
+    public void testGet() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
@@ -108,7 +107,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testHead() throws IOException, HttpOperationFailedException {
+    public void testHead() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
 
@@ -124,7 +123,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testHeadError() throws IOException, HttpOperationFailedException {
+    public void testHeadError() throws IOException, FcrepoOperationFailedException {
         final int status = 400;
         final URI uri = create(baseUrl);
 
@@ -140,7 +139,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testPut() throws IOException, HttpOperationFailedException {
+    public void testPut() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
@@ -157,7 +156,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testPutError() throws IOException, HttpOperationFailedException {
+    public void testPutError() throws IOException, FcrepoOperationFailedException {
         final int status = 500;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
@@ -174,7 +173,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testDelete() throws IOException, HttpOperationFailedException {
+    public void testDelete() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
 
@@ -190,7 +189,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testDeleteError() throws IOException, HttpOperationFailedException {
+    public void testDeleteError() throws IOException, FcrepoOperationFailedException {
         final int status = 404;
         final URI uri = create(baseUrl);
 
@@ -206,7 +205,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testPatch() throws IOException, HttpOperationFailedException {
+    public void testPatch() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -223,7 +222,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testPatchError() throws IOException, HttpOperationFailedException {
+    public void testPatchError() throws IOException, FcrepoOperationFailedException {
         final int status = 401;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -240,7 +239,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testPost() throws IOException, HttpOperationFailedException {
+    public void testPost() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -257,7 +256,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testPostError() throws IOException, HttpOperationFailedException {
+    public void testPostError() throws IOException, FcrepoOperationFailedException {
         final int status = 404;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -274,7 +273,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testHeaders() throws IOException, HttpOperationFailedException {
+    public void testHeaders() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
         final Header contentTypeHeader = new BasicHeader("Content-Type", TEXT_TURTLE);
@@ -300,7 +299,7 @@ public class FcrepoClientErrorTest {
     }
 
     @Test
-    public void testHeadersWithoutContentType() throws IOException, HttpOperationFailedException {
+    public void testHeadersWithoutContentType() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
         final Header linkHeader = new BasicHeader("Link", "<" + baseUrl + "/bar>; rel=\"describedby\"");

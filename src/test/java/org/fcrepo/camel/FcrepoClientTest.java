@@ -31,11 +31,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 
-import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -65,6 +64,9 @@ public class FcrepoClientTest {
     @Mock
     private StatusLine mockStatus;
 
+    @Mock
+    private HttpEntity mockEntity;
+
     @Before
     public void setUp() throws IOException {
         testClient = new FcrepoClient(null, null, null, true);
@@ -72,7 +74,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testGet() throws IOException, HttpOperationFailedException {
+    public void testGet() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
@@ -89,7 +91,7 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
-    @Test (expected = HttpOperationFailedException.class)
+    @Test (expected = FcrepoOperationFailedException.class)
     public void testGetError() throws Exception {
         final int status = 400;
         final URI uri = create(baseUrl);
@@ -100,7 +102,7 @@ public class FcrepoClientTest {
         testClient.get(uri, RDF_XML, "return=representation");
     }
 
-    @Test (expected = HttpOperationFailedException.class)
+    @Test (expected = FcrepoOperationFailedException.class)
     public void testGet100() throws Exception {
         final int status = 100;
         final URI uri = create(baseUrl);
@@ -148,7 +150,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testHead() throws IOException, HttpOperationFailedException {
+    public void testHead() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
 
@@ -163,14 +165,14 @@ public class FcrepoClientTest {
         assertEquals(response.getBody(), null);
     }
 
-    @Test (expected = HttpOperationFailedException.class)
-    public void testHeadError() throws IOException, HttpOperationFailedException {
+    @Test (expected = FcrepoOperationFailedException.class)
+    public void testHeadError() throws IOException, FcrepoOperationFailedException {
         doSetupMockRequest(TEXT_TURTLE, null, 404);
         testClient.head(create(baseUrl));
     }
 
     @Test
-    public void testPut() throws IOException, HttpOperationFailedException {
+    public void testPut() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
@@ -187,7 +189,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPutNoBody() throws IOException, HttpOperationFailedException {
+    public void testPutNoBody() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
 
@@ -203,7 +205,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPutWithResponseBody() throws IOException, HttpOperationFailedException {
+    public void testPutWithResponseBody() throws IOException, FcrepoOperationFailedException {
         final int status = 201;
         final URI uri = create(baseUrl);
 
@@ -218,8 +220,8 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody()), uri.toString());
     }
 
-    @Test (expected = HttpOperationFailedException.class)
-    public void testPutError() throws IOException, HttpOperationFailedException {
+    @Test (expected = FcrepoOperationFailedException.class)
+    public void testPutError() throws IOException, FcrepoOperationFailedException {
         final int status = 500;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
@@ -229,7 +231,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testDelete() throws IOException, HttpOperationFailedException {
+    public void testDelete() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
 
@@ -245,7 +247,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testDeleteWithResponseBody() throws IOException, HttpOperationFailedException {
+    public void testDeleteWithResponseBody() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final String responseText = "tombstone found";
@@ -261,8 +263,8 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
-    @Test (expected = HttpOperationFailedException.class)
-    public void testDeleteError() throws IOException, HttpOperationFailedException {
+    @Test (expected = FcrepoOperationFailedException.class)
+    public void testDeleteError() throws IOException, FcrepoOperationFailedException {
         final int status = 401;
         final URI uri = create(baseUrl);
 
@@ -271,7 +273,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPatch() throws IOException, HttpOperationFailedException {
+    public void testPatch() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -288,7 +290,7 @@ public class FcrepoClientTest {
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void testPatchNoContent() throws IOException, HttpOperationFailedException {
+    public void testPatchNoContent() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
 
@@ -297,7 +299,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPatchResponseBody() throws IOException, HttpOperationFailedException {
+    public void testPatchResponseBody() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final String responseText = "Sparql-update response";
@@ -313,8 +315,8 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
-    @Test (expected = HttpOperationFailedException.class)
-    public void testPatchError() throws IOException, HttpOperationFailedException {
+    @Test (expected = FcrepoOperationFailedException.class)
+    public void testPatchError() throws IOException, FcrepoOperationFailedException {
         final int status = 415;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -324,7 +326,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPost() throws IOException, HttpOperationFailedException {
+    public void testPost() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -341,7 +343,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPostResponseBody() throws IOException, HttpOperationFailedException {
+    public void testPostResponseBody() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final String responseText = baseUrl + "/bar";
@@ -359,7 +361,7 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPostNoBody() throws IOException, HttpOperationFailedException {
+    public void testPostNoBody() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
         final String responseText = baseUrl + "/bar";
@@ -375,8 +377,8 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
-    @Test (expected = HttpOperationFailedException.class)
-    public void testPostError() throws IOException, HttpOperationFailedException {
+    @Test (expected = FcrepoOperationFailedException.class)
+    public void testPostError() throws IOException, FcrepoOperationFailedException {
         final int status = 415;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
@@ -386,88 +388,71 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPostErrorContentTypeHeader() throws IOException, HttpOperationFailedException {
+    public void testPostErrorNullUrl() throws IOException, FcrepoOperationFailedException {
         final int status = 401;
-        final URI uri = create(baseUrl);
-        final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final Header contentTypeHeader = new BasicHeader("Content-Type", SPARQL_UPDATE);
-        final Header[] responseHeaders = new Header[]{ contentTypeHeader };
-        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(SPARQL_UPDATE, responseBody, status);
-
-        when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
-
-        try {
-            testClient.post(uri, body, SPARQL_UPDATE);
-        } catch (HttpOperationFailedException ex) {
-            assertEquals(ex.getUri(), uri.toString());
-            assertEquals(ex.getResponseBody(), response);
-            assertEquals(ex.getRedirectLocation(), null);
-            assertEquals(ex.getStatusCode(), status);
-            for (Map.Entry<String, String> entry : ex.getResponseHeaders().entrySet()) {
-                assertEquals(entry.getKey(), "Content-Type");
-                assertEquals(entry.getValue(), SPARQL_UPDATE);
-            }
-        }
-    }
-
-    @Test
-    public void testPostErrorLocationHeader() throws IOException, HttpOperationFailedException {
-        final int status = 401;
-        final URI uri = create(baseUrl);
-        final String redirect = baseUrl + "/bar";
-        final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-        final Header locationHeader = new BasicHeader("Location", redirect);
-        final Header[] responseHeaders = new Header[]{ locationHeader };
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(SPARQL_UPDATE, responseBody, status);
-
-        when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
-        when(mockResponse.getFirstHeader("location")).thenReturn(new BasicHeader("Location", redirect));
-
-        try {
-            testClient.post(uri, body, SPARQL_UPDATE);
-        } catch (HttpOperationFailedException ex) {
-            assertEquals(ex.getUri(), uri.toString());
-            assertEquals(ex.getResponseBody(), response);
-            assertEquals(ex.getRedirectLocation(), redirect);
-            assertEquals(ex.getStatusCode(), status);
-            for (Map.Entry<String, String> entry : ex.getResponseHeaders().entrySet()) {
-                assertEquals(entry.getKey(), "Location");
-                assertEquals(entry.getValue(), redirect);
-            }
-        }
-    }
-
-    @Test
-    public void testPostErrorNoResponseHeaders() throws IOException, HttpOperationFailedException {
-        final int status = 401;
-        final URI uri = create(baseUrl);
+        final String statusPhrase = "Unauthorized";
         final String response = "Response error";
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
         final Header contentTypeHeader = new BasicHeader("Content-Type", SPARQL_UPDATE);
         final Header[] responseHeaders = new Header[]{ contentTypeHeader };
 
-        final CloseableHttpResponse mockResponse = doSetupMockRequest(SPARQL_UPDATE, responseBody, status);
+        doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
 
         when(mockResponse.getAllHeaders()).thenReturn(null);
 
         try {
-            testClient.post(uri, body, SPARQL_UPDATE);
-        } catch (HttpOperationFailedException ex) {
-            assertEquals(ex.getUri(), uri.toString());
-            assertEquals(ex.getResponseBody(), response);
-            assertEquals(ex.getRedirectLocation(), null);
+            testClient.post(null, body, SPARQL_UPDATE);
+        } catch (FcrepoOperationFailedException ex) {
+            assertEquals(ex.getUrl(), null);
+            assertEquals(ex.getStatusText(), statusPhrase);
             assertEquals(ex.getStatusCode(), status);
-            assertEquals(ex.getResponseHeaders(), null);
         }
+    }
+
+    @Test
+    public void testBadRequest() throws IOException, FcrepoOperationFailedException {
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+
+        when(mockHttpclient.execute(any(HttpUriRequest.class))).thenThrow(new IOException("Expected error"));
+
+        try {
+            testClient.post(uri, body, SPARQL_UPDATE);
+        } catch (FcrepoOperationFailedException ex) {
+            assertEquals(ex.getUrl(), uri);
+            assertEquals(ex.getStatusText(), "Expected error");
+            assertEquals(ex.getStatusCode(), -1);
+        }
+    }
+
+    @Test
+    public void testBadResponseBody() throws IOException, FcrepoOperationFailedException {
+        final int status = 200;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+        entity.setContentType(RDF_XML);
+
+        doSetupMockRequest(RDF_XML, entity, status);
+        when(mockResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenThrow(new IOException("Expected IO error"));
+
+        final FcrepoResponse response = testClient.get(uri, RDF_XML, "return=minimal");
+
+        assertEquals(response.getUrl(), uri);
+        assertEquals(response.getStatusCode(), status);
+        assertEquals(response.getContentType(), RDF_XML);
+        assertEquals(response.getLocation(), null);
+        assertEquals(response.getBody(), null);
     }
 
     private CloseableHttpResponse doSetupMockRequest(final String contentType, final ByteArrayEntity entity,
             final int status) throws IOException {
+        return doSetupMockRequest(contentType, entity, status, null);
+    }
+
+    private CloseableHttpResponse doSetupMockRequest(final String contentType, final ByteArrayEntity entity,
+            final int status, final String statusPhrase) throws IOException {
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
         final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{};
@@ -480,6 +465,7 @@ public class FcrepoClientTest {
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
+        when(mockStatus.getReasonPhrase()).thenReturn(statusPhrase);
 
         return mockResponse;
     }
