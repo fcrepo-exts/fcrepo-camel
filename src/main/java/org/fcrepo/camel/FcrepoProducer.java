@@ -25,8 +25,6 @@ import java.io.IOException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.component.http4.HttpMethods;
-import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.camel.converter.stream.CachedOutputStream;
 import org.apache.camel.impl.DefaultProducer;
 import org.apache.camel.util.ExchangeHelper;
@@ -68,10 +66,10 @@ public class FcrepoProducer extends DefaultProducer {
      * Define how message exchanges are processed.
      *
      * @param exchange the InOut message exchange
-     * @throws HttpOperationFailedException
+     * @throws FcrepoOperationFailedException
      */
     @Override
-    public void process(final Exchange exchange) throws HttpOperationFailedException, IOException {
+    public void process(final Exchange exchange) throws FcrepoOperationFailedException {
         final Message in = exchange.getIn();
         final HttpMethods method = getMethod(exchange);
         final String contentType = getContentType(exchange);
@@ -119,7 +117,7 @@ public class FcrepoProducer extends DefaultProducer {
      * Retrieve the resource location from a HEAD request.
      */
     private URI getMetadataUri(final String url)
-            throws HttpOperationFailedException, IOException {
+            throws FcrepoOperationFailedException {
         final FcrepoResponse headResponse = client.head(URI.create(url));
         if (headResponse.getLocation() != null) {
             return headResponse.getLocation();
@@ -162,7 +160,7 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
-     * Given an exchange, extract the accept value for use with an Accept header. The order of preference is:
+     * Given an exchange, extract the value for use with an Accept header. The order of preference is:
      * 1) whether a transform is being requested 2) an accept value is set on the endpoint 3) a value set on
      * the Exchange.ACCEPT_CONTENT_TYPE header 4) a value set on an "Accept" header 5) the endpoint
      * DEFAULT_CONTENT_TYPE (i.e. application/rdf+xml)
@@ -172,17 +170,32 @@ public class FcrepoProducer extends DefaultProducer {
     private String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
+        final String acceptHeader = getAcceptHeader(exchange);
 
         if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
             return "application/json";
         } else if (!isBlank(endpoint.getAccept())) {
             return endpoint.getAccept();
-        } else if (!isBlank(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))) {
+        } else if (!isBlank(acceptHeader)) {
+            return acceptHeader;
+        } else {
+            return DEFAULT_CONTENT_TYPE;
+        }
+    }
+
+    /**
+     * Given an exchange, extract the value of an incoming Accept header.
+     *
+     * @param exchange the incoming message exchange
+     */
+    private String getAcceptHeader(final Exchange exchange) {
+        final Message in = exchange.getIn();
+        if (!isBlank(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))) {
             return in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class);
         } else if (!isBlank(in.getHeader("Accept", String.class))) {
             return in.getHeader("Accept", String.class);
         } else {
-            return DEFAULT_CONTENT_TYPE;
+            return null;
         }
     }
 
@@ -273,8 +286,7 @@ public class FcrepoProducer extends DefaultProducer {
         }
     }
 
-    private static InputStream extractResponseBodyAsStream(final InputStream is, final Exchange exchange)
-            throws IOException {
+    private static InputStream extractResponseBodyAsStream(final InputStream is, final Exchange exchange) {
         // As httpclient is using a AutoCloseInputStream, it will be closed when the connection is closed
         // we need to cache the stream for it.
         if (is == null) {
@@ -285,6 +297,9 @@ public class FcrepoProducer extends DefaultProducer {
                 IOHelper.copy(is, cos);
                 // When the InputStream is closed, the CachedOutputStream will be closed
                 return cos.getWrappedInputStream();
+            } catch (IOException ex) {
+                LOGGER.debug("Error extracting body from http request", ex);
+                return null;
             } finally {
                 IOHelper.close(is, "Extracting response body", LOGGER);
             }

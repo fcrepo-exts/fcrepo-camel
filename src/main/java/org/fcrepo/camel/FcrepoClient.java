@@ -16,6 +16,7 @@
 package org.fcrepo.camel;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -27,7 +28,6 @@ import java.util.Map;
 
 import javax.ws.rs.core.Link;
 
-import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -42,11 +42,13 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
@@ -63,6 +65,8 @@ public class FcrepoClient {
     private CloseableHttpClient httpclient;
 
     private Boolean throwExceptionOnFailure = true;
+
+    private static final Logger LOGGER = getLogger(FcrepoClient.class);
 
     /**
      * Create a FcrepoClient with a set of authentication values.
@@ -97,21 +101,14 @@ public class FcrepoClient {
     }
 
     /**
-     * Stop the client
-     */
-    public void stop() throws IOException {
-        this.httpclient.close();
-    }
-
-    /**
      * Make a HEAD response
      * @param url the URL of the resource to check
      */
     public FcrepoResponse head(final URI url)
-            throws IOException, HttpOperationFailedException {
+            throws FcrepoOperationFailedException {
 
         final HttpHead request = new HttpHead(url);
-        final HttpResponse response = httpclient.execute(request);
+        final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
 
@@ -123,7 +120,11 @@ public class FcrepoClient {
             }
             return new FcrepoResponse(url, status, contentType, describedBy, null);
         } else {
-            throw buildHttpOperationFailedException(url, response);
+            throw new FcrepoOperationFailedException(url, status,
+                    response.getStatusLine().getReasonPhrase(),
+                    getRedirectLocation(response),
+                    getResponseHeaders(response),
+                    getResponseBodyAsString(response));
         }
     }
 
@@ -134,9 +135,10 @@ public class FcrepoClient {
      * @param contentType the MIMEType of the resource
      */
     public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
-            throws IOException, HttpOperationFailedException {
+            throws FcrepoOperationFailedException {
 
         final HttpPut request = new HttpPut(url);
+
         if (contentType != null) {
             request.addHeader(CONTENT_TYPE, contentType);
         }
@@ -144,17 +146,7 @@ public class FcrepoClient {
             request.setEntity(new InputStreamEntity(body));
         }
 
-        final HttpResponse response = httpclient.execute(request);
-        final int status = response.getStatusLine().getStatusCode();
-        final String contentTypeHeader = getContentTypeHeader(response);
-
-        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            final HttpEntity entity = response.getEntity();
-            return new FcrepoResponse(url, status, contentTypeHeader, null,
-                    entity != null ? entity.getContent() : null);
-        } else {
-            throw buildHttpOperationFailedException(url, response);
-        }
+        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
     }
 
     /**
@@ -164,22 +156,14 @@ public class FcrepoClient {
      * @param body the body to be sent to the repository
      */
     public FcrepoResponse patch(final URI url, final InputStream body)
-            throws IOException, HttpOperationFailedException {
+            throws FcrepoOperationFailedException {
 
         final HttpPatch request = new HttpPatch(url);
+
         request.addHeader(CONTENT_TYPE, "application/sparql-update");
         request.setEntity(new InputStreamEntity(body));
 
-        final HttpResponse response = httpclient.execute(request);
-        final int status = response.getStatusLine().getStatusCode();
-        final String contentType = getContentTypeHeader(response);
-
-        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            final HttpEntity entity = response.getEntity();
-            return new FcrepoResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
-        } else {
-            throw buildHttpOperationFailedException(url, response);
-        }
+        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
     }
 
     /**
@@ -189,25 +173,16 @@ public class FcrepoClient {
      * @param contentType the Content-Type of the body
      */
     public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
-            throws IOException, HttpOperationFailedException {
+            throws FcrepoOperationFailedException {
 
         final HttpPost request = new HttpPost(url);
+
         request.addHeader(CONTENT_TYPE, contentType);
         if (body != null) {
             request.setEntity(new InputStreamEntity(body));
         }
 
-        final HttpResponse response = httpclient.execute(request);
-        final int status = response.getStatusLine().getStatusCode();
-        final String contentTypeHeader = getContentTypeHeader(response);
-
-        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            final HttpEntity entity = response.getEntity();
-            return new FcrepoResponse(url, status, contentTypeHeader, null,
-                    entity != null ? entity.getContent() : null);
-        } else {
-            throw buildHttpOperationFailedException(url, response);
-        }
+        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
     }
 
     /**
@@ -215,19 +190,11 @@ public class FcrepoClient {
      * @param url the URL of the resource to delete
      */
     public FcrepoResponse delete(final URI url)
-            throws IOException, HttpOperationFailedException {
+            throws FcrepoOperationFailedException {
 
         final HttpDelete request = new HttpDelete(url);
-        final HttpResponse response = httpclient.execute(request);
-        final int status = response.getStatusLine().getStatusCode();
-        final String contentType = getContentTypeHeader(response);
 
-        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            final HttpEntity entity = response.getEntity();
-            return new FcrepoResponse(url, status, contentType, null, entity != null ? entity.getContent() : null);
-        } else {
-            throw buildHttpOperationFailedException(url, response);
-        }
+        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
     }
 
     /**
@@ -236,7 +203,7 @@ public class FcrepoClient {
      * @param accept the requested MIMEType of the resource to be retrieved
      */
     public FcrepoResponse get(final URI url, final String accept, final String prefer)
-            throws IOException, HttpOperationFailedException {
+            throws FcrepoOperationFailedException {
 
         final HttpGet request = new HttpGet(url);
 
@@ -248,53 +215,111 @@ public class FcrepoClient {
             request.setHeader("Prefer", prefer);
         }
 
-        final HttpResponse response = httpclient.execute(request);
+        final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            final HttpEntity entity = response.getEntity();
             URI describedBy = null;
             final List<URI> links = getLinkHeaders(response, DESCRIBED_BY);
             if (links.size() == 1) {
                 describedBy = links.get(0);
             }
             return new FcrepoResponse(url, status, contentType, describedBy,
-                    entity != null ? entity.getContent() : null);
+                    getEntityContent(response));
         } else {
-            throw buildHttpOperationFailedException(url, response);
+            throw new FcrepoOperationFailedException(url, status,
+                    response.getStatusLine().getReasonPhrase(),
+                    getRedirectLocation(response),
+                    getResponseHeaders(response),
+                    getResponseBodyAsString(response));
         }
     }
 
     /**
-     * Build a HttpOperationFailedException object from an http response
-     * @param url the URL of the request
-     * @param response the HTTP response
+     * Execute the HTTP request
      */
-    protected static HttpOperationFailedException
-        buildHttpOperationFailedException(final URI url, final HttpResponse response)
-            throws IOException  {
-
-        final int status = response.getStatusLine().getStatusCode();
-        final Header locationHeader = response.getFirstHeader("location");
-        final HttpEntity entity = response.getEntity();
-        String locationValue = null;
-
-        if (locationHeader != null) {
-            locationValue = locationHeader.getValue();
+    private HttpResponse executeRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
+        try {
+            return httpclient.execute(request);
+        } catch (IOException ex) {
+            LOGGER.debug("HTTP Operation failed: ", ex);
+            throw new FcrepoOperationFailedException(request.getURI(), -1, ex.getMessage(), null,
+                    null, null);
         }
+    }
 
-        return new HttpOperationFailedException(url.toString(), status,
-                response.getStatusLine().getReasonPhrase(),
-                locationValue,
-                extractResponseHeaders(response.getAllHeaders()),
-                entity != null ? EntityUtils.toString(entity) : null);
+    /**
+     * Handle the general case with responses.
+     */
+    private FcrepoResponse fcrepoGenericResponse(final URI url, final HttpResponse response,
+            final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
+        final int status = response.getStatusLine().getStatusCode();
+        final String contentTypeHeader = getContentTypeHeader(response);
+
+        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
+            return new FcrepoResponse(url, status, contentTypeHeader, null, getEntityContent(response));
+        } else {
+            throw new FcrepoOperationFailedException(url, status,
+                    response.getStatusLine().getReasonPhrase(),
+                    getRedirectLocation(response),
+                    getResponseHeaders(response),
+                    getResponseBodyAsString(response));
+        }
+    }
+
+
+    /**
+     * Extract the response body as an input stream
+     */
+    private static InputStream getEntityContent(final HttpResponse response) {
+        try {
+            final HttpEntity entity = response.getEntity();
+            if (entity == null) {
+                return null;
+            } else {
+                return entity.getContent();
+            }
+        } catch (IOException ex) {
+            LOGGER.debug("Unable to extract HttpEntity response into an InputStream: ", ex);
+            return null;
+        }
+    }
+
+    /**
+     * Extract the response body as a String
+     */
+    private static String getResponseBodyAsString(final HttpResponse response) {
+        final HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            try {
+                return EntityUtils.toString(entity);
+            } catch (IOException ex) {
+                LOGGER.debug("Unable to extract HttpEntity response as a String: ", ex);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Extract the redirect location, if any
+     */
+    private static URI getRedirectLocation(final HttpResponse response) {
+        final Header locationHeader = response.getFirstHeader("location");
+        if (locationHeader != null) {
+            return URI.create(locationHeader.getValue());
+        } else {
+            return null;
+        }
     }
 
     /**
      * Extract the response headers into a Map
      */
-    protected static Map<String, String> extractResponseHeaders(final Header[] responseHeaders) {
+    private static Map<String, String> getResponseHeaders(final HttpResponse response) {
+        final Header[] responseHeaders = response.getAllHeaders();
         if (responseHeaders == null) {
             return null;
         }
@@ -310,7 +335,7 @@ public class FcrepoClient {
     /**
      * Extract the content-type header value
      */
-    protected static String getContentTypeHeader(final HttpResponse response) {
+    private static String getContentTypeHeader(final HttpResponse response) {
         final Header[] contentTypes = response.getHeaders(CONTENT_TYPE);
         if (contentTypes.length > 0) {
             return contentTypes[0].getValue();
@@ -322,7 +347,7 @@ public class FcrepoClient {
     /**
      * Extract any Link headers
      */
-    protected static List<URI> getLinkHeaders(final HttpResponse response, final String relationship) {
+    private static List<URI> getLinkHeaders(final HttpResponse response, final String relationship) {
         final List<URI> uris = new ArrayList<URI>();
         final Header[] links = response.getHeaders("Link");
         for (Header header: links) {
