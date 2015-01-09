@@ -67,6 +67,7 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         for (final String s : document.split("\n")) {
             resultEndpoint.expectedBodyReceived().body().contains(s);
         }
+        resultEndpoint.expectedBodyReceived().body().contains("<" + base + path + "> dc:title \"some title\" .");
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
