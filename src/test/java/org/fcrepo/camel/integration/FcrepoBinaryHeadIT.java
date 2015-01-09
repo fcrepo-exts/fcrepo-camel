@@ -70,7 +70,7 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(2);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        binaryEndpoint.expectedBodiesReceived(null);
+        binaryEndpoint.allMessages().body().equals(null);
         binaryEndpoint.expectedMessageCount(1);
         binaryEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "text/plain");
         binaryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
@@ -80,7 +80,7 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         deletedEndpoint.expectedMessageCount(4);
-        deletedEndpoint.expectedBodiesReceived(null, null, null, null);
+        deletedEndpoint.allMessages().body().equals(null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         goneEndpoint.expectedMessageCount(2);
