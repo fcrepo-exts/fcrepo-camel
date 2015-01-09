@@ -16,7 +16,6 @@
 package org.fcrepo.camel;
 
 import java.net.URI;
-import java.util.Map;
 
 import org.apache.camel.CamelException;
 
@@ -26,32 +25,23 @@ import org.apache.camel.CamelException;
  * @since January 8, 2015
  */
 public class FcrepoOperationFailedException extends CamelException {
+
     private final URI url;
-    private final URI redirectLocation;
     private final int statusCode;
     private final String statusText;
-    private final Map<String, String> responseHeaders;
-    private final String responseBody;
 
     /**
      * Create an FcrepoOperationFailedException
      * @param url the requested url
      * @param statusCode the HTTP response code
-     * @param statusText the text corresponding to the status code
-     * @param location a location url
-     * @param responseHeaders a map of the response headers
-     * @param responseBody the response body
+     * @param statusText the response message
      */
-    public FcrepoOperationFailedException(final URI url, final int statusCode, final String statusText,
-            final URI location, final Map<String, String> responseHeaders, final String responseBody) {
-        super("HTTP operation failed invoking " + url.toString() + " with statusCode: " + statusCode +
-                (location != null ? ", redirectLocation: " + location.toString() : ""));
+    public FcrepoOperationFailedException(final URI url, final int statusCode, final String statusText) {
+        super("HTTP operation failed invoking " + (url != null ? url.toString() : "[null]") +
+                " with statusCode: " + statusCode + " and message: " + statusText);
         this.url = url;
         this.statusCode = statusCode;
         this.statusText = statusText;
-        this.redirectLocation = location;
-        this.responseHeaders = responseHeaders;
-        this.responseBody = responseBody;
     }
 
     /**
@@ -62,13 +52,6 @@ public class FcrepoOperationFailedException extends CamelException {
     }
 
     /**
-     * Get the redirect location.
-     */
-    public URI getRedirectLocation() {
-        return redirectLocation;
-    }
-
-    /**
      * Get the status code.
      */
     public int getStatusCode() {
@@ -76,23 +59,9 @@ public class FcrepoOperationFailedException extends CamelException {
     }
 
     /**
-     * Get the text corresponding to the status code.
+     * Get the status text.
      */
     public String getStatusText() {
         return statusText;
-    }
-
-    /**
-     * Get the response headers.
-     */
-    public Map<String, String> getResponseHeaders() {
-        return responseHeaders;
-    }
-
-    /**
-     * Get any response body.
-     */
-    public String getResponseBody() {
-        return responseBody;
     }
 }

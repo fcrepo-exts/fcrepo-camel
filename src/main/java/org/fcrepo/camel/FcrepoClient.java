@@ -22,9 +22,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.Link;
 
@@ -47,7 +45,6 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 
 /**
@@ -121,10 +118,7 @@ public class FcrepoClient {
             return new FcrepoResponse(url, status, contentType, describedBy, null);
         } else {
             throw new FcrepoOperationFailedException(url, status,
-                    response.getStatusLine().getReasonPhrase(),
-                    getRedirectLocation(response),
-                    getResponseHeaders(response),
-                    getResponseBodyAsString(response));
+                    response.getStatusLine().getReasonPhrase());
         }
     }
 
@@ -229,10 +223,7 @@ public class FcrepoClient {
                     getEntityContent(response));
         } else {
             throw new FcrepoOperationFailedException(url, status,
-                    response.getStatusLine().getReasonPhrase(),
-                    getRedirectLocation(response),
-                    getResponseHeaders(response),
-                    getResponseBodyAsString(response));
+                    response.getStatusLine().getReasonPhrase());
         }
     }
 
@@ -244,8 +235,7 @@ public class FcrepoClient {
             return httpclient.execute(request);
         } catch (IOException ex) {
             LOGGER.debug("HTTP Operation failed: ", ex);
-            throw new FcrepoOperationFailedException(request.getURI(), -1, ex.getMessage(), null,
-                    null, null);
+            throw new FcrepoOperationFailedException(request.getURI(), -1, ex.getMessage());
         }
     }
 
@@ -261,10 +251,7 @@ public class FcrepoClient {
             return new FcrepoResponse(url, status, contentTypeHeader, null, getEntityContent(response));
         } else {
             throw new FcrepoOperationFailedException(url, status,
-                    response.getStatusLine().getReasonPhrase(),
-                    getRedirectLocation(response),
-                    getResponseHeaders(response),
-                    getResponseBodyAsString(response));
+                    response.getStatusLine().getReasonPhrase());
         }
     }
 
@@ -284,52 +271,6 @@ public class FcrepoClient {
             LOGGER.debug("Unable to extract HttpEntity response into an InputStream: ", ex);
             return null;
         }
-    }
-
-    /**
-     * Extract the response body as a String
-     */
-    private static String getResponseBodyAsString(final HttpResponse response) {
-        final HttpEntity entity = response.getEntity();
-        if (entity != null) {
-            try {
-                return EntityUtils.toString(entity);
-            } catch (IOException ex) {
-                LOGGER.debug("Unable to extract HttpEntity response as a String: ", ex);
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Extract the redirect location, if any
-     */
-    private static URI getRedirectLocation(final HttpResponse response) {
-        final Header locationHeader = response.getFirstHeader("location");
-        if (locationHeader != null) {
-            return URI.create(locationHeader.getValue());
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Extract the response headers into a Map
-     */
-    private static Map<String, String> getResponseHeaders(final HttpResponse response) {
-        final Header[] responseHeaders = response.getAllHeaders();
-        if (responseHeaders == null) {
-            return null;
-        }
-
-        final Map<String, String> answer = new HashMap<String, String>();
-        for (Header header : responseHeaders) {
-            answer.put(header.getName(), header.getValue());
-        }
-
-        return answer;
     }
 
     /**
@@ -358,6 +299,4 @@ public class FcrepoClient {
         }
         return uris;
     }
-
-
  }

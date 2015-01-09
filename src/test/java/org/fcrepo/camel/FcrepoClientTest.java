@@ -31,7 +31,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -389,72 +388,9 @@ public class FcrepoClientTest {
     }
 
     @Test
-    public void testPostErrorContentTypeHeader() throws IOException, FcrepoOperationFailedException {
+    public void testPostErrorNullUrl() throws IOException, FcrepoOperationFailedException {
         final int status = 401;
         final String statusPhrase = "Unauthorized";
-        final URI uri = create(baseUrl);
-        final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final Header contentTypeHeader = new BasicHeader("Content-Type", SPARQL_UPDATE);
-        final Header[] responseHeaders = new Header[]{ contentTypeHeader };
-        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-
-        doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
-
-        when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
-
-        try {
-            testClient.post(uri, body, SPARQL_UPDATE);
-        } catch (FcrepoOperationFailedException ex) {
-            assertEquals(ex.getUrl(), uri);
-            assertEquals(ex.getResponseBody(), response);
-            assertEquals(ex.getRedirectLocation(), null);
-            assertEquals(ex.getStatusText(), statusPhrase);
-            assertEquals(ex.getStatusCode(), status);
-            for (Map.Entry<String, String> entry : ex.getResponseHeaders().entrySet()) {
-                assertEquals(entry.getKey(), "Content-Type");
-                assertEquals(entry.getValue(), SPARQL_UPDATE);
-            }
-        }
-    }
-
-    @Test
-    public void testPostErrorLocationHeader() throws IOException, FcrepoOperationFailedException {
-        final int status = 401;
-        final String statusPhrase = "Unauthorized";
-        final URI uri = create(baseUrl);
-        final String redirect = baseUrl + "/bar";
-        final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-        final Header locationHeader = new BasicHeader("Location", redirect);
-        final Header[] responseHeaders = new Header[]{ locationHeader };
-
-        doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
-
-        when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
-        when(mockResponse.getFirstHeader("location")).thenReturn(new BasicHeader("Location", redirect));
-
-        try {
-            testClient.post(uri, body, SPARQL_UPDATE);
-        } catch (FcrepoOperationFailedException ex) {
-            assertEquals(ex.getUrl(), uri);
-            assertEquals(ex.getResponseBody(), response);
-            assertEquals(ex.getStatusText(), statusPhrase);
-            assertEquals(ex.getRedirectLocation(), URI.create(redirect));
-            assertEquals(ex.getStatusCode(), status);
-            for (Map.Entry<String, String> entry : ex.getResponseHeaders().entrySet()) {
-                assertEquals(entry.getKey(), "Location");
-                assertEquals(entry.getValue(), redirect);
-            }
-        }
-    }
-
-    @Test
-    public void testPostErrorNoResponseHeaders() throws IOException, FcrepoOperationFailedException {
-        final int status = 401;
-        final String statusPhrase = "Unauthorized";
-        final URI uri = create(baseUrl);
         final String response = "Response error";
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
@@ -466,42 +402,11 @@ public class FcrepoClientTest {
         when(mockResponse.getAllHeaders()).thenReturn(null);
 
         try {
-            testClient.post(uri, body, SPARQL_UPDATE);
+            testClient.post(null, body, SPARQL_UPDATE);
         } catch (FcrepoOperationFailedException ex) {
-            assertEquals(ex.getUrl(), uri);
-            assertEquals(ex.getResponseBody(), response);
-            assertEquals(ex.getRedirectLocation(), null);
+            assertEquals(ex.getUrl(), null);
             assertEquals(ex.getStatusText(), statusPhrase);
             assertEquals(ex.getStatusCode(), status);
-            assertEquals(ex.getResponseHeaders(), null);
-        }
-    }
-
-    @Test
-    public void testBadErrorResponseBody() throws IOException, FcrepoOperationFailedException {
-        final int status = 401;
-        final String statusPhrase = "Unauthorized";
-        final URI uri = create(baseUrl);
-        final String response = "Response error";
-        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
-        final Header contentTypeHeader = new BasicHeader("Content-Type", SPARQL_UPDATE);
-        final Header[] responseHeaders = new Header[]{ contentTypeHeader };
-
-        doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
-
-        when(mockResponse.getEntity()).thenReturn(mockEntity);
-        when(mockEntity.getContent()).thenThrow(new IOException("Expected error"));
-
-        try {
-            testClient.post(uri, body, SPARQL_UPDATE);
-        } catch (FcrepoOperationFailedException ex) {
-            assertEquals(ex.getUrl(), uri);
-            assertEquals(ex.getResponseBody(), null);
-            assertEquals(ex.getRedirectLocation(), null);
-            assertEquals(ex.getStatusText(), statusPhrase);
-            assertEquals(ex.getStatusCode(), status);
-            assertEquals(ex.getResponseHeaders(), null);
         }
     }
 
@@ -516,11 +421,8 @@ public class FcrepoClientTest {
             testClient.post(uri, body, SPARQL_UPDATE);
         } catch (FcrepoOperationFailedException ex) {
             assertEquals(ex.getUrl(), uri);
-            assertEquals(ex.getResponseBody(), null);
-            assertEquals(ex.getRedirectLocation(), null);
             assertEquals(ex.getStatusText(), "Expected error");
             assertEquals(ex.getStatusCode(), -1);
-            assertEquals(ex.getResponseHeaders(), null);
         }
     }
 
