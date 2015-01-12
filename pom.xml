@@ -37,7 +37,6 @@
     <mockito.version>1.10.8</mockito.version>
     <slf4j.version>1.7.9</slf4j.version>
     <solr.version>4.10.2</solr.version>
-    <javax.ws.rs.version>2.0.1</javax.ws.rs.version>
     <spring.version>4.0.7.RELEASE</spring.version>
     <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
     <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
@@ -52,10 +51,6 @@
     <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
     <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.unit.file}</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
-    <!-- osgi -->
-    <camel.osgi.import.before.defaults>org.apache.camel.spi;${camel.osgi.import.strict.version}</camel.osgi.import.before.defaults>
-    <camel.osgi.export.pkg>org.fcrepo.camel.*</camel.osgi.export.pkg>
-    <camel.osgi.export.service>org.apache.camel.spi.ComponentResolver;component=fcrepo</camel.osgi.export.service>
   </properties>
 
   <licenses>
@@ -140,12 +135,6 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>${javax.ws.rs.version}</version>
     </dependency>
 
     <!-- logging -->
@@ -621,7 +610,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Name>${project.artifactId}</Bundle-Name>
+            <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
               org.fcrepo.camel;version=${project.version},
               org.fcrepo.camel.processor;version=${project.version}
@@ -631,7 +621,6 @@
               com.google.thirdparty.publicsuffix.*,
               com.hp.hpl.jena.*,
               com.ibm.icu.*,
-              javax.ws.rs.*,
               org.apache.clerezza.rdf.*,
               org.apache.clerezza.utils.*,
               org.apache.commons.codec.*,
@@ -640,6 +629,8 @@
               org.osgi.service.component,
               org.wymiwyg.commons.util.*,
             </Private-Package>
+            <Implementation-Title>Fedora Repository - Camel</Implementation-Title>
+            <Implementation-Version>${project.version}</Implementation-Version>
           </instructions>
         </configuration>
       </plugin>
@@ -656,10 +647,6 @@
             </goals>
             <configuration>
               <properties>
-                <property>
-                  <name>jms.port</name>
-                  <value>${jms.port}</value>
-                </property>
                 <property>
                   <name>integration-test</name>
                   <value>true</value>

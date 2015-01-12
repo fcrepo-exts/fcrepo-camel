@@ -24,8 +24,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.Link;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -292,7 +290,7 @@ public class FcrepoClient {
         final List<URI> uris = new ArrayList<URI>();
         final Header[] links = response.getHeaders("Link");
         for (Header header: links) {
-            final Link link = Link.valueOf(header.getValue());
+            final FcrepoLink link = new FcrepoLink(header.getValue());
             if (link.getRel().equals(relationship)) {
                 uris.add(link.getUri());
             }
