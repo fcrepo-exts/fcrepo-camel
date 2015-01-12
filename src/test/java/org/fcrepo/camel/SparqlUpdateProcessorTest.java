@@ -16,8 +16,6 @@
 package org.fcrepo.camel;
 
 import static org.apache.commons.lang3.StringUtils.normalizeSpace;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.apache.commons.lang3.ArrayUtils.reverse;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
@@ -53,19 +51,22 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
     @Test
     public void testDescribe() throws IOException, InterruptedException {
         final String base = "http://localhost/rest";
-        final String path = "/path/a/b/c/d";
+        final String path = "/path/a/b/c";
         final String document = getN3Document();
+        // Reverse the lines as the RDF may be serialized in opposite order
 
-        // Reverse the lines as the RDF is serialized in opposite order
-        final String[] lines = document.split("\n");
-        reverse(lines);
-
-        // Assertions
-        resultEndpoint.expectedBodiesReceived(
+        final String responsePrefix =
                   "update=DELETE WHERE { <" + base + path + "> ?p ?o }; " +
                   "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }; " +
-                  "INSERT { " + join(lines, " ") + " } " +
-                  "WHERE { }");
+                  "INSERT { ";
+        final String responseSuffix = " } WHERE { }";
+
+        // Assertions
+        resultEndpoint.allMessages().body().contains(responsePrefix);
+        resultEndpoint.allMessages().body().contains(responseSuffix);
+        for (final String s : document.split("\n")) {
+            resultEndpoint.expectedBodyReceived().body().contains(s);
+        }
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 

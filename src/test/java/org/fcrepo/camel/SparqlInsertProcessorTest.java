@@ -16,8 +16,6 @@
 package org.fcrepo.camel;
 
 import static org.apache.commons.lang3.StringUtils.normalizeSpace;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.apache.commons.lang3.ArrayUtils.reverse;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
@@ -56,12 +54,12 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         final String path = "/path/a/b/c/d";
         final String document = getN3Document();
 
-        // Reverse the lines as the RDF is serialized in opposite order
-        final String[] lines = document.split("\n");
-        reverse(lines);
-
         // Assertions
-        resultEndpoint.expectedBodiesReceived("update=INSERT DATA { " + join(lines, " ") + " }");
+        resultEndpoint.allMessages().body().contains("update=INSERT DATA { ");
+        resultEndpoint.allMessages().body().contains(" }");
+        for (final String s : document.split("\n")) {
+            resultEndpoint.expectedBodyReceived().body().contains(s);
+        }
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
