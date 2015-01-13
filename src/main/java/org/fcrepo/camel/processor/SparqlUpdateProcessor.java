@@ -24,6 +24,7 @@ import org.apache.camel.Message;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
@@ -53,8 +54,11 @@ public class SparqlUpdateProcessor implements Processor {
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
         final String subject = ProcessorUtils.getSubjectUri(in);
 
+        /* the text/rdf+nt mimetype will be removed in the next version of clerezza
+         * at which point they will be using application/n-triples. Once that happens,
+         * this ternary expression can be removed. */
         parser.parse(graph, in.getBody(InputStream.class),
-                "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, null);
+                "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, new UriRef(subject));
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
         /*

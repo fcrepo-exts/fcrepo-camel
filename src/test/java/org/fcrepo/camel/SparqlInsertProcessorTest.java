@@ -51,7 +51,7 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
     @Test
     public void testDescribe() throws IOException, InterruptedException {
         final String base = "http://localhost/rest";
-        final String path = "/path/a/b/c/d";
+        final String path = "/path/a/b/c";
         final String document = getN3Document();
 
         // Assertions
@@ -60,6 +60,7 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         for (final String s : document.split("\n")) {
             resultEndpoint.expectedBodyReceived().body().contains(s);
         }
+        resultEndpoint.expectedBodyReceived().body().contains("<" + base + path + "> dc:title \"some title\" .");
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
