@@ -34,7 +34,7 @@ Examples
 
 A simple example for sending messages to an external Solr service:
 
-    XPathBuilder xpath = new XPathBuilder("/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#indexable']");
+    XPathBuilder xpath = new XPathBuilder("/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/config#Indexable']");
     xpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
     from("activemq:topic:fedora")
@@ -49,7 +49,7 @@ Or, using the Spring DSL:
       <from uri="activemq:topic:fedora"/>
       <to uri="fcrepo:localhost:8080/rest"/>
       <filter>
-        <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#indexable']</xpath>
+        <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/config#Indexable']</xpath>
         <to uri="fcrepo:localhost:8080/rest?transform=mytransform"/>
         <to uri="http4:solr-host:8080/solr/core/update"/>
       </filter>
