@@ -107,15 +107,15 @@ Response code
 Camel will handle the HTTP response code in the following ways:
 
 * Response code in the range 100..299 is a success.
-* Response code in the range 300..399 is a redirection and will throw a `HttpOperationFailedException` with the relevant information.
-* Response code is 400+ is regarded as an external server error and will throw an `HttpOperationFailedException` with the relevant information.
+* Response code in the range 300..399 is a redirection and will throw a `FcrepoOperationFailedException` with the relevant information.
+* Response code is 400+ is regarded as an external server error and will throw an `FcrepoOperationFailedException` with the relevant information.
 
 Resource path
 -------------
 
 The path for `fcrepo` resources can be set in several different ways. If the
-`FCREPO_IDENTIFIER` header is set, that value will be appended to the endpoint
-URI. If the `FCREPO_IDENTIFIER` is not set, the path will be populated by the
+`CamelFcrepoIdentifier` header is set, that value will be appended to the endpoint
+URI. If the `CamelFcrepoIdentifier` is not set, the path will be populated by the
 `org.fcrepo.jms.identifier` header and appended to the endpoint URI. If neither
 header is set, only the endpoint URI will be used.
 
@@ -127,28 +127,27 @@ For example, each of these routes will request the resource at
 `http://localhost:8080/rest/a/b/c/abcdef`:
 
     from("direct:start")
-      .setHeader("FCREPO_IDENTIFIER", "/a/b/c/abcdef")
+      .setHeader("CamelFcrepoIdentifier", "/a/b/c/abcdef")
       .to("fcrepo:localhost:8080/rest");
 
-    // org.fcrepo.jms.identifier and FCREPO_IDENTIFIER headers are undefined
+    // org.fcrepo.jms.identifier and CamelFcrepoIdentifier headers are undefined
     from("direct:start")
       .to("fcrepo:localhost:8080/rest/a/b/c/abcdef");
 
     // org.fcrepo.jms.identifier is set as '/a/b/c/abcdef'
-    // and FCREPO_IDENTIFIER is not defined
+    // and CamelFcrepoIdentifier is not defined
     from("direct:start")
       .to("fcrepo:localhost:8080/rest")
 
 
-HttpOperationFailedException
-----------------------------
+FcrepoOperationFailedException
+------------------------------
 
 This exception contains the following information:
 
+* The requested URL
 * The HTTP status code
 * The HTTP status line (text of the status code)
-* Redirect location, if the server returned a redirect
-* Response body as a `java.lang.String`, if server provided a body as response
 
 
 How to set the HTTP method
@@ -226,5 +225,5 @@ There are several example projects in the `examples` directory of this distribut
 
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
-[fedora project wiki](https://wiki.duraspace.org/display/FF/Setup+Camel+Message+Integrations).
+[fedora project wiki](https://wiki.duraspace.org/display/FEDORA40/Setup+Camel+Message+Integrations).
 
