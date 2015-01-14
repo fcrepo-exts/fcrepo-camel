@@ -44,7 +44,7 @@ public class FcrepoConstantsIT {
     @Test
     public void testRdfLexicon() {
         assertEquals(RdfNamespaces.REPOSITORY, RdfLexicon.REPOSITORY_NAMESPACE);
-        assertEquals(RdfNamespaces.INDEXING, RdfLexicon.INDEXING_NAMESPACE);
+        assertEquals(RdfNamespaces.FEDORA_CONFIG, RdfLexicon.FEDORA_CONFIG_NAMESPACE);
         assertEquals(RdfNamespaces.RDF, RdfLexicon.RDF_NAMESPACE);
         assertEquals(RdfNamespaces.LDP, RdfLexicon.LDP_NAMESPACE);
         assertEquals(RdfNamespaces.REPOSITORY + "ServerManaged", RdfLexicon.SERVER_MANAGED.toString());
