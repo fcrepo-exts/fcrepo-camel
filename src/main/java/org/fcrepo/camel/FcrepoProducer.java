@@ -77,9 +77,7 @@ public class FcrepoProducer extends DefaultProducer {
         final String url = getUrl(exchange);
         final String prefer = getPrefer(exchange);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
-        }
+        LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
 
         FcrepoResponse response;
 
@@ -109,6 +107,7 @@ public class FcrepoProducer extends DefaultProducer {
             response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url), accept, prefer);
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
+
         exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
         exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
@@ -211,7 +210,9 @@ public class FcrepoProducer extends DefaultProducer {
         final HttpMethods method = getMethod(exchange);
         final URI baseUri = URI.create(endpoint.getBaseUrl());
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
-        final StringBuilder url = new StringBuilder("http://" + baseUri);
+        final StringBuilder url = new StringBuilder("http://");
+
+        url.append(baseUri);
 
         if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
             url.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class));
@@ -224,9 +225,11 @@ public class FcrepoProducer extends DefaultProducer {
                 url.append("/fcr:transform");
             } else if (method == HttpMethods.GET) {
                 if (!isBlank(fcrepoTransform)) {
-                    url.append("/fcr:transform/" + fcrepoTransform);
+                    url.append("/fcr:transform/");
+                    url.append(fcrepoTransform);
                 } else {
-                    url.append("/fcr:transform/" + endpoint.getTransform());
+                    url.append("/fcr:transform/");
+                    url.append(endpoint.getTransform());
                 }
             }
         } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
@@ -262,14 +265,15 @@ public class FcrepoProducer extends DefaultProducer {
         if (isBlank(include) && isBlank(omit)) {
             return null;
         } else {
-            String prefer = "return=representation;";
+            final StringBuilder prefer = new StringBuilder("return=representation;");
+
             if (!isBlank(include)) {
-                prefer += " include=\"" + addPreferNamespace(include) + "\";";
+                prefer.append(" include=\"" + addPreferNamespace(include) + "\";");
             }
             if (!isBlank(omit)) {
-                prefer += " omit=\"" + addPreferNamespace(omit) + "\";";
+                prefer.append(" omit=\"" + addPreferNamespace(omit) + "\";");
             }
-            return prefer;
+            return prefer.toString();
         }
     }
 

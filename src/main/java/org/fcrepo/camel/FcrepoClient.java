@@ -81,6 +81,8 @@ public class FcrepoClient {
         if (isBlank(username) || isBlank(password)) {
             this.httpclient = HttpClients.createDefault();
         } else {
+            LOGGER.debug("Accessing fcrepo with user credentials");
+
             if (isBlank(host)) {
                 scope = new AuthScope(AuthScope.ANY);
             } else {
@@ -106,6 +108,8 @@ public class FcrepoClient {
         final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
+
+        LOGGER.debug("Fcrepo HEAD request returned status [{}]", status);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             URI describedBy = null;
@@ -138,7 +142,13 @@ public class FcrepoClient {
             request.setEntity(new InputStreamEntity(body));
         }
 
-        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
+        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+
+        final HttpResponse response = executeRequest(request);
+
+        LOGGER.debug("Fcrepo PUT request returned status [{}]", response.getStatusLine().getStatusCode());
+
+        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
     /**
@@ -155,7 +165,13 @@ public class FcrepoClient {
         request.addHeader(CONTENT_TYPE, "application/sparql-update");
         request.setEntity(new InputStreamEntity(body));
 
-        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
+        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+
+        final HttpResponse response = executeRequest(request);
+
+        LOGGER.debug("Fcrepo PATCH request returned status [{}]", response.getStatusLine().getStatusCode());
+
+        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
     /**
@@ -169,12 +185,20 @@ public class FcrepoClient {
 
         final HttpPost request = new HttpPost(url);
 
-        request.addHeader(CONTENT_TYPE, contentType);
+        if (contentType != null) {
+            request.addHeader(CONTENT_TYPE, contentType);
+        }
         if (body != null) {
             request.setEntity(new InputStreamEntity(body));
         }
 
-        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
+        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+
+        final HttpResponse response = executeRequest(request);
+
+        LOGGER.debug("Fcrepo POST request returned status [{}]", response.getStatusLine().getStatusCode());
+
+        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
     /**
@@ -186,7 +210,11 @@ public class FcrepoClient {
 
         final HttpDelete request = new HttpDelete(url);
 
-        return fcrepoGenericResponse(url, executeRequest(request), throwExceptionOnFailure);
+        final HttpResponse response = executeRequest(request);
+
+        LOGGER.debug("Fcrepo DELETE request returned status [{}]", response.getStatusLine().getStatusCode());
+
+        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
     /**
@@ -207,9 +235,13 @@ public class FcrepoClient {
             request.setHeader("Prefer", prefer);
         }
 
+        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+
         final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
+
+        LOGGER.debug("Fcrepo GET request returned status [{}]", status);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
             URI describedBy = null;

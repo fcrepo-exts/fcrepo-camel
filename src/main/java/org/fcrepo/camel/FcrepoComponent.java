@@ -37,6 +37,7 @@ public class FcrepoComponent extends DefaultComponent {
      * Create a FcrepoComponent independent of a CamelContext.
      */
     public FcrepoComponent() {
+        super();
     }
 
     /**
@@ -57,7 +58,7 @@ public class FcrepoComponent extends DefaultComponent {
     protected Endpoint createEndpoint(final String uri, final String remaining, final Map<String, Object> parameters) {
         final Endpoint endpoint = new FcrepoEndpoint(uri, remaining, this);
         endpoint.configureProperties(parameters);
-        LOGGER.info("Created Fcrepo Endpoint [{}]", endpoint);
+        LOGGER.debug("Created Fcrepo Endpoint [{}]", endpoint);
         return endpoint;
     }
 }
