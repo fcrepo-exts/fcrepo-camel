@@ -55,6 +55,9 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     private String authHost = null;
 
     @UriParam
+    private Boolean secure = false;
+
+    @UriParam
     private Boolean tombstone = false;
 
     @UriParam
@@ -281,7 +284,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     }
 
     /**
-     * preferOmit getter
+     * preferInclude getter
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
     public String getPreferInclude() {
@@ -303,4 +306,21 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     public String getPreferOmit() {
         return preferOmit;
     }
+
+    /**
+     * secure setter
+     */
+    @ManagedAttribute(description = "Whether to use the https scheme with connections to Fedora")
+    public void setSecure(final Boolean secure) {
+        this.secure = secure;
+    }
+
+    /**
+     * secure getter
+     */
+    @ManagedAttribute(description = "Whether to use the https scheme with connections to Fedora")
+    public Boolean getSecure() {
+        return secure;
+    }
+
 }

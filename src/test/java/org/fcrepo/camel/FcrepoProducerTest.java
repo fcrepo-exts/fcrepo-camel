@@ -461,8 +461,6 @@ public class FcrepoProducerTest {
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
 
-
-
     @Test
     public void testTransformProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
@@ -621,4 +619,59 @@ public class FcrepoProducerTest {
             assertEquals(RdfNamespaces.LDP + s, RdfNamespaces.PREFER_PROPERTIES.get(s));
         }
     }
+
+    @Test
+    public void testGetSecureProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrlSecure);
+        final int status = 200;
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+
+        testEndpoint.setBaseUrl("localhost/rest");
+        testEndpoint.setSecure(true);
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(eq(create(TestUtils.baseUrlSecure)), eq(TestUtils.RDF_XML),
+                    any(String.class))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+    @Test
+    public void testSecureTransformProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrlSecure);
+        final int status = 200;
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+                new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
+
+        testEndpoint.setBaseUrl("localhost/rest");
+        testEndpoint.setTransform("default");
+        testEndpoint.setSecure(true);
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(create(TestUtils.baseUrlSecure + "/fcr:transform/default"), TestUtils.JSON, null))
+            .thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.serializedJson);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TestUtils.JSON);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+
+
 }
