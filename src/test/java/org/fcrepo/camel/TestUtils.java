@@ -27,6 +27,8 @@ class TestUtils {
 
     public static final String baseUrl = "http://localhost:8080/rest/foo";
 
+    public static final String baseUrlSecure = "https://localhost/rest/secure";
+
     public static final String rdfXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
             "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
               "<rdf:Description rdf:about=\"http://localhost:8080/rest/foo\">" +

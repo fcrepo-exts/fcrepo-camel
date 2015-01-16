@@ -210,7 +210,7 @@ public class FcrepoProducer extends DefaultProducer {
         final HttpMethods method = getMethod(exchange);
         final URI baseUri = URI.create(endpoint.getBaseUrl());
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
-        final StringBuilder url = new StringBuilder("http://");
+        final StringBuilder url = new StringBuilder(endpoint.getSecure() ? "https://" : "http://");
 
         url.append(baseUri);
 
