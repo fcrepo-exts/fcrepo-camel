@@ -56,7 +56,8 @@ public class FcrepoProducerTest {
     public void setUp() throws IOException {
         final FcrepoComponent mockComponent = mock(FcrepoComponent.class);
 
-        testEndpoint = new FcrepoEndpoint("fcrepo:localhost:8080", "/rest", mockComponent);
+        final FcrepoConfiguration testConfig = new FcrepoConfiguration();
+        testEndpoint = new FcrepoEndpoint("fcrepo:localhost:8080", "/rest", mockComponent, testConfig);
         testEndpoint.setBaseUrl("localhost:8080/rest");
         testExchange = new DefaultExchange(new DefaultCamelContext());
         testExchange.getIn().setBody(null);

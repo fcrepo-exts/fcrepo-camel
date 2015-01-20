@@ -50,6 +50,57 @@ public class FcrepoComponentTest {
     }
 
     @Test
+    public void testCreateEndpointFromConfig() {
+        final FcrepoConfiguration configuration = new FcrepoConfiguration();
+
+        configuration.setMetadata(false);
+
+        final FcrepoComponent testComponent = new FcrepoComponent(configuration);
+        final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
+        assertEquals(TEST_ENDPOINT_URI, testEndpoint.getEndpointUri());
+
+        assertEquals(false, testComponent.getConfiguration().getMetadata());
+    }
+
+    @Test
+    public void testPreConfiguredComponent() {
+        final FcrepoConfiguration config = new FcrepoConfiguration();
+        config.setAuthUsername("foo");
+        config.setAuthPassword("bar");
+        config.setAuthHost("baz");
+        config.setSecure(true);
+
+        final FcrepoComponent testComponent = new FcrepoComponent();
+
+        testComponent.setConfiguration(config);
+
+        final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
+
+        assertEquals(TEST_ENDPOINT_URI, testEndpoint.getEndpointUri());
+        assertEquals("foo", testComponent.getConfiguration().getAuthUsername());
+        assertEquals("bar", testComponent.getConfiguration().getAuthPassword());
+        assertEquals("baz", testComponent.getConfiguration().getAuthHost());
+        assertEquals(true, testComponent.getConfiguration().getSecure());
+    }
+
+    @Test
+    public void testPostConfiguredComponent() {
+        final FcrepoComponent testComponent = new FcrepoComponent();
+        testComponent.setAuthUsername("foo");
+        testComponent.setAuthPassword("bar");
+        testComponent.setAuthHost("baz");
+        testComponent.setSecure(true);
+
+        final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
+
+        assertEquals(TEST_ENDPOINT_URI, testEndpoint.getEndpointUri());
+        assertEquals("foo", testComponent.getConfiguration().getAuthUsername());
+        assertEquals("bar", testComponent.getConfiguration().getAuthPassword());
+        assertEquals("baz", testComponent.getConfiguration().getAuthHost());
+        assertEquals(true, testComponent.getConfiguration().getSecure());
+    }
+
+    @Test
     public void testCreateEndpointFromDefaultConstructor() {
         final FcrepoComponent testComponent = new FcrepoComponent();
         final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);

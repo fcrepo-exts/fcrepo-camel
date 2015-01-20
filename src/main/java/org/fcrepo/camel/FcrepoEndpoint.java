@@ -34,43 +34,8 @@ import org.apache.camel.spi.UriParam;
 @UriEndpoint(scheme = "fcrepo")
 public class FcrepoEndpoint extends DefaultEndpoint {
 
-    private String baseUrl = "";
-
     @UriParam
-    private String contentType = null;
-
-    @UriParam
-    private String accept = null;
-
-    @UriParam
-    private String transform = null;
-
-    @UriParam
-    private String authUsername = null;
-
-    @UriParam
-    private String authPassword = null;
-
-    @UriParam
-    private String authHost = null;
-
-    @UriParam
-    private Boolean secure = false;
-
-    @UriParam
-    private Boolean tombstone = false;
-
-    @UriParam
-    private Boolean metadata = true;
-
-    @UriParam
-    private Boolean throwExceptionOnFailure = true;
-
-    @UriParam
-    private String preferInclude = null;
-
-    @UriParam
-    private String preferOmit = null;
+    private FcrepoConfiguration configuration;
 
     /**
      * Create a FcrepoEndpoint with a uri, path and component
@@ -78,8 +43,10 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      * @param remaining any path values on the endpoint uri
      * @param component an existing component value
      */
-    public FcrepoEndpoint(final String uri, final String remaining, final FcrepoComponent component) {
+    public FcrepoEndpoint(final String uri, final String remaining, final FcrepoComponent component,
+            final FcrepoConfiguration configuration) {
         super(uri, component);
+        this.configuration = configuration;
         this.setBaseUrl(remaining);
     }
 
@@ -108,18 +75,33 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     }
 
     /**
+     * configuration getter
+     */
+    public FcrepoConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * configuration setter
+     * @param config The FcrepoConfiguration
+     */
+    public void setConfiguration(final FcrepoConfiguration config) {
+        this.configuration = config;
+    }
+
+    /**
      * baseUrl setter
      * @param url the baseUrl string
      */
     public void setBaseUrl(final String url) {
-        this.baseUrl = url;
+        getConfiguration().setBaseUrl(url);
     }
 
     /**
      * baseUrl getter
      */
     public String getBaseUrl() {
-        return baseUrl;
+        return getConfiguration().getBaseUrl();
     }
 
     /**
@@ -128,7 +110,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Accept: Header")
     public void setAccept(final String type) {
-        this.accept = type.replaceAll(" ", "+");
+        getConfiguration().setAccept(type.replaceAll(" ", "+"));
     }
 
     /**
@@ -136,7 +118,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Accept: Header")
     public String getAccept() {
-        return accept;
+        return getConfiguration().getAccept();
     }
 
     /**
@@ -145,7 +127,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Content-Type: Header")
     public void setContentType(final String type) {
-        this.contentType = type.replaceAll(" ", "+");
+        getConfiguration().setContentType(type);
     }
 
     /**
@@ -153,7 +135,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Content-Type: Header")
     public String getContentType() {
-        return contentType;
+        return getConfiguration().getContentType();
     }
 
     /**
@@ -162,7 +144,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Username for authentication")
     public void setAuthUsername(final String username) {
-        this.authUsername = username;
+        getConfiguration().setAuthUsername(username);
     }
 
     /**
@@ -170,7 +152,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Username for authentication")
     public String getAuthUsername() {
-        return authUsername;
+        return getConfiguration().getAuthUsername();
     }
 
     /**
@@ -179,7 +161,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Password for authentication")
     public void setAuthPassword(final String password) {
-        this.authPassword = password;
+        getConfiguration().setAuthPassword(password);
     }
 
     /**
@@ -187,7 +169,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Password for authentication")
     public String getAuthPassword() {
-        return authPassword;
+        return getConfiguration().getAuthPassword();
     }
 
     /**
@@ -196,7 +178,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Hostname for authentication")
     public void setAuthHost(final String host) {
-        this.authHost = host;
+        getConfiguration().setAuthHost(host);
     }
 
     /**
@@ -204,7 +186,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Hostname for authentication")
     public String getAuthHost() {
-        return authHost;
+        return getConfiguration().getAuthHost();
     }
 
     /**
@@ -213,7 +195,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to retrieve the /fcr:metadata endpoint for Binary nodes")
     public void setMetadata(final Boolean metadata) {
-        this.metadata = metadata;
+        getConfiguration().setMetadata(metadata);
     }
 
     /**
@@ -221,7 +203,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to retrieve the /fcr:metadata endpoint for Binary nodes")
     public Boolean getMetadata() {
-        return metadata;
+        return getConfiguration().getMetadata();
     }
 
     /**
@@ -230,7 +212,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether non 2xx response codes should throw an exception")
     public void setThrowExceptionOnFailure(final Boolean throwOnFailure) {
-        this.throwExceptionOnFailure = throwOnFailure;
+        getConfiguration().setThrowExceptionOnFailure(throwOnFailure);
     }
 
     /**
@@ -238,7 +220,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether non 2xx response codes should throw an exception")
     public Boolean getThrowExceptionOnFailure() {
-        return throwExceptionOnFailure;
+        return getConfiguration().getThrowExceptionOnFailure();
     }
 
     /**
@@ -247,7 +229,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "The LDPath transform program to use")
     public void setTransform(final String transform) {
-        this.transform = transform;
+        getConfiguration().setTransform(transform);
     }
 
     /**
@@ -255,7 +237,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "The LDPath transform program to use")
     public String getTransform() {
-        return transform;
+        return getConfiguration().getTransform();
     }
 
     /**
@@ -264,7 +246,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
     public void setTombstone(final Boolean tombstone) {
-        this.tombstone = tombstone;
+        getConfiguration().setTombstone(tombstone);
     }
 
     /**
@@ -272,7 +254,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
     public Boolean getTombstone() {
-        return tombstone;
+        return getConfiguration().getTombstone();
     }
 
     /**
@@ -280,7 +262,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
     public void setPreferInclude(final String include) {
-        this.preferInclude = include;
+        getConfiguration().setPreferInclude(include);
     }
 
     /**
@@ -288,7 +270,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
     public String getPreferInclude() {
-        return preferInclude;
+        return getConfiguration().getPreferInclude();
     }
 
     /**
@@ -296,7 +278,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; omit=\"URI\" header")
     public void setPreferOmit(final String omit) {
-        this.preferOmit = omit;
+        getConfiguration().setPreferOmit(omit);
     }
 
     /**
@@ -304,7 +286,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; omit=\"URI\" header")
     public String getPreferOmit() {
-        return preferOmit;
+        return getConfiguration().getPreferOmit();
     }
 
     /**
@@ -312,7 +294,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to use the https scheme with connections to Fedora")
     public void setSecure(final Boolean secure) {
-        this.secure = secure;
+        getConfiguration().setSecure(secure);
     }
 
     /**
@@ -320,7 +302,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @ManagedAttribute(description = "Whether to use the https scheme with connections to Fedora")
     public Boolean getSecure() {
-        return secure;
+        return getConfiguration().getSecure();
     }
 
 }
