@@ -66,6 +66,20 @@ Setting basic authentication
 | `authPassword` | `null`          | Password for authentication |
 | `authHost`     | `null`          | The host name for authentication |
 
+Configuring the fcrepo component
+--------------------------------
+
+In addition to configuring the `fcrepo` component with URI options on each request, it is also
+sometimes convenient to set up component-wide configurations. This can be done via Spring
+(or Blueprint), like so:
+
+    <bean id="fcrepo" class="org.fcrepo.camel.FcrepoComponent">
+      <property name="authUsername" value="${fcrepo.authUsername}"/>
+      <property name="authPassword" value="${fcrepo.authPassword}"/>
+      <property name="authHost" value="${fcrepo.authHost}"/>
+      <property name="secure" value="${fcrepo.secure}"/>
+    </bean>
+
 
 Message headers
 ---------------

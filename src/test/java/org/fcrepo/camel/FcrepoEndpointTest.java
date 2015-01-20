@@ -42,28 +42,41 @@ public class FcrepoEndpointTest {
     @Mock
     private Processor mockProcessor;
 
+    private FcrepoConfiguration testConfig = new FcrepoConfiguration();
+
     @Test(expected = RuntimeCamelException.class)
     public void testNoConsumerCanBeCreated() throws RuntimeCamelException {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         testEndpoint.createConsumer(mockProcessor);
     }
 
     @Test
     public void testCreateProducer() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final Producer testProducer = testEndpoint.createProducer();
         assertEquals(testEndpoint, testProducer.getEndpoint());
     }
 
     @Test
     public void testBaseUrl() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(testEndpoint.getBaseUrl(), FCREPO_PATH);
     }
 
     @Test
+    public void testConfiguration() {
+        final FcrepoConfiguration config = new FcrepoConfiguration();
+        config.setTombstone(true);
+
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
+        assertEquals(false, testEndpoint.getTombstone());
+        testEndpoint.setConfiguration(config);
+        assertEquals(true, testEndpoint.getTombstone());
+    }
+
+    @Test
     public void testTombstone() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(false, testEndpoint.getTombstone());
         testEndpoint.setTombstone(true);
         assertEquals(true, testEndpoint.getTombstone());
@@ -71,7 +84,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testTransform() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String transform = "default";
         assertEquals(null, testEndpoint.getTransform());
         testEndpoint.setTransform(transform);
@@ -80,7 +93,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testThrowExceptionOnFailure() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(true, testEndpoint.getThrowExceptionOnFailure());
         testEndpoint.setThrowExceptionOnFailure(false);
         assertEquals(false, testEndpoint.getThrowExceptionOnFailure());
@@ -88,7 +101,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testMetadata() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(true, testEndpoint.getMetadata());
         testEndpoint.setMetadata(false);
         assertEquals(false, testEndpoint.getMetadata());
@@ -96,7 +109,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testAuthHost() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String authHost = "example.org";
         assertEquals(null, testEndpoint.getAuthHost());
         testEndpoint.setAuthHost(authHost);
@@ -105,7 +118,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testAuthUser() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String authUser = "fedoraAdmin";
         assertEquals(null, testEndpoint.getAuthUsername());
         testEndpoint.setAuthUsername(authUser);
@@ -114,7 +127,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testAuthPassword() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String authPassword = "foo";
         assertEquals(null, testEndpoint.getAuthPassword());
         testEndpoint.setAuthPassword(authPassword);
@@ -123,7 +136,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testAccept() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String accept1 = "application/rdf+xml";
         final String accept2 = "text/turtle";
         final String accept3 = "application/ld+json";
@@ -141,7 +154,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testContentType() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String contentType1 = "application/rdf+xml";
         final String contentType2 = "text/turtle";
         final String contentType3 = "application/ld+json";
@@ -159,7 +172,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testPreferOmit() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String omit1 = "PreferContainment";
         final String omit2 = "http://www.w3.org/ns/ldp#PreferMembership";
         final String omit3 = "http://www.w3.org/ns/ldp#PreferMinimalContainer " +
@@ -175,7 +188,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testPreferInclude() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final String include1 = "PreferContainment";
         final String include2 = "http://www.w3.org/ns/ldp#PreferMembership";
         final String include3 = "http://www.w3.org/ns/ldp#PreferMinimalContainer " +
@@ -191,7 +204,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testSecure() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(false, testEndpoint.getSecure());
         testEndpoint.setSecure(true);
         assertEquals(true, testEndpoint.getSecure());
@@ -199,7 +212,7 @@ public class FcrepoEndpointTest {
 
     @Test
     public void testSingleton() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext);
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(true, testEndpoint.isSingleton());
     }
 
