@@ -23,7 +23,6 @@ import org.apache.camel.api.management.ManagedResource;
 import org.apache.camel.api.management.ManagedAttribute;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.UriEndpoint;
-import org.apache.camel.spi.UriParam;
 
 /**
  * Represents a Fcrepo endpoint.
@@ -34,7 +33,6 @@ import org.apache.camel.spi.UriParam;
 @UriEndpoint(scheme = "fcrepo")
 public class FcrepoEndpoint extends DefaultEndpoint {
 
-    @UriParam
     private FcrepoConfiguration configuration;
 
     /**
