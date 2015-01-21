@@ -27,7 +27,7 @@ public final class RdfNamespaces {
 
     public static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
-    public static final String INDEXING = "http://fedora.info/definitions/v4/indexing#";
+    public static final String FEDORA_CONFIG = "http://fedora.info/definitions/v4/config#";
 
     public static final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 

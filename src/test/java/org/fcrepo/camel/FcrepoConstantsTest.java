@@ -53,7 +53,7 @@ public class FcrepoConstantsTest {
     @Test
     public void testRdfLexicon() {
         assertEquals(RdfNamespaces.REPOSITORY, "http://fedora.info/definitions/v4/repository#");
-        assertEquals(RdfNamespaces.INDEXING, "http://fedora.info/definitions/v4/indexing#");
+        assertEquals(RdfNamespaces.FEDORA_CONFIG, "http://fedora.info/definitions/v4/config#");
         assertEquals(RdfNamespaces.RDF, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         assertEquals(RdfNamespaces.LDP, "http://www.w3.org/ns/ldp#");
     }
