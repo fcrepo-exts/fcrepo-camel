@@ -18,6 +18,7 @@
        <cm:property name="jms.brokerUrl" value="tcp://localhost:61616"/>
        <cm:property name="jms.fcrepoEndpoint" value="topic:fedora"/>
        <cm:property name="triplestore.baseUrl" value="localhost:3030/ds"/>
+       <cm:property name="solr.baseUrl" value="localhost:8080/solr/core"/>
        <cm:property name="error.dir" value="/tmp/camel"/>
        <cm:property name="error.file" value="errors.log"/>
        <cm:property name="rest.port" value="9080"/>

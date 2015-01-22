@@ -86,6 +86,6 @@ public class UpdateRouter extends RouteBuilder {
                 .constant(HttpMethods.POST)
             .setHeader(Exchange.CONTENT_TYPE)
                 .constant("application/json")
-            .to("http4://{{solr.uri}}/update");
+            .to("http4://{{solr.baseUrl}}/update");
     }
 }

@@ -67,6 +67,6 @@ public class DeleteRouter extends RouteBuilder {
                 .constant(HttpMethods.POST)
             .transform()
                 .simple(String.format(solrFormat, JmsHeaders.IDENTIFIER))
-            .to("http4://{{solr.uri}}/update");
+            .to("http4://{{solr.baseUrl}}/update");
     }
 }
