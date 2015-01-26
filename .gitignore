@@ -16,3 +16,4 @@ velocity.log
 .classpath
 .project
 .settings/
+/examples/*/target/
