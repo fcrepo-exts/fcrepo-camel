@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="fcrepo-camel-${project.version}">
+  <feature name="fcrepo-camel" version="${project.version}" resolver="(obr)" start-level="50">
+    <details>Installs the fcrepo-camel component</details>
+    <bundle>mvn:org.fcrepo.camel/fcrepo-camel/${project.version}</bundle>
+    <feature version="${camel.version.range}">camel</feature>
+  </feature>
+</features>

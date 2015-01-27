@@ -27,6 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <camel.version>2.14.0</camel.version>
+    <camel.version.range>[2.14,3)</camel.version.range>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
     <project.version>${project.version}</project.version>
@@ -283,6 +284,12 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -507,6 +514,22 @@
               <goal>reserve-network-port</goal>
             </goals>
           </execution>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>target/classes/features.xml</file>
+                  <type>xml</type>
+                  <classifier>features</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -595,6 +618,15 @@
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
+        <executions>
+          <execution>
+            <id>filter</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -629,6 +661,10 @@
               org.osgi.service.component,
               org.wymiwyg.commons.util.*,
             </Private-Package>
+            <Import-Package>
+              org.apache.camel*;version="${camel.version.range}",
+              *
+            </Import-Package>
             <Implementation-Title>Fedora Repository - Camel</Implementation-Title>
             <Implementation-Version>${project.version}</Implementation-Version>
           </instructions>
