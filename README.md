@@ -3,7 +3,7 @@ Fcrepo Component
 
 The **fcrepo:** component provides access to an external
 [Fedora4](http://fcrepo.org) Object
-[API](https://wiki.duraspace.org/display/FEDORA40/RESTful+HTTP+API+-+Containers)
+[API](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers)
 for use with [Apache Camel](https://camel.apache.org).
 
 [![Build Status](https://travis-ci.org/fcrepo4/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4/fcrepo-camel)
@@ -26,8 +26,8 @@ FcrepoEndpoint options
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
 | `transform` | `null` | If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
 | `secure` | `false` | Whether to use the `https` scheme when connecting to the Fedora repository |
-| `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA40/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
-| `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA40/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
+| `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
+| `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
 
 Examples
@@ -240,5 +240,5 @@ There are several example projects in the `examples` directory of this distribut
 
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
-[fedora project wiki](https://wiki.duraspace.org/display/FEDORA40/Setup+Camel+Message+Integrations).
+[fedora project wiki](https://wiki.duraspace.org/display/FEDORA4x/Setup+Camel+Message+Integrations).
 
