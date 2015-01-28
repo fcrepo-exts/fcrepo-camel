@@ -21,6 +21,7 @@ import static org.apache.camel.Exchange.CONTENT_TYPE;
 import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.fcrepo.camel.FcrepoHeaders;
 
 import java.io.IOException;
 
@@ -38,6 +39,7 @@ public class SparqlDeleteProcessor implements Processor {
     public void process(final Exchange exchange) throws IOException {
 
         final Message in = exchange.getIn();
+        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
         final String subject = ProcessorUtils.getSubjectUri(in);
 
         /*
@@ -56,10 +58,15 @@ public class SparqlDeleteProcessor implements Processor {
          * too many triples from the triplestore. This command does
          * not remove blank nodes.
          */
-        in.setBody("update=DELETE WHERE { <" + subject + "> ?p ?o };\n" +
-                   "DELETE WHERE { <" + subject + "/fcr:export?format=jcr/xml> ?p ?o }");
+        final StringBuilder query = new StringBuilder("update=");
+
+        query.append(ProcessorUtils.deleteWhere(subject, namedGraph));
+        query.append(";\n");
+        query.append(ProcessorUtils.deleteWhere(subject + "/fcr:export?format=jcr/xml", namedGraph));
+
+        in.setBody(query.toString());
         in.setHeader(HTTP_METHOD, "POST");
         in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
-
    }
+
 }

@@ -18,6 +18,8 @@ package org.fcrepo.camel.processor;
 import java.io.IOException;
 
 import org.apache.camel.Message;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.FcrepoHeaders;
 
@@ -64,6 +66,57 @@ public final class ProcessorUtils {
            base.append(in.getHeader(JmsHeaders.IDENTIFIER, String.class));
         }
         return base.toString();
+    }
+
+    /**
+     * Create a DELETE WHERE { ... } statement from the provided subject
+     *
+     * @param subject the subject of the triples to delete.
+     * @param namedGraph an optional named graph
+     */
+    public static String deleteWhere(final String subject, final String namedGraph) {
+        final StringBuilder stmt = new StringBuilder("DELETE WHERE { ");
+
+        if (!StringUtils.isBlank(namedGraph)) {
+            stmt.append("GRAPH ");
+            stmt.append(new UriRef(namedGraph));
+            stmt.append(" { ");
+        }
+
+        stmt.append(new UriRef(subject));
+        stmt.append(" ?p ?o ");
+
+        if (!StringUtils.isBlank(namedGraph)) {
+            stmt.append("} ");
+        }
+
+        stmt.append("}");
+        return stmt.toString();
+    }
+
+    /**
+     *  Create an INSERT DATA { ... } update query with the provided ntriples
+     *
+     *  @param serializedGraph the triples to insert
+     *  @param namedGraph an optional named graph
+     */
+    public static String insertData(final String serializedGraph, final String namedGraph) {
+        final StringBuilder query = new StringBuilder("INSERT DATA { ");
+
+        if (!StringUtils.isBlank(namedGraph)) {
+            query.append("GRAPH ");
+            query.append(new UriRef(namedGraph));
+            query.append(" { ");
+        }
+
+        query.append(serializedGraph);
+
+        if (!StringUtils.isBlank(namedGraph)) {
+            query.append("} ");
+        }
+
+        query.append("}");
+        return query.toString();
     }
 }
 

@@ -22,6 +22,7 @@ import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
+import org.apache.clerezza.rdf.core.UriRef;
 
 import java.io.IOException;
 
@@ -46,9 +47,9 @@ public class SparqlDescribeProcessor implements Processor {
     public void process(final Exchange exchange) throws IOException {
 
         final Message in = exchange.getIn();
-        final String subject = ProcessorUtils.getSubjectUri(in);
+        final UriRef subject = new UriRef(ProcessorUtils.getSubjectUri(in));
 
-        exchange.getIn().setBody("query=DESCRIBE <" + subject + ">");
+        exchange.getIn().setBody("query=DESCRIBE " + subject);
         exchange.getIn().setHeader(HTTP_METHOD, "POST");
         exchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, "application/rdf+xml");
         exchange.getIn().setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
