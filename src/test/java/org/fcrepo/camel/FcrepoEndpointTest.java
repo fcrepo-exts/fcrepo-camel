@@ -203,14 +203,6 @@ public class FcrepoEndpointTest {
     }
 
     @Test
-    public void testSecure() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
-        assertEquals(false, testEndpoint.getSecure());
-        testEndpoint.setSecure(true);
-        assertEquals(true, testEndpoint.getSecure());
-    }
-
-    @Test
     public void testSingleton() {
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(true, testEndpoint.isSingleton());

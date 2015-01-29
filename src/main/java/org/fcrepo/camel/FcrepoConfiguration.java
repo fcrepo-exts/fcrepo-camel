@@ -62,9 +62,6 @@ public class FcrepoConfiguration implements Cloneable {
     @UriParam
     private String preferOmit = null;
 
-    @UriParam
-    private Boolean secure = false;
-
     /**
      * Create a new FcrepoConfiguration object
      */
@@ -260,19 +257,5 @@ public class FcrepoConfiguration implements Cloneable {
      */
     public String getPreferOmit() {
         return preferOmit;
-    }
-
-    /**
-     * secure getter
-     */
-    public Boolean getSecure() {
-        return secure;
-    }
-
-    /**
-     * secure setter
-     */
-    public void setSecure(final Boolean secure) {
-        this.secure = secure;
     }
 }

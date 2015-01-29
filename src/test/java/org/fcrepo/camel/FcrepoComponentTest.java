@@ -68,7 +68,6 @@ public class FcrepoComponentTest {
         config.setAuthUsername("foo");
         config.setAuthPassword("bar");
         config.setAuthHost("baz");
-        config.setSecure(true);
 
         final FcrepoComponent testComponent = new FcrepoComponent();
 
@@ -80,7 +79,6 @@ public class FcrepoComponentTest {
         assertEquals("foo", testComponent.getConfiguration().getAuthUsername());
         assertEquals("bar", testComponent.getConfiguration().getAuthPassword());
         assertEquals("baz", testComponent.getConfiguration().getAuthHost());
-        assertEquals(true, testComponent.getConfiguration().getSecure());
     }
 
     @Test
@@ -89,7 +87,6 @@ public class FcrepoComponentTest {
         testComponent.setAuthUsername("foo");
         testComponent.setAuthPassword("bar");
         testComponent.setAuthHost("baz");
-        testComponent.setSecure(true);
 
         final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
 
@@ -97,7 +94,6 @@ public class FcrepoComponentTest {
         assertEquals("foo", testComponent.getConfiguration().getAuthUsername());
         assertEquals("bar", testComponent.getConfiguration().getAuthPassword());
         assertEquals("baz", testComponent.getConfiguration().getAuthHost());
-        assertEquals(true, testComponent.getConfiguration().getSecure());
     }
 
     @Test

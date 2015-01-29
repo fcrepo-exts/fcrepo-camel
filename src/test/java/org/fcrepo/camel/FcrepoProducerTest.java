@@ -622,6 +622,31 @@ public class FcrepoProducerTest {
     }
 
     @Test
+    public void testGetProducerWithScheme() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final int status = 200;
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+
+        // set the baseUrl with an explicit http:// scheme
+        testEndpoint.setBaseUrl("http://localhost:8080/rest");
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(eq(create(TestUtils.baseUrl)), eq(TestUtils.RDF_XML),
+                    any(String.class))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+    @Test
     public void testGetSecureProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrlSecure);
         final int status = 200;
@@ -629,14 +654,39 @@ public class FcrepoProducerTest {
         final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
         final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
 
-        testEndpoint.setBaseUrl("localhost/rest");
-        testEndpoint.setSecure(true);
+        // set the baseUrl with no scheme but with a secure port
+        testEndpoint.setBaseUrl("localhost:443/rest");
         init();
 
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(eq(create(TestUtils.baseUrlSecure)), eq(TestUtils.RDF_XML),
+                    any(String.class))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+    @Test
+    public void testGetSecureProducerWithScheme() throws Exception {
+        final URI uri = create(TestUtils.baseUrlSecureWithoutPort);
+        final int status = 200;
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+
+        // set the baseUrl with explicit scheme but no port
+        testEndpoint.setBaseUrl("https://localhost/rest");
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
+
+        when(mockClient.head(any(URI.class))).thenReturn(headResponse);
+        when(mockClient.get(eq(create(TestUtils.baseUrlSecureWithoutPort)), eq(TestUtils.RDF_XML),
                     any(String.class))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -654,9 +704,9 @@ public class FcrepoProducerTest {
         final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
-        testEndpoint.setBaseUrl("localhost/rest");
+        // set the baseUrl with no scheme but explicit secure port
+        testEndpoint.setBaseUrl("localhost:443/rest");
         testEndpoint.setTransform("default");
-        testEndpoint.setSecure(true);
 
         init();
 
@@ -672,7 +722,4 @@ public class FcrepoProducerTest {
         assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TestUtils.JSON);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
     }
-
-
-
 }
