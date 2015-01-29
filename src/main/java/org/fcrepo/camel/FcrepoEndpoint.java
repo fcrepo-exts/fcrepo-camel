@@ -286,21 +286,4 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     public String getPreferOmit() {
         return getConfiguration().getPreferOmit();
     }
-
-    /**
-     * secure setter
-     */
-    @ManagedAttribute(description = "Whether to use the https scheme with connections to Fedora")
-    public void setSecure(final Boolean secure) {
-        getConfiguration().setSecure(secure);
-    }
-
-    /**
-     * secure getter
-     */
-    @ManagedAttribute(description = "Whether to use the https scheme with connections to Fedora")
-    public Boolean getSecure() {
-        return getConfiguration().getSecure();
-    }
-
 }

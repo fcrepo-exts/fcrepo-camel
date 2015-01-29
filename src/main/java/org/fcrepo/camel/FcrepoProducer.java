@@ -41,6 +41,8 @@ public class FcrepoProducer extends DefaultProducer {
 
     public static final String DEFAULT_CONTENT_TYPE = "application/rdf+xml";
 
+    public static final int DEFAULT_HTTPS_PORT = 443;
+
     private static final Logger LOGGER = getLogger(FcrepoProducer.class);
 
     private FcrepoEndpoint endpoint;
@@ -199,6 +201,85 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
+     * Get the repository baseUrl with a full scheme.
+     * The base URL may be any of the following:
+     * localhost:8080/rest
+     * fedora.institution.org:8983/rest
+     * http://localhost:8080/fcrepo/rest
+     * https://fedora.institution.org/rest
+     * fedora.insitution.org:443/rest
+     *
+     * This method ensures that the url (fragment) is properly prefixed
+     * with either the http or https scheme, suitable for sending to the
+     * httpclient.
+     *
+     * @return String
+     */
+    private String getBaseUrlWithScheme() {
+        final String baseUrl = endpoint.getBaseUrl();
+        final StringBuilder url = new StringBuilder();
+
+        if (!baseUrl.startsWith("http:") && !baseUrl.startsWith("https:")) {
+            if (URI.create("http://" + baseUrl).getPort() == DEFAULT_HTTPS_PORT) {
+                url.append("https://");
+            } else {
+                url.append("http://");
+            }
+        }
+        url.append(baseUrl);
+        return url.toString();
+    }
+
+    /**
+     * The resource path can be set either by the Camel header (CamelFcrepoIdentifier)
+     * or by fedora's jms headers (org.fcrepo.jms.identifier). This method extracts
+     * a path from the appropriate header (the camel header overrides the jms header).
+     *
+     * @param exchange The camel exchange
+     * @return String
+     */
+    private String getPathFromHeaders(final Exchange exchange) {
+        final Message in = exchange.getIn();
+
+        if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
+            return in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class);
+        } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
+            return in.getHeader(JmsHeaders.IDENTIFIER, String.class);
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     *  Extract a transformation path from the exchange if the appropriate headers
+     *  are set. This will format the URL to use the transform program defined
+     *  in the CamelFcrepoTransform header or the transform uri option (in that
+     *  order of precidence).
+     *
+     *  @param exchange the camel message exchange
+     *  @return String
+     */
+    private String getTransformPath(final Exchange exchange) {
+        final Message in = exchange.getIn();
+        final HttpMethods method = getMethod(exchange);
+        final String transformProgram = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
+        final String fcrTransform = "/fcr:transform";
+
+        if (!isBlank(endpoint.getTransform()) || !isBlank(transformProgram)) {
+            if (method == HttpMethods.POST) {
+                return fcrTransform;
+            } else if (method == HttpMethods.GET) {
+                if (!isBlank(transformProgram)) {
+                    return fcrTransform + "/" + transformProgram;
+                } else {
+                    return fcrTransform + "/" + endpoint.getTransform();
+                }
+            }
+        }
+        return "";
+    }
+
+    /**
      * Given an exchange, extract the fully qualified URL for a fedora resource. By default, this will use the entire
      * path set on the endpoint. If either of the following headers are defined, they will be appended to that path in
      * this order of preference: 1) FCREPO_IDENTIFIER 2) org.fcrepo.jms.identifier
@@ -206,32 +287,15 @@ public class FcrepoProducer extends DefaultProducer {
      * @param exchange the incoming message exchange
      */
     private String getUrl(final Exchange exchange) {
-        final Message in = exchange.getIn();
+        final StringBuilder url = new StringBuilder();
+        final String transformPath = getTransformPath(exchange);
         final HttpMethods method = getMethod(exchange);
-        final URI baseUri = URI.create(endpoint.getBaseUrl());
-        final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
-        final StringBuilder url = new StringBuilder(endpoint.getSecure() ? "https://" : "http://");
 
-        url.append(baseUri);
+        url.append(getBaseUrlWithScheme());
+        url.append(getPathFromHeaders(exchange));
 
-        if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
-            url.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class));
-        } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
-            url.append(in.getHeader(JmsHeaders.IDENTIFIER, String.class));
-        }
-
-        if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
-            if (method == HttpMethods.POST) {
-                url.append("/fcr:transform");
-            } else if (method == HttpMethods.GET) {
-                if (!isBlank(fcrepoTransform)) {
-                    url.append("/fcr:transform/");
-                    url.append(fcrepoTransform);
-                } else {
-                    url.append("/fcr:transform/");
-                    url.append(endpoint.getTransform());
-                }
-            }
+        if (!isBlank(transformPath)) {
+            url.append(transformPath);
         } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
             url.append("/fcr:tombstone");
         }

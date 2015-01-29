@@ -25,7 +25,6 @@ FcrepoEndpoint options
 | `accept` | `null` | Set the `Accept` header for content negotiation |
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
 | `transform` | `null` | If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
-| `secure` | `false` | Whether to use the `https` scheme when connecting to the Fedora repository |
 | `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
@@ -77,7 +76,6 @@ sometimes convenient to set up component-wide configurations. This can be done v
       <property name="authUsername" value="${fcrepo.authUsername}"/>
       <property name="authPassword" value="${fcrepo.authPassword}"/>
       <property name="authHost" value="${fcrepo.authHost}"/>
-      <property name="secure" value="${fcrepo.secure}"/>
     </bean>
 
 

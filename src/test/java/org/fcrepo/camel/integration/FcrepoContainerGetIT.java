@@ -148,7 +148,7 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
             @Override
             public void configure() {
 
-                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
+                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUriWithScheme();
 
                 final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
 
@@ -156,6 +156,7 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:created");
 
+                // use an explicit scheme with the fcrepo: endpoint
                 from("direct:get")
                     .to(fcrepo_uri)
                     .filter().xpath(

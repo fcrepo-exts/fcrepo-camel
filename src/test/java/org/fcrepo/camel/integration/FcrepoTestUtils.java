@@ -55,6 +55,16 @@ public final class FcrepoTestUtils {
     }
 
     /**
+     * Retrieve the endpoint uri with an explicit scheme
+     */
+    public static String getFcrepoEndpointUriWithScheme() {
+        if (FCREPO_PORT == 80) {
+            return "fcrepo:http://localhost/rest";
+        }
+        return "fcrepo:http://localhost:" + FCREPO_PORT + "/rest";
+    }
+
+    /**
      * Retrieve an RDF document serialized in TTL
      */
     public static String getTurtleDocument() {

@@ -101,15 +101,6 @@ public class FcrepoComponent extends UriEndpointComponent {
     }
 
     /**
-     * set whether to use the https scheme when connecting
-     * to the fedora server.
-     * @param secure whether to use the https scheme
-     */
-    public void setSecure(final Boolean secure) {
-        getConfiguration().setSecure(secure);
-    }
-
-    /**
      *  Create an Endpoint from a fcrepo uri along with an optional path value and attributes.
      *  @param uri the fcrepo uri identifying the repository hostname and port
      *  @param remaining the string identifying the repository path
