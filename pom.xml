@@ -12,9 +12,11 @@
   <groupId>org.fcrepo.camel</groupId>
   <artifactId>fcrepo-camel</artifactId>
   <packaging>bundle</packaging>
+  
   <version>4.1.1-SNAPSHOT</version>
 
   <name>Fcrepo Camel Component</name>
+  <description>Camel Component for interacting with a Fedora Repository</description>
   <url>http://fcrepo.org</url>
 
   <organization>
@@ -25,7 +27,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <project.version>${project.version}</project.version>
+    <project.copyrightYear>2015</project.copyrightYear>
 
     <!-- Use ${project_name} instead of ${project.artifactId} to avoid incorrect
       replacements of "fcrepo4" in child modules (for scm, site-distribution, etc -->
@@ -35,22 +37,24 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <camel.version>2.14.0</camel.version>
+    <camel.version>2.14.1</camel.version>
     <camel.version.range>[2.14,3)</camel.version.range>
-    <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
-    <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
+    <clerezza.ext.icu.version>0.6</clerezza.ext.icu.version>
     <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
+    <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
+    <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
-    <grizzly.version>2.3.16</grizzly.version>
+    <commons.logging.version>1.2</commons.logging.version>
+    <grizzly.version>2.3.18</grizzly.version>
     <guava.version>18.0</guava.version>
     <httpclient.version>4.3.5</httpclient.version>
-    <jena.fuseki.version>1.1.0</jena.fuseki.version>
-    <jersey.version>2.13</jersey.version>
+    <jena.fuseki.version>1.1.1</jena.fuseki.version>
+    <jersey.version>2.15</jersey.version>
     <mockito.version>1.10.8</mockito.version>
-    <slf4j.version>1.7.9</slf4j.version>
+    <slf4j.version>1.7.10</slf4j.version>
     <solr.version>4.10.2</solr.version>
-    <spring.version>4.0.7.RELEASE</spring.version>
+    <spring.version>4.1.4.RELEASE</spring.version>
     <!-- osgi bundle dependencies -->
     <commons.codec.version>1.9</commons.codec.version>
     <httpcore.version>4.3.2</httpcore.version>
@@ -62,12 +66,43 @@
     <clerezza.rdf.jena.facade.version>0.14</clerezza.rdf.jena.facade.version>
     <clerezza.rdf.jena.commons.version>0.7</clerezza.rdf.jena.commons.version>
     <!-- plugins -->
-    <checkstyle.plugin.version>2.12.1</checkstyle.plugin.version>
+    <build.helper.plugin.version>1.9.1</build.helper.plugin.version>
+    <bundle.plugin.version>2.5.3</bundle.plugin.version>
+    <checkstyle.plugin.version>2.13</checkstyle.plugin.version>
+    <compiler.plugin.version>3.2</compiler.plugin.version>
+    <dependency.plugin.version>2.10</dependency.plugin.version>
     <doxia.plugin.version>1.3</doxia.plugin.version>
+    <failsafe.plugin.version>2.18.1</failsafe.plugin.version>
     <github.site.plugin.version>0.9</github.site.plugin.version>
+    <gpg.plugin.version>1.6</gpg.plugin.version>
+    <graph.plugin.version>1.35</graph.plugin.version>
+    <jacoco.plugin.version>0.7.2.201409121644</jacoco.plugin.version>
+    <javadoc.plugin.version>2.10.1</javadoc.plugin.version>
+    <jetty.plugin.version>9.2.6.v20141205</jetty.plugin.version>
+    <license.plugin.version>2.8</license.plugin.version>    
     <maven.site.plugin.version>3.4</maven.site.plugin.version>
-    <!-- values -->
-    <project.copyrightYear>2015</project.copyrightYear>
+    <properties.plugin.version>1.0-alpha-2</properties.plugin.version>
+    <release.plugin.version>2.5.1</release.plugin.version>
+    <resources.plugin.version>2.7</resources.plugin.version>
+    <scmgit.plugin.version>1.8.1</scmgit.plugin.version>
+    <surefire.plugin.version>2.18.1</surefire.plugin.version>    
+    <!-- osgi -->
+    <fcrepo.osgi.export.pkg>org.fcrepo.camel.*</fcrepo.osgi.export.pkg>
+    <fcrepo.osgi.private.pkg>
+      com.google.common.*,
+      com.google.thirdparty.publicsuffix.*,
+      com.hp.hpl.jena.*,
+      com.ibm.icu.*,
+      org.apache.clerezza.rdf.*,
+      org.apache.clerezza.utils.*,
+      org.apache.commons.codec.*,
+      org.apache.commons.lang3.*,
+      org.apache.jena.*,
+      org.apache.http.*,
+      org.osgi.service.component,
+      org.wymiwyg.commons.util.*,
+    </fcrepo.osgi.private.pkg>
+    <!-- code coverage -->
     <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
     <jacoco.out.unit.file>jacoco-ut.exec</jacoco.out.unit.file>
     <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
@@ -75,11 +110,15 @@
     <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
   </properties>
 
+  <prerequisites>
+    <maven>3.0.0</maven>
+  </prerequisites>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      <comments>Copyright (c) 2014 DuraSpace</comments>
+      <comments>Copyright (c) 2015 DuraSpace</comments>
     </license>
   </licenses>
 
@@ -151,15 +190,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${httpclient.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons.lang3.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
     </dependency>
 
     <dependency>
@@ -316,137 +355,41 @@
       <version>4.1.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
+    <defaultGoal>install</defaultGoal>
+
     <resources>
       <resource>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>
     </resources>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>com.mycila</groupId>
-          <artifactId>license-maven-plugin</artifactId>
-          <version>2.6</version>
-          <configuration>
-            <header>fcrepo-license/LICENSE_HEADER.txt</header>
-            <includes>
-              <include>**/src/main/java/**</include>
-              <include>**/src/test/java/**</include>
-              <include>**/examples/fcrepo-camel-osgi/src/main/java/**</include>
-              <include>**/examples/fcrepo-camel-scala/src/main/scala/**</include>
-            </includes>
-            <excludes>
-              <exclude>target/**</exclude>
-              <exclude>**/src/test/resources/**</exclude>
-              <exclude>**/src/main/resources/**</exclude>
-              <exclude>**/*.properties</exclude>
-            </excludes>
-            <properties>
-              <name>${project.artifactId}</name>
-              <year>${project.copyrightYear}</year>
-              <holder>${project.organization.name}</holder>
-            </properties>
-            <encoding>UTF-8</encoding>
-            <strictCheck>true</strictCheck>
-          </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>org.fcrepo</groupId>
-              <artifactId>fcrepo-build-tools</artifactId>
-              <version>${project.version}</version>
-            </dependency>
-          </dependencies>
-          <executions>
-            <execution>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>2.4.1</version>
-          <configuration>
-            <!-- see http://jira.codehaus.org/browse/MRELEASE-424 -->
-            <mavenExecutorId>forked-path</mavenExecutorId>
-          </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.maven.scm</groupId>
-              <artifactId>maven-scm-provider-gitexe</artifactId>
-              <version>1.8.1</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.7.1.201405082137</version>
-          <executions>
-            <execution>
-              <id>default-prepare-agent</id>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-
-              <configuration>
-                <destFile>${sonar.jacoco.reportPath}</destFile>
-                <propertyName>jacoco.agent.unit.arg</propertyName>
-                <append>true</append>
-              </configuration>
-            </execution>
-            <execution>
-              <id>default-prepare-agent-integration</id>
-              <goals>
-                <goal>prepare-agent-integration</goal>
-              </goals>
-              <configuration>
-                <destFile>${sonar.jacoco.itReportPath}</destFile>
-                <propertyName>jacoco.agent.it.arg</propertyName>
-                <append>true</append>
-              </configuration>
-            </execution>
-            <execution>
-              <id>default-report</id>
-              <goals>
-                <goal>report</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>default-report-integration</id>
-              <goals>
-                <goal>report-integration</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.17</version>
-          <configuration>
-            <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=512m</argLine>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <defaultGoal>install</defaultGoal>
 
     <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${release.plugin.version}</version>
+        <configuration>
+          <!-- see http://jira.codehaus.org/browse/MRELEASE-424 -->
+          <mavenExecutorId>forked-path</mavenExecutorId>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>${scmgit.plugin.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+
       <!-- Launch jetty for integration testing with Solr -->
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.2.6.v20141205</version>
+        <version>${jetty.plugin.version}</version>
         <configuration>
           <systemProperties>
             <systemProperty>
@@ -463,7 +406,7 @@
           <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
+            <version>${commons.logging.version}</version>
           </dependency>
           <dependency>
             <groupId>org.slf4j</groupId>
@@ -493,6 +436,7 @@
               </contextHandlers>
             </configuration>
           </execution>
+
           <execution>
             <id>stop-jetty</id>
             <phase>post-integration-test</phase>
@@ -503,11 +447,12 @@
         </executions>
       </plugin>
 
+
       <!--Bring in solr webapp for integration testing-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
+        <version>${dependency.plugin.version}</version>
         <executions>
           <execution>
             <id>copy</id>
@@ -531,10 +476,11 @@
         </executions>
       </plugin>
 
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.9.1</version>
+        <version>${build.helper.plugin.version}</version>
         <configuration>
           <portNames>
             <portName>fcrepo.dynamic.test.port</portName>
@@ -551,6 +497,7 @@
               <goal>reserve-network-port</goal>
             </goals>
           </execution>
+
           <execution>
             <id>attach-artifacts</id>
             <phase>package</phase>
@@ -570,10 +517,12 @@
         </executions>
       </plugin>
 
+
+      <!-- integration testing -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.17</version>
+        <version>${failsafe.plugin.version}</version>
         <configuration>
           <argLine>-XX:MaxPermSize=128m ${jacoco.agent.it.arg}</argLine>
           <systemPropertyVariables>
@@ -592,21 +541,65 @@
         </executions>
       </plugin>
 
+
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.plugin.version}</version>
         <configuration>
           <!--
             This line enables code-coverage. However, it also blows the build's permgen.
             Fix me!
           -->
-          <argLine>-XX:-UseSplitVerifier ${jacoco.agent.unit.arg}</argLine>
+          <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=512m -XX:-UseSplitVerifier ${jacoco.agent.unit.arg}</argLine>
         </configuration>
       </plugin>
 
+
+      <!-- use jacoco for code coverage -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>default-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <destFile>${sonar.jacoco.reportPath}</destFile>
+              <propertyName>jacoco.agent.unit.arg</propertyName>
+              <append>true</append>
+            </configuration>
+          </execution>
+          
+          <execution>
+            <id>default-prepare-agent-integration</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+            <configuration>
+              <destFile>${sonar.jacoco.itReportPath}</destFile>
+              <propertyName>jacoco.agent.it.arg</propertyName>
+              <append>true</append>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>default-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-report-integration</id>
+            <goals>
+              <goal>report-integration</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
+
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -640,18 +633,21 @@
         </executions>
       </plugin>
 
+
+      <!-- compile with java7 -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
+        <version>${compiler.plugin.version}</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
       </plugin>
 
+
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
+        <version>${resources.plugin.version}</version>
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
@@ -666,30 +662,71 @@
         </executions>
       </plugin>
 
+
+      <!-- verify that source files contain the correct license headers
+        $ mvn license:check to check files
+        $ mvn license:format to update files -->
       <plugin>
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
+        <version>${license.plugin.version}</version>
+        <configuration>
+          <header>fcrepo-license/LICENSE_HEADER.txt</header>
+          <includes>
+            <include>**/src/main/java/**</include>
+            <include>**/src/test/java/**</include>
+            <include>**/examples/fcrepo-camel-osgi/src/main/java/**</include>
+            <include>**/examples/fcrepo-camel-scala/src/main/scala/**</include>
+          </includes>
+          <excludes>
+            <exclude>target/**</exclude>
+            <exclude>**/src/test/resources/**</exclude>
+            <exclude>**/src/main/resources/**</exclude>
+            <exclude>**/*.properties</exclude>
+          </excludes>
+          <properties>
+            <name>${project.artifactId}</name>
+            <year>${project.copyrightYear}</year>
+            <holder>${project.organization.name}</holder>
+          </properties>
+          <encoding>UTF-8</encoding>
+          <strictCheck>true</strictCheck>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.fcrepo</groupId>
+            <artifactId>fcrepo-build-tools</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
-      <!-- to generate the MANIFEST-FILE of the bundle -->
+
+      <!-- to generate the OSGi MANIFEST file of the bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>${bundle.plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
             <Bundle-Name>${project.artifactId}</Bundle-Name>
             <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>
-              org.fcrepo.camel;version=${project.version},
-              org.fcrepo.camel.processor;version=${project.version}
-            </Export-Package>
+            <Export-Package>${fcrepo.osgi.export.pkg};version=${project.version}</Export-Package>
+            <Private-Package>${fcrepo.osgi.private.pkg}</Private-Package>
             <Import-Package>
+              ${fcrepo.osgi.import.pkg},
               org.apache.camel*;version="${camel.version.range}",
               *
             </Import-Package>
-            <Implementation-Title>Fedora Repository - Camel</Implementation-Title>
+            <Implementation-Title>${project.name}</Implementation-Title>
             <Implementation-Version>${project.version}</Implementation-Version>
           </instructions>
         </configuration>
@@ -698,7 +735,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0-alpha-2</version>
+        <version>${properties.plugin.version}</version>
         <executions>
           <execution>
             <phase>pre-integration-test</phase>
@@ -715,10 +752,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
       </plugin>
 
       <plugin>
@@ -774,25 +807,9 @@
           </dependency>
         </dependencies>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.1</version>
-        <configuration>
-          <linksource>true</linksource>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>javadoc</goal>
-            </goals>
-            <phase>site</phase>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
+
 
   <profiles>
     <profile>
@@ -806,8 +823,22 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${javadoc.plugin.version}</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>${gpg.plugin.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -824,23 +855,18 @@
         </plugins>
       </build>
     </profile>
-     <profile>
+    
+    <!--
+      build a PNG representation of the dependency graph
+      $ mvn -P graph-dependencies graph:project -Dhide-scope=test -Dhide-optional=true -->
+    <profile>
       <id>graph-dependencies</id>
-      <pluginRepositories>
-        <pluginRepository>
-          <id>mvnplugins.fusesource.org</id>
-          <url>http://mvnplugins.fusesource.org/repo/release</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </pluginRepository>
-      </pluginRepositories>
       <build>
         <plugins>
           <plugin>
             <groupId>org.fusesource.mvnplugins</groupId>
             <artifactId>maven-graph-plugin</artifactId>
-            <version>1.4</version>
+            <version>${graph.plugin.version}</version>
           </plugin>
         </plugins>
       </build>
