@@ -46,7 +46,7 @@
     <!-- plugins -->
     <checkstyle.plugin.version>2.12.1</checkstyle.plugin.version>
     <!-- values -->
-    <project.copyrightYear>2014</project.copyrightYear>
+    <project.copyrightYear>2015</project.copyrightYear>
     <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
     <jacoco.out.unit.file>jacoco-ut.exec</jacoco.out.unit.file>
     <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
