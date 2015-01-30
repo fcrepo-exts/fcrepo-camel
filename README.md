@@ -91,6 +91,7 @@ Message headers
 | `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
 | `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
 | `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
+| `FcrepoHeaders.FCREPO_NAMED_GRAPH`   | `String` | Sets a URI for a named graph when used with the `processor.Sparql*` classes. This may be useful when storing data in an external triplestore. |
 
 The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `CamelFcrepoIdentifier` is not defined.
 
@@ -102,6 +103,7 @@ If these headers are used with the Spring DSL or with the Simple language, the h
 | `FcrepoHeaders.FCREPO_IDENTIFIER` | `CamelFcrepoIdentifier` |
 | `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` |
 | `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
+| `FcrepoHeaders.FCREPO_NAMED_GRAPH` | `CamelFcrepoNamedGraph` |
 
 These headers can be removed as a group like this in the Java DSL: `removeHeaders("CamelFcrepo*")`
 

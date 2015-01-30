@@ -49,7 +49,7 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
     protected ProducerTemplate template;
 
     @Test
-    public void testDescribe() throws IOException, InterruptedException {
+    public void testInsert() throws IOException, InterruptedException {
         final String base = "http://localhost/rest";
         final String path = "/path/a/b/c";
         final String document = getN3Document();

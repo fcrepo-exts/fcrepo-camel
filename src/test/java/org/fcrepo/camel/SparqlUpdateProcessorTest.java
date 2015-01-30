@@ -49,7 +49,65 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
     protected ProducerTemplate template;
 
     @Test
-    public void testDescribe() throws IOException, InterruptedException {
+    public void testNamedGraph() throws IOException, InterruptedException {
+        final String base = "http://localhost/rest";
+        final String path = "/path/a/b/c";
+        final String graph = "foo";
+        final String document = getN3Document();
+        // Reverse the lines as the RDF may be serialized in opposite order
+
+        final String responsePrefix =
+                  "update=DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "> ?p ?o } }; " +
+                  "DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o } }; " +
+                  "INSERT DATA { GRAPH <" + graph + "> { ";
+        final String responseSuffix = " } }";
+
+        // Assertions
+        resultEndpoint.allMessages().body().contains(responsePrefix);
+        resultEndpoint.allMessages().body().contains(responseSuffix);
+        for (final String s : document.split("\n")) {
+            resultEndpoint.expectedBodyReceived().body().contains(s);
+        }
+        resultEndpoint.expectedBodyReceived().body().contains("<" + base + path + "> dc:title \"some title\" .");
+        resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
+
+        // Test
+        final Map<String, Object> headers = new HashMap<>();
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base + "/");
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        headers.put(FcrepoHeaders.FCREPO_NAMED_GRAPH, graph);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
+        template.sendBodyAndHeaders(document, headers);
+
+        headers.clear();
+        headers.put(JmsHeaders.BASE_URL, base + "/");
+        headers.put(JmsHeaders.IDENTIFIER, path);
+        headers.put(FcrepoHeaders.FCREPO_NAMED_GRAPH, graph);
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+        template.sendBodyAndHeaders(getTurtleDocument(), headers);
+
+        headers.clear();
+        headers.put(JmsHeaders.BASE_URL, base);
+        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        headers.put(FcrepoHeaders.FCREPO_NAMED_GRAPH, graph);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
+        template.sendBodyAndHeaders(document, headers);
+
+        headers.clear();
+        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
+        headers.put(JmsHeaders.IDENTIFIER, path);
+        headers.put(FcrepoHeaders.FCREPO_NAMED_GRAPH, graph);
+        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
+        template.sendBodyAndHeaders(document, headers);
+
+        // Confirm that assertions passed
+        resultEndpoint.expectedMessageCount(4);
+        resultEndpoint.assertIsSatisfied();
+    }
+
+    @Test
+    public void testUpdate() throws IOException, InterruptedException {
         final String base = "http://localhost/rest";
         final String path = "/path/a/b/c";
         final String document = getN3Document();
@@ -58,8 +116,8 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         final String responsePrefix =
                   "update=DELETE WHERE { <" + base + path + "> ?p ?o }; " +
                   "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }; " +
-                  "INSERT { ";
-        final String responseSuffix = " } WHERE { }";
+                  "INSERT DATA { ";
+        final String responseSuffix = " }";
 
         // Assertions
         resultEndpoint.allMessages().body().contains(responsePrefix);

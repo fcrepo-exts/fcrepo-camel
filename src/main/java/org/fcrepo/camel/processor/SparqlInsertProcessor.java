@@ -28,6 +28,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
+import org.fcrepo.camel.FcrepoHeaders;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class SparqlInsertProcessor implements Processor {
         final SerializingProvider serializer = new JenaSerializerProvider();
         final MGraph graph = new SimpleMGraph();
         final String contentType = in.getHeader(Exchange.CONTENT_TYPE, String.class);
+        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
         final String subject = ProcessorUtils.getSubjectUri(in);
 
@@ -61,7 +63,10 @@ public class SparqlInsertProcessor implements Processor {
                 "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, new UriRef(subject));
         serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
 
-        exchange.getIn().setBody("update=INSERT DATA { " + serializedGraph.toString("UTF-8") + " }");
+        final StringBuilder query = new StringBuilder("update=");
+        query.append(ProcessorUtils.insertData(serializedGraph.toString("UTF-8"), namedGraph));
+
+        exchange.getIn().setBody(query.toString());
         exchange.getIn().setHeader(HTTP_METHOD, "POST");
         exchange.getIn().setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
     }

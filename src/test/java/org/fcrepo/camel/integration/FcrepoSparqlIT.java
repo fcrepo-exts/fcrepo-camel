@@ -192,6 +192,61 @@ public class FcrepoSparqlIT extends CamelTestSupport {
         deletedEndpoint.assertIsSatisfied();
     }
 
+    @Test
+    public void testInsertDeleteNamedGraphSparql() throws Exception {
+        // Assertions
+        resultEndpoint.expectedMessageCount(1);
+        resultEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
+        sparqlQueryEndpoint.expectedMessageCount(6);
+        sparqlQueryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
+        sparqlUpdateEndpoint.expectedMessageCount(4);
+        sparqlUpdateEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedBodiesReceived(null, null);
+        deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+
+        // Setup
+        final Map<String, Object> headers = new HashMap<String, Object>();
+        headers.put(Exchange.HTTP_METHOD, "POST");
+        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+
+        final String fullPath = template.requestBodyAndHeaders(
+                "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
+
+        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
+        final String base_url = "http://localhost:" + System.getProperty("test.port", "8080") + "/rest";
+
+        // Test
+        final Map<String, Object> testHeaders = new HashMap<String, Object>();
+        testHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        testHeaders.put(FcrepoHeaders.FCREPO_NAMED_GRAPH, "http://example.org/foo");
+        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, base_url);
+
+        template.sendBodyAndHeaders("direct:insert.named", null, testHeaders);
+        template.sendBodyAndHeaders("direct:delete.named", null, testHeaders);
+        template.sendBodyAndHeaders("direct:count.named.triples", null, testHeaders);
+
+        testHeaders.clear();
+        testHeaders.put(JmsHeaders.IDENTIFIER, identifier);
+        testHeaders.put(FcrepoHeaders.FCREPO_BASE_URL, base_url);
+        template.sendBodyAndHeaders("direct:describe.delete.insert.named", null, testHeaders);
+
+        // Teardown
+        final Map<String, Object> teardownHeaders = new HashMap<String, Object>();
+        teardownHeaders.put(Exchange.HTTP_METHOD, "DELETE");
+        teardownHeaders.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        template.sendBodyAndHeaders("direct:teardown", null, teardownHeaders);
+
+        // Confirm that the assertions passed
+        resultEndpoint.assertIsSatisfied();
+        sparqlQueryEndpoint.assertIsSatisfied();
+        sparqlUpdateEndpoint.assertIsSatisfied();
+        deletedEndpoint.assertIsSatisfied();
+    }
+
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
@@ -228,6 +283,28 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .filter(resourceXpath)
                         .to("mock:sparql.query");
 
+                from("direct:check.named.TypeResource")
+                    .removeHeaders("CamelHttp*")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT * WHERE { " +
+                                "GRAPH <${headers.CamelFcrepoNamedGraph}> { " +
+                                "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
+                                "<" + RdfNamespaces.RDF + "type> ?o } }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .filter(resourceXpath)
+                        .to("mock:sparql.query");
+
+                 from("direct:check.named.TypeContainer")
+                    .removeHeaders("CamelHttp*")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT * WHERE { " +
+                               "GRAPH <${headers.CamelFcrepoNamedGraph}> { " +
+                                "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
+                                "<" + RdfNamespaces.RDF + "type> ?o } }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .filter(containerXpath)
+                        .to("mock:sparql.query");
+
                  from("direct:check.TypeContainer")
                     .removeHeaders("CamelHttp*")
                     .setHeader(Exchange.HTTP_QUERY, simple(
@@ -238,6 +315,17 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .filter(containerXpath)
                         .to("mock:sparql.query");
 
+                from("direct:check.named.DcTitle")
+                    .removeHeaders("CamelHttp*")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT * WHERE { " +
+                                "GRAPH <${headers.CamelFcrepoNamedGraph}> { " +
+                                "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
+                                "<http://purl.org/dc/elements/1.1/title> ?o } }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .filter(titleXpath)
+                        .to("mock:sparql.query");
+
                 from("direct:check.DcTitle")
                     .removeHeaders("CamelHttp*")
                     .setHeader(Exchange.HTTP_QUERY, simple(
@@ -245,7 +333,6 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                                 "<${headers.CamelFcrepoBaseUrl}${headers.CamelFcrepoIdentifier}> " +
                                 "<http://purl.org/dc/elements/1.1/title> ?o }"))
                     .to("http4:" + fuseki_url + "/test/query")
-                    .convertBodyTo(String.class)
                     .filter(titleXpath)
                         .to("mock:sparql.query");
 
@@ -255,7 +342,15 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .to("http4:" + fuseki_url + "/test/query")
                     .setHeader("ItemCount").xpath("count(//sparql:result)", String.class, ns)
                     .filter().simple("${header.ItemCount} <= 1")
-                    .to("mock:sparql.query");
+                        .to("mock:sparql.query");
+
+                from("direct:count.named.triples")
+                    .setHeader(Exchange.HTTP_QUERY, simple(
+                            "query=SELECT ?s WHERE { GRAPH <${headers.CamelFcrepoNamedGraph}> { ?s ?p ?o } }"))
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .setHeader("ItemCount").xpath("count(//sparql:result)", String.class, ns)
+                    .filter().simple("${header.ItemCount} <= 1")
+                        .to("mock:sparql.query");
 
                 from("direct:update")
                     .to(fcrepo_uri)
@@ -275,6 +370,27 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .to("direct:check.TypeResource")
                     .to("direct:check.TypeContainer");
 
+                from("direct:insert.named")
+                    .to(fcrepo_uri)
+                    .process(new SparqlInsertProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .to("direct:check.named.DcTitle")
+                    .to("direct:check.named.TypeResource")
+                    .to("direct:check.named.TypeContainer");
+
+
+                from("direct:delete.named")
+                    .process(new SparqlDescribeProcessor())
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .to("mock:sparql.query")
+                    .process(new SparqlDeleteProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .to("direct:check.named.DcTitle")
+                    .to("direct:check.named.TypeResource")
+                    .to("direct:check.named.TypeContainer");
+
                 from("direct:delete")
                     .process(new SparqlDescribeProcessor())
                     .to("http4:" + fuseki_url + "/test/query")
@@ -285,6 +401,20 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                     .to("direct:check.DcTitle")
                     .to("direct:check.TypeResource")
                     .to("direct:check.TypeContainer");
+
+                from("direct:describe.delete.insert.named")
+                    .process(new SparqlDescribeProcessor())
+                    .to("http4:" + fuseki_url + "/test/query")
+                    .to("mock:sparql.query")
+                    .process(new SparqlDeleteProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .setHeader(Exchange.HTTP_METHOD).constant("GET")
+                    .to(fcrepo_uri + "?accept=application/n-triples")
+                    .process(new SparqlInsertProcessor())
+                    .to("http4:" + fuseki_url + "/test/update")
+                    .to("mock:sparql.update")
+                    .to("mock:result");
 
                 from("direct:describe.delete.insert")
                     .process(new SparqlDescribeProcessor())

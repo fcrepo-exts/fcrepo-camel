@@ -28,6 +28,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
+import org.fcrepo.camel.FcrepoHeaders;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class SparqlUpdateProcessor implements Processor {
         final SerializingProvider serializer = new JenaSerializerProvider();
         final MGraph graph = new SimpleMGraph();
         final String contentType = in.getHeader(Exchange.CONTENT_TYPE, String.class);
+        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
         final String subject = ProcessorUtils.getSubjectUri(in);
 
@@ -77,11 +79,15 @@ public class SparqlUpdateProcessor implements Processor {
          * delete too many triples from the triplestore. This command does
          * not delete blank nodes.
          */
-        exchange.getIn().setBody("update=DELETE WHERE { <" + subject + "> ?p ?o };\n" +
-                                 "DELETE WHERE { <" + subject + "/fcr:export?format=jcr/xml> ?p ?o };\n" +
-                                 "INSERT { " + serializedGraph.toString("UTF-8") + " }\n" +
-                                 "WHERE { }");
-        exchange.getIn().setHeader(HTTP_METHOD, "POST");
-        exchange.getIn().setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
+        final StringBuilder query = new StringBuilder("update=");
+        query.append(ProcessorUtils.deleteWhere(subject, namedGraph));
+        query.append(";\n");
+        query.append(ProcessorUtils.deleteWhere(subject + "/fcr:export?format=jcr/xml", namedGraph));
+        query.append(";\n");
+        query.append(ProcessorUtils.insertData(serializedGraph.toString("UTF-8"), namedGraph));
+
+        in.setBody(query.toString());
+        in.setHeader(HTTP_METHOD, "POST");
+        in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
     }
 }
