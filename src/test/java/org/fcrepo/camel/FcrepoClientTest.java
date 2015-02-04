@@ -24,6 +24,7 @@ import static org.fcrepo.camel.TestUtils.RDF_XML;
 import static org.fcrepo.camel.TestUtils.SPARQL_UPDATE;
 import static org.fcrepo.camel.TestUtils.TEXT_TURTLE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -343,6 +344,27 @@ public class FcrepoClientTest {
     }
 
     @Test
+    public void testPostWithLocation() throws IOException, FcrepoOperationFailedException {
+        final int status = 204;
+        final URI uri = create(baseUrl);
+        final Header locationHeader = new BasicHeader("Location", "http://localhost:8080/rest/bar");
+        final InputStream emptyBody = null;
+        final String emptyContentType = null;
+
+        doSetupMockRequest(null, null, status);
+        when(mockResponse.getFirstHeader("Location")).thenReturn(locationHeader);
+
+        final FcrepoResponse response = testClient.post(uri, emptyBody, emptyContentType);
+
+        assertEquals(response.getUrl(), uri);
+        assertEquals(response.getStatusCode(), status);
+        assertEquals(response.getLocation(), URI.create("http://localhost:8080/rest/bar"));
+        assertNull(response.getContentType());
+        assertNull(response.getBody());
+    }
+
+
+    @Test
     public void testPostResponseBody() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
@@ -454,13 +476,12 @@ public class FcrepoClientTest {
     private CloseableHttpResponse doSetupMockRequest(final String contentType, final ByteArrayEntity entity,
             final int status, final String statusPhrase) throws IOException {
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
-        final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{};
         final Header[] responseHeaders = new Header[]{ contentTypeHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getFirstHeader("location")).thenReturn(null);
-        when(mockResponse.getHeaders("Content-Type")).thenReturn(contentTypeHeaders);
+        when(mockResponse.getFirstHeader("Location")).thenReturn(null);
+        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
         when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);

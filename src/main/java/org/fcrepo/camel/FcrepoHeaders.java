@@ -30,6 +30,10 @@ public final class FcrepoHeaders {
 
     public static final String FCREPO_NAMED_GRAPH = "CamelFcrepoNamedGraph";
 
+    public static final String FCREPO_LOCATION = "CamelFcrepoLocation";
+
+    public static final String FCREPO_TRANSACTION = "CamelFcrepoTransaction";
+
     private FcrepoHeaders() {
         // prevent instantiation
     }

@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.component.http4.HttpMethods;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultExchange;
 import org.junit.Before;

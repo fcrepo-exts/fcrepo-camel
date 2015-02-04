@@ -25,6 +25,7 @@ FcrepoEndpoint options
 | `accept` | `null` | Set the `Accept` header for content negotiation |
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
 | `transform` | `null` | If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
+| `transaction` | `null` | If set, this will call transaction-related endpoints on the repository. |
 | `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
@@ -87,11 +88,13 @@ Message headers
 | `Exchange.HTTP_METHOD` | `String` | The HTTP method to use |
 | `Exchange.CONTENT_TYPE` | `String` | The ContentType of the resource. This sets the `Content-Type` header, but this value can be overridden directly on the endpoint. |
 | `Exchange.ACCEPT_CONTENT_TYPE` | `String` | This sets the `Accept` header, but this value can be overridden directly on the endpoint. |
-| `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
-| `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
 | `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
-| `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
+| `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
+| `FcrepoHeaders.FCREPO_LOCATION` | `String` | Defines an alternate location for the requested resource, either from the `Location` or `Link` (rel=describedby) header in the response. |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH`   | `String` | Sets a URI for a named graph when used with the `processor.Sparql*` classes. This may be useful when storing data in an external triplestore. |
+| `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
+| `FcrepoHeaders.FCREPO_TRANSACTION` | `String` | Defines a transaction ID for the current transaction. This header will be set/cleared automatically when using the `transaction` endpoint option. |
+| `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
 
 The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `CamelFcrepoIdentifier` is not defined.
 
@@ -101,9 +104,11 @@ If these headers are used with the Spring DSL or with the Simple language, the h
 | ------- | ----- |
 | `FcrepoHeaders.FCREPO_BASE_URL` | `CamelFcrepoBaseUrl` |
 | `FcrepoHeaders.FCREPO_IDENTIFIER` | `CamelFcrepoIdentifier` |
-| `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` |
-| `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
+| `FcrepoHeaders.FCREPO_LOCATION` | `CamelFcrepoLocation` |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH` | `CamelFcrepoNamedGraph` |
+| `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
+| `FcrepoHeaders.FCREPO_TRANSACTION` | `CamelFcrepoTransaction` |
+| `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` |
 
 These headers can be removed as a group like this in the Java DSL: `removeHeaders("CamelFcrepo*")`
 
@@ -125,6 +130,45 @@ Camel will handle the HTTP response code in the following ways:
 * Response code in the range 300..399 is a redirection and will throw a `FcrepoOperationFailedException` with the relevant information.
 * Response code is 400+ is regarded as an external server error and will throw an `FcrepoOperationFailedException` with the relevant information.
 
+Transactions
+------------
+
+It is possible to wrap fedora operations in transactions, as defined by the [fedora transaction API](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Transactions).
+In a camel route, this can be done with the `transaction` uri option like so:
+
+    onException(Exception.class)
+      .to("fcrepo:localhost:8080/rest?transaction=rollback")
+      .handled(true);
+
+    from("activemq:topic:fedora")
+      .filter(myPredicate)
+        .to("fcrepo:localhost:8080/rest?transaction=create")
+        .setHeader(Exchange.HTTP_METHOD).constant("PATCH")
+        .process(new MyFirstProcessor())
+        .to("fcrepo:localhost:8080/rest")
+        .setHeader(Exchange.HTTP_METHOD).constant("PATCH")
+        .process(new MySecondProcessor())
+        .to("fcrepo:localhost:8080/rest")
+        .to("fcrepo:localhost:8080/rest?transaction=commit");
+
+In the above example, messages are read from the activemq topic and then filtered according to some predicate. Messages
+are transformed with two custom `Processor` classes, and the resource is modified twice with the `PATCH` operation
+inside of a single transaction. Changes will be rolled back if an exception is encountered.
+
+Committing transactions can be handled by calling the `fcrepo` endpoint with the `transaction` option set to `commit`.
+Transactions will be rolled back if the value of the `transaction` option is `rollback`. Any other value will create
+a new transaction; in this example, the value of `create` is used. Because transactions will eventually time out, it
+is sometimes necessary to keep a transaction alive. This can be done with any value other than `commit` or `rollback`.
+A good choice is `refresh`.
+
+During a transaction, the header `CamelFcrepoTransaction` (FcrepoHeaders.FCREPO_TRANSACTION in the JAVA DSL) will be
+set with the transaction ID. In most cases, it will not be necessary to do anything with this value, though some care
+should be taken if you plan to clear header values mid-transaction: **clearing or otherwise modifying this header value
+will probably result in aborting the transaction**. The header value will automatically be cleared following a `commit`
+or `rollback` operation. For other (e.g. `create` or `refresh`) option values, the underlying behavior is dependent on
+the presence of this header: if the header is set, that transaction will be refreshed while if the header is not set,
+a new transaction will be created.
+
 Resource path
 -------------
 
@@ -144,10 +188,6 @@ For example, each of these routes will request the resource at
     from("direct:start")
       .setHeader("CamelFcrepoIdentifier", "/a/b/c/abcdef")
       .to("fcrepo:localhost:8080/rest");
-
-    // org.fcrepo.jms.identifier and CamelFcrepoIdentifier headers are undefined
-    from("direct:start")
-      .to("fcrepo:localhost:8080/rest/a/b/c/abcdef");
 
     // org.fcrepo.jms.identifier is set as '/a/b/c/abcdef'
     // and CamelFcrepoIdentifier is not defined

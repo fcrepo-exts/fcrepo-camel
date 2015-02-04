@@ -57,6 +57,8 @@ public class FcrepoClient {
 
     private static final String CONTENT_TYPE = "Content-Type";
 
+    private static final String LOCATION = "Location";
+
     private CloseableHttpClient httpclient;
 
     private Boolean throwExceptionOnFailure = true;
@@ -276,9 +278,10 @@ public class FcrepoClient {
             final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
         final int status = response.getStatusLine().getStatusCode();
         final String contentTypeHeader = getContentTypeHeader(response);
+        final URI locationHeader = getLocationHeader(response);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
-            return new FcrepoResponse(url, status, contentTypeHeader, null, getEntityContent(response));
+            return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
         } else {
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
@@ -307,9 +310,21 @@ public class FcrepoClient {
      * Extract the content-type header value
      */
     private static String getContentTypeHeader(final HttpResponse response) {
-        final Header[] contentTypes = response.getHeaders(CONTENT_TYPE);
-        if (contentTypes.length > 0) {
-            return contentTypes[0].getValue();
+        final Header contentType = response.getFirstHeader(CONTENT_TYPE);
+        if (contentType != null) {
+            return contentType.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Extract a Location: header value
+     */
+    private static URI getLocationHeader(final HttpResponse response) {
+        final Header location = response.getFirstHeader(LOCATION);
+        if (location != null) {
+            return URI.create(location.getValue());
         } else {
             return null;
         }

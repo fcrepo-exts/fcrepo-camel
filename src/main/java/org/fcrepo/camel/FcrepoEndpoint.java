@@ -286,4 +286,20 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     public String getPreferOmit() {
         return getConfiguration().getPreferOmit();
     }
+
+    /**
+     * transaction setter
+     */
+    @ManagedAttribute(description = "The transaction type; e.g. commit, rollback or a non-empty value")
+    public void setTransaction(final String transaction) {
+        getConfiguration().setTransaction(transaction);
+    }
+
+    /**
+     * transaction getter
+     */
+    @ManagedAttribute(description = "The transaction type; e.g. commit, rollback or a non-empty value")
+    public String getTransaction() {
+        return getConfiguration().getTransaction();
+    }
 }
