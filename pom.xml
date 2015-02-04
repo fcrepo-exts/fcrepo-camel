@@ -30,6 +30,14 @@
     <camel.version.range>[2.14,3)</camel.version.range>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
+
+    <!-- Use ${project_name} instead of ${project.artifactId} to avoid incorrect
+      replacements of "fcrepo4" in child modules (for scm, site-distribution, etc -->
+    <project_name>fcrepo-camel</project_name>
+
+    <!-- https://github.com/github/maven-plugins/blob/master/README.md -->
+    <github.global.server>github</github.global.server>
+
     <project.version>${project.version}</project.version>
     <grizzly.version>2.3.16</grizzly.version>
     <httpclient.version>4.3.5</httpclient.version>
@@ -61,6 +69,13 @@
       <comments>Copyright (c) 2014 DuraSpace</comments>
     </license>
   </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/fcrepo4/${project_name}.git</connection>
+    <developerConnection>scm:git:git@github.com:fcrepo4/${project_name}.git</developerConnection>
+    <url>https://github.com/fcrepo4/fcrepo-camel</url>
+    <tag>HEAD</tag>
+  </scm>
 
   <repositories>
     <repository>
@@ -692,6 +707,10 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
