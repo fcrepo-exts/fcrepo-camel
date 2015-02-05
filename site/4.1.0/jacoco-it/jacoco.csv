@@ -1,0 +1,19 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoClient,88,394,18,30,20,86,15,22,0,13
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoLink,6,93,9,9,3,20,9,6,0,6
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoProducer,55,593,11,67,3,127,9,48,0,16
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoResponse,3,50,0,0,1,21,1,10,1,10
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoComponent,46,33,3,1,17,9,9,3,7,3
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoProducer.new Object() {...},6,41,0,0,0,1,0,1,0,1
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoEndpoint,32,117,0,0,9,37,5,25,5,25
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoConfiguration,22,120,0,0,9,47,4,22,4,22
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoHeaders,3,0,0,0,2,0,1,0,1,0
+Fcrepo Camel Component,org.fcrepo.camel,JmsHeaders,3,0,0,0,2,0,1,0,1,0
+Fcrepo Camel Component,org.fcrepo.camel,RdfNamespaces,3,22,0,0,2,7,1,1,1,1
+Fcrepo Camel Component,org.fcrepo.camel,HttpMethods,0,103,0,0,0,12,0,4,0,4
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoOperationFailedException,42,0,2,0,8,0,5,0,4,0
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlDeleteProcessor,0,56,0,0,0,12,0,2,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,ProcessorUtils,31,144,5,13,6,32,5,9,1,4
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlInsertProcessor,0,90,0,2,0,18,0,3,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlDescribeProcessor,0,39,0,0,0,8,0,2,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlUpdateProcessor,2,112,1,1,0,22,1,2,0,2
