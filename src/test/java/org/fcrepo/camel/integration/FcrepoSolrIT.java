@@ -125,7 +125,7 @@ public class FcrepoSolrIT extends CamelTestSupport {
             public void configure() {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
                 final String solr_uri = "http4://localhost:" + System.getProperty(
-                        "test.solr.port", "8983") + "/solr/testCore/update";
+                        "solr.dynamic.test.port", "8983") + "/solr/testCore/update";
 
                 from("direct:setup")
                     .to(fcrepo_uri);

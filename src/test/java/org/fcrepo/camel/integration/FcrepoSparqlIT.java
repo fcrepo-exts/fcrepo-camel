@@ -60,7 +60,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
     final private Logger logger = getLogger(FcrepoSparqlIT.class);
 
     private static final int FUSEKI_PORT = Integer.parseInt(System.getProperty(
-            "test.fuseki.port", "3030"));
+            "fuseki.dynamic.test.port", "3030"));
 
     private static EmbeddedFusekiServer server = null;
 
@@ -114,7 +114,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                 "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
 
         final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
-        final String base_url = "http://localhost:" + System.getProperty("test.port", "8080") + "/rest";
+        final String base_url = "http://localhost:" + System.getProperty("fcrepo.dynamic.test.port", "8080") + "/rest";
 
         // Test
         final Map<String, Object> testHeaders = new HashMap<String, Object>();
@@ -163,7 +163,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                 "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
 
         final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
-        final String base_url = "http://localhost:" + System.getProperty("test.port", "8080") + "/rest";
+        final String base_url = "http://localhost:" + System.getProperty("fcrepo.dynamic.test.port", "8080") + "/rest";
 
         // Test
         final Map<String, Object> testHeaders = new HashMap<String, Object>();
@@ -217,7 +217,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
                 "direct:setup", FcrepoTestUtils.getTurtleDocument(), headers, String.class);
 
         final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
-        final String base_url = "http://localhost:" + System.getProperty("test.port", "8080") + "/rest";
+        final String base_url = "http://localhost:" + System.getProperty("fcrepo.dynamic.test.port", "8080") + "/rest";
 
         // Test
         final Map<String, Object> testHeaders = new HashMap<String, Object>();
@@ -253,7 +253,7 @@ public class FcrepoSparqlIT extends CamelTestSupport {
             public void configure() throws IOException {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
-                final String fuseki_url = "localhost:" + System.getProperty("test.fuseki.port", "3030");
+                final String fuseki_url = "localhost:" + System.getProperty("fuseki.dynamic.test.port", "3030");
                 final Processor sparqlInsert = new SparqlInsertProcessor();
                 final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
                 ns.add("dc", "http://purl.org/dc/elements/1.1/");
