@@ -202,6 +202,18 @@ public class FcrepoEndpointTest {
     }
 
     @Test
+    public void testTransaction() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
+        assertEquals(null, testEndpoint.getTransaction());
+        testEndpoint.setTransaction("commit");
+        assertEquals("commit", testEndpoint.getTransaction());
+        testEndpoint.setTransaction("rollback");
+        assertEquals("rollback", testEndpoint.getTransaction());
+        testEndpoint.setTransaction("foo");
+        assertEquals("foo", testEndpoint.getTransaction());
+    }
+
+    @Test
     public void testSingleton() {
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(true, testEndpoint.isSingleton());

@@ -62,6 +62,9 @@ public class FcrepoConfiguration implements Cloneable {
     @UriParam
     private String preferOmit = null;
 
+    @UriParam
+    private String transaction = null;
+
     /**
      * Create a new FcrepoConfiguration object
      */
@@ -257,5 +260,19 @@ public class FcrepoConfiguration implements Cloneable {
      */
     public String getPreferOmit() {
         return preferOmit;
+    }
+
+    /**
+     * transaction getter
+     */
+    public String getTransaction() {
+        return transaction;
+    }
+
+    /**
+     * transaction setter
+     */
+    public void setTransaction(final String transaction) {
+        this.transaction = transaction;
     }
 }

@@ -49,6 +49,8 @@ public class FcrepoConstantsTest {
         assertEquals(FcrepoHeaders.FCREPO_TRANSFORM, "CamelFcrepoTransform");
         assertEquals(FcrepoHeaders.FCREPO_PREFER, "CamelFcrepoPrefer");
         assertEquals(FcrepoHeaders.FCREPO_NAMED_GRAPH, "CamelFcrepoNamedGraph");
+        assertEquals(FcrepoHeaders.FCREPO_LOCATION, "CamelFcrepoLocation");
+        assertEquals(FcrepoHeaders.FCREPO_TRANSACTION, "CamelFcrepoTransaction");
     }
 
     @Test

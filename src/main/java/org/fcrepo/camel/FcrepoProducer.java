@@ -92,8 +92,13 @@ public class FcrepoProducer extends DefaultProducer {
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case POST:
-            response = client.post(URI.create(url), in.getBody(InputStream.class), contentType);
-            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
+            if (!isBlank(endpoint.getTransaction())) {
+                response = client.post(URI.create(url), null, null);
+                exchange.getIn().setBody(null);
+            } else {
+                response = client.post(URI.create(url), in.getBody(InputStream.class), contentType);
+                exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
+            }
             break;
         case DELETE:
             response = client.delete(URI.create(url));
@@ -109,7 +114,19 @@ public class FcrepoProducer extends DefaultProducer {
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
 
-        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
+        if (!isBlank(endpoint.getTransaction()) && (endpoint.getTransaction().equalsIgnoreCase("commit") ||
+                    endpoint.getTransaction().equalsIgnoreCase("rollback"))) {
+            exchange.getIn().removeHeader(FcrepoHeaders.FCREPO_TRANSACTION);
+        } else if (!isBlank(endpoint.getTransaction()) && response.getLocation() != null) {
+            exchange.getIn().setHeader(FcrepoHeaders.FCREPO_TRANSACTION,
+                    response.getLocation().toString().substring(getBaseUrlWithScheme().length() + 1));
+        }
+        if (response.getContentType() != null) {
+            exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
+        }
+        if (response.getLocation() != null) {
+            exchange.getIn().setHeader(FcrepoHeaders.FCREPO_LOCATION, response.getLocation());
+        }
         exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
 
@@ -130,12 +147,16 @@ public class FcrepoProducer extends DefaultProducer {
      * Given an exchange, determine which HTTP method to use. Basically, use GET unless the value of the
      * Exchange.HTTP_METHOD header is defined. Unlike the http4: component, the request does not use POST if there is
      * a message body defined. This is so in order to avoid inadvertant changes to the repository.
+     * The exception to this is transaction-related URIs (transaction=commit|rollback|other), which will always
+     * send POST requests.
      *
      * @param exchange the incoming message exchange
      */
     private HttpMethods getMethod(final Exchange exchange) {
         final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
-        if (method == null) {
+        if (!isBlank(endpoint.getTransaction())) {
+            return HttpMethods.POST;
+        } else if (method == null) {
             return HttpMethods.GET;
         } else {
             return method;
@@ -239,14 +260,21 @@ public class FcrepoProducer extends DefaultProducer {
      */
     private String getPathFromHeaders(final Exchange exchange) {
         final Message in = exchange.getIn();
+        final String transaction = in.getHeader(FcrepoHeaders.FCREPO_TRANSACTION, String.class);
+        final StringBuilder path = new StringBuilder();
+
+        if (!isBlank(transaction)) {
+            path.append("/");
+            path.append(transaction);
+        }
 
         if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
-            return in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class);
+            path.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class));
         } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
-            return in.getHeader(JmsHeaders.IDENTIFIER, String.class);
-        } else {
-            return "";
+            path.append(in.getHeader(JmsHeaders.IDENTIFIER, String.class));
         }
+
+        return path.toString();
     }
 
     /**
@@ -278,6 +306,20 @@ public class FcrepoProducer extends DefaultProducer {
         return "";
     }
 
+    private String getTransactionOperation() {
+        if (!isBlank(endpoint.getTransaction())) {
+            if (endpoint.getTransaction().equalsIgnoreCase("commit")) {
+                return "/fcr:tx/fcr:commit";
+            } else if (endpoint.getTransaction().equalsIgnoreCase("rollback")) {
+                return "/fcr:tx/fcr:rollback";
+            } else {
+                return "/fcr:tx";
+            }
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Given an exchange, extract the fully qualified URL for a fedora resource. By default, this will use the entire
      * path set on the endpoint. If either of the following headers are defined, they will be appended to that path in
@@ -288,12 +330,15 @@ public class FcrepoProducer extends DefaultProducer {
     private String getUrl(final Exchange exchange) {
         final StringBuilder url = new StringBuilder();
         final String transformPath = getTransformPath(exchange);
+        final String transactionOperation = getTransactionOperation();
         final HttpMethods method = getMethod(exchange);
 
         url.append(getBaseUrlWithScheme());
         url.append(getPathFromHeaders(exchange));
 
-        if (!isBlank(transformPath)) {
+        if (!isBlank(transactionOperation)) {
+            url.append(transactionOperation);
+        } else if (!isBlank(transformPath)) {
             url.append(transformPath);
         } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
             url.append("/fcr:tombstone");
