@@ -26,7 +26,7 @@ import static java.lang.System.getProperty;
 public final class FcrepoTestUtils {
 
     private static final int FCREPO_PORT = parseInt(getProperty(
-                "test.port", "8080"));
+                "fcrepo.dynamic.test.port", "8080"));
 
     /**
      * This is a utility class; the constructor is off-limits

@@ -434,7 +434,7 @@
           </systemProperties>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <stopKey>STOP</stopKey>
-          <stopPort>${jetty.port.stop}</stopPort>
+          <stopPort>${jetty.dynamic.stop.port}</stopPort>
           <daemon>true</daemon>
         </configuration>
         <dependencies>
@@ -459,7 +459,7 @@
             </goals>
             <configuration>
               <httpConnector>
-                <port>${test.solr.port}</port>
+                <port>${solr.dynamic.test.port}</port>
               </httpConnector>
               <scanIntervalSeconds>0</scanIntervalSeconds>
               <daemon>true</daemon>
@@ -515,10 +515,10 @@
         <version>1.9.1</version>
         <configuration>
           <portNames>
-            <portName>test.port</portName>
-            <portName>test.fuseki.port</portName>
-            <portName>test.solr.port</portName>
-            <portName>jetty.port.stop</portName>
+            <portName>fcrepo.dynamic.test.port</portName>
+            <portName>fuseki.dynamic.test.port</portName>
+            <portName>solr.dynamic.test.port</portName>
+            <portName>jetty.dynamic.stop.port</portName>
           </portNames>
         </configuration>
         <executions>
@@ -555,9 +555,9 @@
         <configuration>
           <argLine>-XX:MaxPermSize=128m ${jacoco.agent.it.arg}</argLine>
           <systemPropertyVariables>
-            <test.port>${test.port}</test.port>
-            <test.fuseki.port>${test.fuseki.port}</test.fuseki.port>
-            <test.solr.port>${test.solr.port}</test.solr.port>
+            <fcrepo.dynamic.test.port>${fcrepo.dynamic.test.port}</fcrepo.dynamic.test.port>
+            <fuseki.dynamic.test.port>${fuseki.dynamic.test.port}</fuseki.dynamic.test.port>
+            <solr.dynamic.test.port>${solr.dynamic.test.port}</solr.dynamic.test.port>
           </systemPropertyVariables>
         </configuration>
         <executions>
