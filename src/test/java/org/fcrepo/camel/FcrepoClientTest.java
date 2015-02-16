@@ -454,13 +454,12 @@ public class FcrepoClientTest {
     private CloseableHttpResponse doSetupMockRequest(final String contentType, final ByteArrayEntity entity,
             final int status, final String statusPhrase) throws IOException {
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
-        final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{};
         final Header[] responseHeaders = new Header[]{ contentTypeHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
         when(mockResponse.getFirstHeader("location")).thenReturn(null);
-        when(mockResponse.getHeaders("Content-Type")).thenReturn(contentTypeHeaders);
+        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
         when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);

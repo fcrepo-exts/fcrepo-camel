@@ -29,6 +29,10 @@ import org.apache.camel.impl.DefaultProducer;
 import org.apache.camel.util.ExchangeHelper;
 import org.apache.camel.util.IOHelper;
 import org.slf4j.Logger;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * The Fedora producer.
@@ -40,13 +44,13 @@ public class FcrepoProducer extends DefaultProducer {
 
     public static final String DEFAULT_CONTENT_TYPE = "application/rdf+xml";
 
-    public static final int DEFAULT_HTTPS_PORT = 443;
-
     private static final Logger LOGGER = getLogger(FcrepoProducer.class);
 
     private FcrepoEndpoint endpoint;
 
     private FcrepoClient client;
+
+    private TransactionTemplate transactionTemplate;
 
     /**
      * Create a FcrepoProducer object
@@ -56,11 +60,13 @@ public class FcrepoProducer extends DefaultProducer {
     public FcrepoProducer(final FcrepoEndpoint endpoint) {
         super(endpoint);
         this.endpoint = endpoint;
+        this.transactionTemplate = endpoint.createTransactionTemplate();
         this.client = new FcrepoClient(
                 endpoint.getAuthUsername(),
                 endpoint.getAuthPassword(),
                 endpoint.getAuthHost(),
                 endpoint.getThrowExceptionOnFailure());
+
     }
 
     /**
@@ -71,11 +77,29 @@ public class FcrepoProducer extends DefaultProducer {
      */
     @Override
     public void process(final Exchange exchange) throws FcrepoOperationFailedException {
+        if (exchange.isTransacted()) {
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                protected void doInTransactionWithoutResult(final TransactionStatus status) {
+                    final DefaultTransactionStatus st = (DefaultTransactionStatus)status;
+                    final FcrepoTransactionObject tx = (FcrepoTransactionObject)st.getTransaction();
+                    try {
+                        doRequest(exchange, tx.getSessionId());
+                    } catch (FcrepoOperationFailedException ex) {
+                        throw new RuntimeException("Error executing fcrepo request in transaction: ", ex);
+                    }
+                }
+            });
+        } else {
+            doRequest(exchange, null);
+        }
+    }
+
+    private void doRequest(final Exchange exchange, final String transaction) throws FcrepoOperationFailedException {
         final Message in = exchange.getIn();
         final HttpMethods method = getMethod(exchange);
         final String contentType = getContentType(exchange);
         final String accept = getAccept(exchange);
-        final String url = getUrl(exchange);
+        final String url = getUrl(exchange, transaction);
         final String prefer = getPrefer(exchange);
 
         LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
@@ -112,6 +136,8 @@ public class FcrepoProducer extends DefaultProducer {
         exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
         exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
+
+
 
     /**
      * Retrieve the resource location from a HEAD request.
@@ -200,36 +226,6 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
-     * Get the repository baseUrl with a full scheme.
-     * The base URL may be any of the following:
-     * localhost:8080/rest
-     * fedora.institution.org:8983/rest
-     * http://localhost:8080/fcrepo/rest
-     * https://fedora.institution.org/rest
-     * fedora.insitution.org:443/rest
-     *
-     * This method ensures that the url (fragment) is properly prefixed
-     * with either the http or https scheme, suitable for sending to the
-     * httpclient.
-     *
-     * @return String
-     */
-    private String getBaseUrlWithScheme() {
-        final String baseUrl = endpoint.getBaseUrl();
-        final StringBuilder url = new StringBuilder();
-
-        if (!baseUrl.startsWith("http:") && !baseUrl.startsWith("https:")) {
-            if (URI.create("http://" + baseUrl).getPort() == DEFAULT_HTTPS_PORT) {
-                url.append("https://");
-            } else {
-                url.append("http://");
-            }
-        }
-        url.append(baseUrl);
-        return url.toString();
-    }
-
-    /**
      * The resource path can be set either by the Camel header (CamelFcrepoIdentifier)
      * or by fedora's jms headers (org.fcrepo.jms.identifier). This method extracts
      * a path from the appropriate header (the camel header overrides the jms header).
@@ -285,12 +281,16 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    private String getUrl(final Exchange exchange) {
+    private String getUrl(final Exchange exchange, final String transaction) {
         final StringBuilder url = new StringBuilder();
         final String transformPath = getTransformPath(exchange);
         final HttpMethods method = getMethod(exchange);
 
-        url.append(getBaseUrlWithScheme());
+        url.append(endpoint.getBaseUrlWithScheme());
+        if (transaction != null) {
+            url.append("/");
+            url.append(transaction);
+        }
         url.append(getPathFromHeaders(exchange));
 
         if (!isBlank(transformPath)) {

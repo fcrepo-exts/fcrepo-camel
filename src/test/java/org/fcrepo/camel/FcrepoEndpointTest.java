@@ -16,6 +16,7 @@
 package org.fcrepo.camel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
@@ -31,9 +32,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FcrepoEndpointTest {
 
-    private final String FCREPO_URI = "fcrepo:foo";
+    private final String FCREPO_URI = "fcrepo:foo/rest";
 
-    private final String FCREPO_PATH = "/rest";
+    private final String FCREPO_PATH = "foo/rest";
 
     @Mock
     private FcrepoComponent mockContext;
@@ -50,6 +51,14 @@ public class FcrepoEndpointTest {
     }
 
     @Test
+    public void testCreateTransactionTemplate() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
+        assertNotNull(testEndpoint.createTransactionTemplate());
+        testEndpoint.setTransactionManager(new FcrepoTransactionManager());
+        assertNotNull(testEndpoint.createTransactionTemplate());
+    }
+
+    @Test
     public void testCreateProducer() {
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         final Producer testProducer = testEndpoint.createProducer();
@@ -60,6 +69,37 @@ public class FcrepoEndpointTest {
     public void testBaseUrl() {
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(testEndpoint.getBaseUrl(), FCREPO_PATH);
+    }
+
+    @Test
+    public void testBaseUrlWithScheme1() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint("fcrepo:localhost:8080/rest", "localhost:8080/rest",
+                mockContext, testConfig);
+        assertEquals("http://localhost:8080/rest", testEndpoint.getBaseUrlWithScheme());
+    }
+
+    @Test
+    public void testBaseUrlWithScheme2() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint("fcrepo:https://localhost/rest",
+                "https://localhost/rest",
+                mockContext, testConfig);
+        assertEquals("https://localhost/rest", testEndpoint.getBaseUrlWithScheme());
+    }
+
+    @Test
+    public void testBaseUrlWithScheme3() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint("fcrepo://localhost:443/rest",
+                "localhost:443/rest",
+                mockContext, testConfig);
+        assertEquals("https://localhost:443/rest", testEndpoint.getBaseUrlWithScheme());
+    }
+
+    @Test
+    public void testBaseUrlWithScheme4() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint("fcrepo:http://localhost:8080/rest",
+                "http://localhost:8080/rest",
+                mockContext, testConfig);
+        assertEquals("http://localhost:8080/rest", testEndpoint.getBaseUrlWithScheme());
     }
 
     @Test

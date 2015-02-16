@@ -19,6 +19,7 @@ import static java.net.URI.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,6 +34,7 @@ import org.apache.camel.component.http4.HttpMethods;
 import org.apache.camel.converter.stream.InputStreamCache;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultExchange;
+import org.apache.camel.impl.DefaultUnitOfWork;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -724,6 +726,116 @@ public class FcrepoProducerTest {
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.serializedJson);
         assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TestUtils.JSON);
         assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+    }
+
+    @Test
+    public void testTransactedGetProducer() throws Exception {
+        final String baseUrl = "http://localhost:8080/rest";
+        final String path = "/transact";
+        final String path2 = "/transact2";
+        final String tx = "tx:12345";
+        final URI uri = create(baseUrl + "/" + tx + path);
+        final URI uri2 = create(baseUrl + "/" + tx + path2);
+        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
+        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final int status = 200;
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
+        final ByteArrayInputStream body2 = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final DefaultUnitOfWork uow = new DefaultUnitOfWork(testExchange);
+        final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
+        txMgr.setBaseUrl(baseUrl);
+
+        testEndpoint.setTransactionManager(txMgr);
+
+        final FcrepoClient otherMockClient = mock(FcrepoClient.class);
+
+        init();
+        TestUtils.setField(txMgr, "client", otherMockClient);
+
+        uow.beginTransactedBy((Object)tx);
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        testExchange.setUnitOfWork(uow);
+
+        when(otherMockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
+                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+        when(otherMockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenReturn(
+                new FcrepoResponse(commitUri, 201, null, null, null));
+
+        when(mockClient.head(any(URI.class))).thenReturn(new FcrepoResponse(uri, 200, null, null, null));
+        when(mockClient.get(eq(uri), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(
+            new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body));
+        when(mockClient.get(eq(uri2), eq(TestUtils.N_TRIPLES), any(String.class))).thenReturn(
+            new FcrepoResponse(uri2, status, TestUtils.N_TRIPLES, null, body2));
+
+        testProducer.process(testExchange);
+
+        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.RDF_XML, testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class));
+        assertEquals(TestUtils.rdfXml, testExchange.getIn().getBody(String.class));
+
+        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, "GET");
+        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TestUtils.N_TRIPLES);
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path2);
+        testExchange.setUnitOfWork(uow);
+        testProducer.process(testExchange);
+        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.N_TRIPLES, testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class));
+        assertEquals(TestUtils.rdfTriples, testExchange.getIn().getBody(String.class));
+
+    }
+
+    @Test (expected = RuntimeException.class)
+    public void testTransactedProducerWithError() throws Exception {
+        final String baseUrl = "http://localhost:8080/rest";
+        final String path = "/transact";
+        final String path2 = "/transact2";
+        final String tx = "tx:12345";
+        final URI uri = create(baseUrl + "/" + tx + path);
+        final URI uri2 = create(baseUrl + "/" + tx + path2);
+        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
+        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final int status = 200;
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
+        final ByteArrayInputStream body2 = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final DefaultUnitOfWork uow = new DefaultUnitOfWork(testExchange);
+        final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
+        txMgr.setBaseUrl(baseUrl);
+
+        testEndpoint.setTransactionManager(txMgr);
+
+        final FcrepoClient otherMockClient = mock(FcrepoClient.class);
+
+        init();
+        TestUtils.setField(txMgr, "client", otherMockClient);
+
+        uow.beginTransactedBy((Object)tx);
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        testExchange.setUnitOfWork(uow);
+
+        when(otherMockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
+                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+        when(otherMockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenReturn(
+                new FcrepoResponse(commitUri, 201, null, null, null));
+
+        when(mockClient.head(any(URI.class))).thenReturn(new FcrepoResponse(uri, 200, null, null, null));
+        when(mockClient.get(eq(uri), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(
+            new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body));
+        when(mockClient.get(eq(uri2), eq(TestUtils.N_TRIPLES), any(String.class))).thenThrow(
+            new FcrepoOperationFailedException(uri2, 400, "Bad Request"));
+
+        testProducer.process(testExchange);
+
+        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.RDF_XML, testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class));
+        assertEquals(TestUtils.rdfXml, testExchange.getIn().getBody(String.class));
+
+        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, "GET");
+        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TestUtils.N_TRIPLES);
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path2);
+        testExchange.setUnitOfWork(uow);
+        testProducer.process(testExchange);
     }
 
     @Test

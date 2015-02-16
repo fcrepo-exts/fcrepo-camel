@@ -199,12 +199,48 @@ You can get the HTTP response code from the `fcrepo` component by getting
 the value from the Out message header with `Exchange.HTTP_RESPONSE_CODE`.
 
 
+Transactions
+------------
+
+The `fcrepo-camel` component follows the [Transactional Client](http://camel.apache.org/transactional-client.html)
+pattern when using transactions with a Fedora Repository. A route can begin using transactions by simply
+identifying the route as `transacted()` like so:
+
+    from("direct:foo")
+      .transacted()
+      .to("fcrepo:localhost:8080/rest")
+      .process(new MyProcessor())
+      .to("fcrepo:localhost:8080/rest")
+      .process(new MyOtherProcessor())
+      .to("fcrepo:localhost:8080/rest");
+
+A single transaction can span multiple routes so long as the transaction is run within a single thread.
+That is, if the `direct` endpoint is used, a transacted workflow may be divided among multiple routes
+(do not use `seda` or `vm`).
+
+In order to enable a transactional client, a `TransactionManager` must be added to the Spring configuration:
+for this to work, the built-in `FcrepoTransactionManager` needs to know the `baseUrl` of the underlying
+repository. Authentication information, if necessary, can also be added in the bean configuration.
+
+    <bean id="fcrepoTxManager" class="org.fcrepo.camel.FcrepoTransactionManager">
+      <property name="baseUrl" value="http://localhost:8080/rest"/>
+    </bean>
+
+    <bean id="fcrepo" class="org.fcrepo.camel.FcrepoComponent">
+      <property name="transactionManager" ref="fcrepoTxManager"/>
+    </bean>
+
+Like with other transactional clients, if an error is encountered anywhere in the route, all transacted
+operations will be rolled back.
+
+
 Building the component
 ----------------------
 
 The `fcrepo-camel` compnent can be built with Maven:
 
     mvn clean install
+
 
 Fcrepo messaging
 ----------------
