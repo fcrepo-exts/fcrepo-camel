@@ -278,12 +278,11 @@ public class FcrepoClientErrorTest {
         final Header contentTypeHeader = new BasicHeader("Content-Type", TEXT_TURTLE);
         final Header linkHeader = new BasicHeader("Link", "<" + baseUrl + "/bar>; rel=\"describedby\"");
         final Header linkFooHeader = new BasicHeader("Link" ,"<" + baseUrl + "/bar>; rel=\"foo\"");
-        final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{ linkHeader, linkFooHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
         when(mockResponse.getFirstHeader("Location")).thenReturn(null);
-        when(mockResponse.getHeaders("Content-Type")).thenReturn(contentTypeHeaders);
+        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
         when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
@@ -307,7 +306,7 @@ public class FcrepoClientErrorTest {
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
         when(mockResponse.getFirstHeader("Location")).thenReturn(null);
-        when(mockResponse.getHeaders("Content-Type")).thenReturn(new Header[]{});
+        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(null);
         when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
@@ -325,13 +324,12 @@ public class FcrepoClientErrorTest {
             throws IOException {
 
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
-        final Header[] contentTypeHeaders = new Header[]{ contentTypeHeader };
         final Header[] linkHeaders = new Header[]{};
         final Header[] responseHeaders = new Header[] { contentTypeHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getFirstHeader("location")).thenReturn(null);
-        when(mockResponse.getHeaders("Content-Type")).thenReturn(contentTypeHeaders);
+        when(mockResponse.getFirstHeader("Location")).thenReturn(null);
+        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
         when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);

@@ -23,6 +23,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.UriEndpointComponent;
 import org.slf4j.Logger;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Represents the component that manages {@link FcrepoEndpoint}.
@@ -32,6 +33,8 @@ import org.slf4j.Logger;
 public class FcrepoComponent extends UriEndpointComponent {
 
     private FcrepoConfiguration configuration;
+
+    private PlatformTransactionManager transactionManager;
 
     private static final Logger LOGGER  = getLogger(FcrepoComponent.class);
 
@@ -76,6 +79,24 @@ public class FcrepoComponent extends UriEndpointComponent {
      */
     public void setConfiguration(final FcrepoConfiguration config) {
         this.configuration = config;
+    }
+
+    /**
+     * Set the transaction manager for the component
+     *
+     * @param transactionManager the transaction manager for this component
+     */
+    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    /**
+     * Get the transaction manager for the component
+     *
+     * @return the transaction manager for this component
+     */
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
     }
 
     /**

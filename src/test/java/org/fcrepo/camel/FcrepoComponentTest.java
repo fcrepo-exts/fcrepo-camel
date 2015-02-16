@@ -17,6 +17,7 @@ package org.fcrepo.camel;
 
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 
@@ -83,9 +84,11 @@ public class FcrepoComponentTest {
     @Test
     public void testPostConfiguredComponent() {
         final FcrepoComponent testComponent = new FcrepoComponent();
+        final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         testComponent.setAuthUsername("foo");
         testComponent.setAuthPassword("bar");
         testComponent.setAuthHost("baz");
+        testComponent.setTransactionManager(txMgr);
 
         final Endpoint testEndpoint = testComponent.createEndpoint(TEST_ENDPOINT_URI, "", EMPTY_MAP);
 
@@ -93,6 +96,12 @@ public class FcrepoComponentTest {
         assertEquals("foo", testComponent.getConfiguration().getAuthUsername());
         assertEquals("bar", testComponent.getConfiguration().getAuthPassword());
         assertEquals("baz", testComponent.getConfiguration().getAuthHost());
+        assertNull(testComponent.getConfiguration().getTransactionManager());
+        assertEquals(txMgr, testComponent.getTransactionManager());
+
+        testComponent.getConfiguration().setTransactionManager(txMgr);
+
+        assertEquals(txMgr, testComponent.getConfiguration().getTransactionManager());
     }
 
     @Test

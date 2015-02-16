@@ -15,6 +15,8 @@
  */
 package org.fcrepo.camel;
 
+import java.net.URI;
+
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
@@ -23,6 +25,9 @@ import org.apache.camel.api.management.ManagedResource;
 import org.apache.camel.api.management.ManagedAttribute;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.UriEndpoint;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Represents a Fcrepo endpoint.
@@ -35,6 +40,10 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     private FcrepoConfiguration configuration;
 
+    private PlatformTransactionManager transactionManager;
+
+    public static final int DEFAULT_HTTPS_PORT = 443;
+
     /**
      * Create a FcrepoEndpoint with a uri, path and component
      * @param uri the endpoint uri (without path values)
@@ -46,7 +55,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
             final FcrepoConfiguration configuration) {
         super(uri, component);
         this.configuration = configuration;
-        this.setBaseUrl(remaining);
+        this.transactionManager = component.getTransactionManager();
+        setBaseUrl(remaining);
     }
 
     /**
@@ -75,6 +85,59 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     @Override
     public boolean isSingleton() {
         return true;
+    }
+
+    /**
+     * Create a template for use in transactions
+     *
+     * @return a transaction template
+     */
+    public TransactionTemplate createTransactionTemplate() {
+        TransactionTemplate transactionTemplate;
+
+        if (getTransactionManager() != null) {
+            transactionTemplate = new TransactionTemplate(getTransactionManager());
+        } else {
+            final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
+            txMgr.setBaseUrl(getBaseUrlWithScheme());
+            txMgr.setAuthUsername(getAuthUsername());
+            txMgr.setAuthPassword(getAuthPassword());
+            txMgr.setAuthHost(getAuthHost());
+            transactionTemplate = new TransactionTemplate(txMgr);
+        }
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        transactionTemplate.afterPropertiesSet();
+        return transactionTemplate;
+    }
+
+    /**
+     * Get the repository baseUrl with a full scheme.
+     * The base URL may be any of the following:
+     * localhost:8080/rest
+     * fedora.institution.org:8983/rest
+     * http://localhost:8080/fcrepo/rest
+     * https://fedora.institution.org/rest
+     * fedora.insitution.org:443/rest
+     *
+     * This method ensures that the url (fragment) is properly prefixed
+     * with either the http or https scheme, suitable for sending to the
+     * httpclient.
+     *
+     * @return String
+     */
+    public String getBaseUrlWithScheme() {
+        final StringBuilder url = new StringBuilder();
+        final String baseUrl = getBaseUrl();
+
+        if (!baseUrl.startsWith("http:") && !baseUrl.startsWith("https:")) {
+            if (URI.create("http://" + baseUrl).getPort() == DEFAULT_HTTPS_PORT) {
+                url.append("https://");
+            } else {
+                url.append("http://");
+            }
+        }
+        url.append(baseUrl);
+        return url.toString();
     }
 
     /**
@@ -111,6 +174,26 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     public String getBaseUrl() {
         return getConfiguration().getBaseUrl();
+    }
+
+    /**
+     * transactionManager setter
+     *
+     * @param transactionManager the transaction manager for this endpoint
+     */
+    @ManagedAttribute(description = "Transaction Manager")
+    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    /**
+     * transactionManager getter
+     *
+     * @return the transaction manager for this endpoint
+     */
+    @ManagedAttribute(description = "Transaction Manager")
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
     }
 
     /**

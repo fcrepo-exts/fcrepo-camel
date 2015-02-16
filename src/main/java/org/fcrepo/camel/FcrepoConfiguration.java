@@ -18,6 +18,7 @@ package org.fcrepo.camel;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriParams;
 import org.apache.camel.RuntimeCamelException;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * An FcrepoConfiguration class.
@@ -62,6 +63,9 @@ public class FcrepoConfiguration implements Cloneable {
 
     @UriParam
     private String preferOmit = null;
+
+    @UriParam
+    private PlatformTransactionManager transactionManager = null;
 
     /**
      * Create a new FcrepoConfiguration object
@@ -298,5 +302,24 @@ public class FcrepoConfiguration implements Cloneable {
      */
     public String getPreferOmit() {
         return preferOmit;
+    }
+
+
+    /**
+     * transactionManager setter
+     *
+     * @param transactionManager the transaction manager for handling transactions
+     */
+    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    /**
+     * transactionManger getter
+     *
+     * @return the transaction manager for handling transactions
+     */
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
     }
 }
