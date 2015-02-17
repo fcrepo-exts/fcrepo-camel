@@ -21,6 +21,7 @@ import org.apache.camel.CamelException;
 
 /**
  * Represents a failure of the underlying HTTP client's interaction with fedora.
+ *
  * @author Aaron Coburn
  * @since January 8, 2015
  */
@@ -32,6 +33,7 @@ public class FcrepoOperationFailedException extends CamelException {
 
     /**
      * Create an FcrepoOperationFailedException
+     *
      * @param url the requested url
      * @param statusCode the HTTP response code
      * @param statusText the response message
@@ -45,21 +47,27 @@ public class FcrepoOperationFailedException extends CamelException {
     }
 
     /**
-     * Return the requested url.
+     * Return the requested url
+     *
+     * @return the requested URL
      */
     public URI getUrl() {
         return url;
     }
 
     /**
-     * Get the status code.
+     * Get the status code
+     *
+     * @return the HTTP status code
      */
     public int getStatusCode() {
         return statusCode;
     }
 
     /**
-     * Get the status text.
+     * Get the status text
+     *
+     * @return the status text for the error
      */
     public String getStatusText() {
         return statusText;

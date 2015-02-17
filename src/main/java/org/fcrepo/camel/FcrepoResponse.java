@@ -21,8 +21,6 @@ import java.io.InputStream;
 /**
  * Represents a response from a fedora repository using a {@link FcrepoClient}.
  *
- * Note: This should be swapped out to use https://github.com/fcrepo4-labs/fcrepo4-client
- *
  * @author Aaron Coburn
  * @since October 20, 2014
  */
@@ -40,6 +38,12 @@ public class FcrepoResponse {
 
     /**
      * Create a FcrepoResponse object from the http response
+     *
+     * @param url the requested URL
+     * @param statusCode the HTTP status code
+     * @param contentType the mime-type of the response
+     * @param location the location of a related resource
+     * @param body the response body stream
      */
     public FcrepoResponse(final URI url, final int statusCode,
             final String contentType, final URI location, final InputStream body) {
@@ -52,6 +56,8 @@ public class FcrepoResponse {
 
     /**
      * url getter
+     *
+     * @return the requested URL
      */
     public URI getUrl() {
         return url;
@@ -59,7 +65,8 @@ public class FcrepoResponse {
 
     /**
      * url setter
-     * @param url the URL
+     * 
+     * @param url the requested URL
      */
     public void setUrl(final URI url) {
         this.url = url;
@@ -67,6 +74,8 @@ public class FcrepoResponse {
 
     /**
      * statusCode getter
+     *
+     * @return the HTTP status code
      */
     public int getStatusCode() {
         return statusCode;
@@ -74,7 +83,8 @@ public class FcrepoResponse {
 
     /**
      * statusCode setter
-     * @param statusCode the http status code
+     * 
+     * @param statusCode the HTTP status code
      */
     public void setStatusCode(final int statusCode) {
         this.statusCode = statusCode;
@@ -82,6 +92,8 @@ public class FcrepoResponse {
 
     /**
      * body getter
+     *
+     * @return the response body as a stream
      */
     public InputStream getBody() {
         return body;
@@ -89,6 +101,7 @@ public class FcrepoResponse {
 
     /**
      * body setter
+     * 
      * @param body the contents of the response body
      */
     public void setBody(final InputStream body) {
@@ -97,6 +110,8 @@ public class FcrepoResponse {
 
     /**
      * location getter
+     * 
+     * @return the location of a related resource
      */
     public URI getLocation() {
         return location;
@@ -104,7 +119,8 @@ public class FcrepoResponse {
 
     /**
      * location setter
-     * @param location the value of any Link: rel=describedby header
+     * 
+     * @param location the value of a related resource
      */
     public void setLocation(final URI location) {
         this.location = location;
@@ -112,6 +128,8 @@ public class FcrepoResponse {
 
     /**
      * contentType getter
+     *
+     * @return the mime-type of response
      */
     public String getContentType() {
         return contentType;
@@ -119,7 +137,8 @@ public class FcrepoResponse {
 
     /**
      * contentType setter
-     * @param contentType the Content-Type of the response
+     *
+     * @param contentType the mime-type of the response
      */
     public void setContentType(final String contentType) {
         this.contentType = contentType;

@@ -40,6 +40,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      * @param uri the endpoint uri (without path values)
      * @param remaining any path values on the endpoint uri
      * @param component an existing component value
+     * @param configuration configuration settings for this endpoint
      */
     public FcrepoEndpoint(final String uri, final String remaining, final FcrepoComponent component,
             final FcrepoConfiguration configuration) {
@@ -50,6 +51,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * Create a producer endpoint.
+     *
+     * @return A new camel producer endpoint
      */
     @Override
     public Producer createProducer() {
@@ -66,6 +69,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * Define the component as a singleton
+     *
+     * @return whether the endpoint is implemented as a singleton.
      */
     @Override
     public boolean isSingleton() {
@@ -74,6 +79,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * configuration getter
+     *
+     * @return the component configuration
      */
     public FcrepoConfiguration getConfiguration() {
         return configuration;
@@ -81,6 +88,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * configuration setter
+     * 
      * @param config The FcrepoConfiguration
      */
     public void setConfiguration(final FcrepoConfiguration config) {
@@ -89,7 +97,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * baseUrl setter
-     * @param url the baseUrl string
+     *
+     * @param url the fcrepo base url
      */
     public void setBaseUrl(final String url) {
         getConfiguration().setBaseUrl(url);
@@ -97,6 +106,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * baseUrl getter
+     *
+     * @return the fcrepo base url
      */
     public String getBaseUrl() {
         return getConfiguration().getBaseUrl();
@@ -104,7 +115,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * accept setter
-     * @param type the content-type for Accept headers
+     *
+     * @param type the mime-type used with Accept headers
      */
     @ManagedAttribute(description = "Accept: Header")
     public void setAccept(final String type) {
@@ -113,6 +125,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * accept getter
+     *
+     * @return the mime-type used with Accept headers
      */
     @ManagedAttribute(description = "Accept: Header")
     public String getAccept() {
@@ -121,7 +135,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * contentType setter
-     * @param type the content-type for Content-Type headers
+     * 
+     * @param type the mime-type used with Content-Type headers
      */
     @ManagedAttribute(description = "Content-Type: Header")
     public void setContentType(final String type) {
@@ -130,6 +145,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * contentType getter
+     *
+     * @return the mime-type used with Content-Type headers
      */
     @ManagedAttribute(description = "Content-Type: Header")
     public String getContentType() {
@@ -138,7 +155,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authUsername setter
-     * @param username used for authentication
+     * 
+     * @param username used for repository authentication
      */
     @ManagedAttribute(description = "Username for authentication")
     public void setAuthUsername(final String username) {
@@ -147,6 +165,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authUsername getter
+     *
+     * @return the username used for repository authentication
      */
     @ManagedAttribute(description = "Username for authentication")
     public String getAuthUsername() {
@@ -155,7 +175,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authPassword setter
-     * @param password used for authentication
+     * 
+     * @param password used for repository authentication
      */
     @ManagedAttribute(description = "Password for authentication")
     public void setAuthPassword(final String password) {
@@ -164,6 +185,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authPassword getter
+     *
+     * @return the password used for repository authentication
      */
     @ManagedAttribute(description = "Password for authentication")
     public String getAuthPassword() {
@@ -172,7 +195,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authHost setter
-     * @param host used for authentication
+     * 
+     * @param host realm used for repository authentication
      */
     @ManagedAttribute(description = "Hostname for authentication")
     public void setAuthHost(final String host) {
@@ -181,6 +205,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authHost getter
+     *
+     * @return the host realm used for repository authentication
      */
     @ManagedAttribute(description = "Hostname for authentication")
     public String getAuthHost() {
@@ -189,6 +215,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * metadata setter
+     *
      * @param metadata whether to retrieve rdf metadata for non-rdf nodes
      */
     @ManagedAttribute(description = "Whether to retrieve the /fcr:metadata endpoint for Binary nodes")
@@ -198,6 +225,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * metadata getter
+     *
+     * @return whether to retrieve rdf metadata for non-rdf nodes
      */
     @ManagedAttribute(description = "Whether to retrieve the /fcr:metadata endpoint for Binary nodes")
     public Boolean getMetadata() {
@@ -206,23 +235,27 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * throwExceptionOnFailure setter
-     * @param throwOnFailure whether non-2xx HTTP response codes throw exceptions
+     *
+     * @param throwOnFailure whether HTTP error codes throw exceptions
      */
-    @ManagedAttribute(description = "Whether non 2xx response codes should throw an exception")
+    @ManagedAttribute(description = "Whether HTTP response errors should throw an exception")
     public void setThrowExceptionOnFailure(final Boolean throwOnFailure) {
         getConfiguration().setThrowExceptionOnFailure(throwOnFailure);
     }
 
     /**
      * throwExceptionOnFailure getter
+     *
+     * @return whether HTTP error codes throw exceptions
      */
-    @ManagedAttribute(description = "Whether non 2xx response codes should throw an exception")
+    @ManagedAttribute(description = "Whether HTTP response errors should throw an exception")
     public Boolean getThrowExceptionOnFailure() {
         return getConfiguration().getThrowExceptionOnFailure();
     }
 
     /**
      * transform setter
+     * 
      * @param transform define an LD-Path transform program for converting RDF to JSON
      */
     @ManagedAttribute(description = "The LDPath transform program to use")
@@ -232,6 +265,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * transform getter
+     *
+     * @return the LD-Path transform program used to convert RDF to JSON
      */
     @ManagedAttribute(description = "The LDPath transform program to use")
     public String getTransform() {
@@ -240,6 +275,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * tombstone setter
+     * 
      * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
      */
     @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
@@ -249,6 +285,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * tombstone getter
+     *
+     * @return whether to access the /fcr:tombstone endpoint for a resource
      */
     @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
     public Boolean getTombstone() {
@@ -257,6 +295,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * preferInclude setter
+     *
+     * @param include the URI(s) that populate the include section in a Prefer header
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
     public void setPreferInclude(final String include) {
@@ -265,6 +305,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * preferInclude getter
+     *
+     * @return the URI(s) that populate the include section in a Prefer header
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; include=\"URI\" header")
     public String getPreferInclude() {
@@ -273,6 +315,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * preferOmit setter
+     *
+     * @param omit the URI(s) that populate the omit section in a Prefer header
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; omit=\"URI\" header")
     public void setPreferOmit(final String omit) {
@@ -281,6 +325,8 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * preferOmit getter
+     *
+     * @return the URI(s) that populate the omit section in a Prefer header
      */
     @ManagedAttribute(description = "Whether to include a Prefer: return=representation; omit=\"URI\" header")
     public String getPreferOmit() {

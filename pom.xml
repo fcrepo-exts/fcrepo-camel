@@ -63,6 +63,9 @@
     <clerezza.rdf.jena.commons.version>0.7</clerezza.rdf.jena.commons.version>
     <!-- plugins -->
     <checkstyle.plugin.version>2.12.1</checkstyle.plugin.version>
+    <doxia.plugin.version>1.3</doxia.plugin.version>
+    <github.site.plugin.version>0.9</github.site.plugin.version>
+    <maven.site.plugin.version>3.4</maven.site.plugin.version>
     <!-- values -->
     <project.copyrightYear>2015</project.copyrightYear>
     <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
@@ -99,6 +102,14 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <site>
+      <id>gh-pages</id>
+      <name>Deployment through GitHub's site deployment plugin</name>
+      <url>site/${project.version}</url>
+    </site>
+  </distributionManagement>
 
   <pluginRepositories>
     <pluginRepository>
@@ -709,6 +720,77 @@
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+          <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <version>${github.site.plugin.version}</version>
+        <!--<version>${github.site.plugin.version}</version>-->
+        <configuration>
+          <message>Creating site for ${project.artifactId}, ${project.version}</message>
+          <!-- this does the trick to place every module in the correct 
+            subfolder -->
+          <path>${project.distributionManagement.site.url}</path>
+          <merge>true</merge>
+          <excludes>
+            <exclude>xref-test/**</exclude>
+            <exclude>testapidocs/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>github</id>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <phase>site-deploy</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven.site.plugin.version}</version>
+        <configuration>
+          <skipDeploy>true</skipDeploy>
+        </configuration>
+        <dependencies>
+          <dependency>
+             <!--allows markdown syntax for site generation. To use it
+              place files below src/site/markdown/[filename].md -->
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-module-markdown</artifactId>
+            <version>${doxia.plugin.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.1</version>
+        <configuration>
+          <linksource>true</linksource>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+            <phase>site</phase>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -723,19 +805,6 @@
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.4</version>
@@ -777,4 +846,24 @@
       </build>
     </profile>
   </profiles>
+
+  <mailingLists>
+    <mailingList>
+      <name>ff-tech</name>
+      <subscribe>ff-tech+subscribe@googlegroups.com</subscribe>
+      <unsubscribe>ff-tech+unsubscribe@googlegroups.com</unsubscribe>
+      <post>ff-tech@googlegroups.com</post>
+      <archive>https://groups.google.com/d/forum/ff-tech</archive>
+    </mailingList>
+  </mailingLists>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/fcrepo4/fcrepo-camel/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://jenkins.fcrepo.org/job/fcrepo-camel/</url>
+  </ciManagement>
 </project>

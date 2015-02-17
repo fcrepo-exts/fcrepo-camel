@@ -67,7 +67,7 @@ public class FcrepoProducer extends DefaultProducer {
      * Define how message exchanges are processed.
      *
      * @param exchange the InOut message exchange
-     * @throws FcrepoOperationFailedException
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     @Override
     public void process(final Exchange exchange) throws FcrepoOperationFailedException {

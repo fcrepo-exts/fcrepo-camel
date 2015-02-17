@@ -34,6 +34,8 @@ class FcrepoLink {
 
     /**
      * Create a representation of a Link header.
+     *
+     * @param link the value for a Link header
      */
     public FcrepoLink(final String link) {
         parse(link);
@@ -41,15 +43,17 @@ class FcrepoLink {
 
     /**
      * Retrieve the URI of the link
-     * @return URI
+     *
+     * @return the URI portion of a Link header
      */
     public URI getUri() {
         return uri;
     }
 
     /**
-     * Retrieve the REL portion of the link.
-     * @return String
+     * Retrieve the REL portion of the link
+     * 
+     * @return the "rel" portion of a Link header
      */
     public String getRel() {
         return rel;
