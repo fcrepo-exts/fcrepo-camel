@@ -21,6 +21,7 @@ import org.apache.camel.RuntimeCamelException;
 
 /**
  * An FcrepoConfiguration class.
+ *
  * @author Aaron Coburn
  * @since Jan 20, 2015
  */
@@ -71,6 +72,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * Copy an FcrepoConfiguration object.
+     *
+     * @return a copy of the component-wide configuration
      */
     @Override
     public FcrepoConfiguration clone() {
@@ -83,6 +86,7 @@ public class FcrepoConfiguration implements Cloneable {
 
    /**
      * baseUrl setter
+     * 
      * @param url the baseUrl string
      */
     public void setBaseUrl(final String url) {
@@ -91,6 +95,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * baseUrl getter
+     *
+     * @return the fedora base url
      */
     public String getBaseUrl() {
         return baseUrl;
@@ -98,7 +104,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * accept setter
-     * @param type the content-type for Accept headers
+     *
+     * @param type the mime-type for Accept headers
      */
     public void setAccept(final String type) {
         this.accept = type.replaceAll(" ", "+");
@@ -106,6 +113,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * accept getter
+     *
+     * @return the mime-type for Accept headers
      */
     public String getAccept() {
         return accept;
@@ -113,7 +122,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * contentType setter
-     * @param type the content-type for Content-Type headers
+     *
+     * @param type the mime-type used with Content-Type headers
      */
     public void setContentType(final String type) {
         this.contentType = type.replaceAll(" ", "+");
@@ -121,6 +131,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * contentType getter
+     *
+     * @return the mime-type used with Content-Type headers
      */
     public String getContentType() {
         return contentType;
@@ -128,7 +140,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * authUsername setter
-     * @param username used for authentication
+     * 
+     * @param username used for repository authentication
      */
     public void setAuthUsername(final String username) {
         this.authUsername = username;
@@ -136,6 +149,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * authUsername getter
+     *
+     * @return the username used for repository authentication
      */
     public String getAuthUsername() {
         return authUsername;
@@ -143,7 +158,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * authPassword setter
-     * @param password used for authentication
+     * 
+     * @param password used for repository authentication
      */
     public void setAuthPassword(final String password) {
         this.authPassword = password;
@@ -151,6 +167,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * authPassword getter
+     *
+     * @return the password used for repository authentication
      */
     public String getAuthPassword() {
         return authPassword;
@@ -158,6 +176,7 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * authHost setter
+     * 
      * @param host used for authentication
      */
     public void setAuthHost(final String host) {
@@ -166,6 +185,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * authHost getter
+     *
+     * @return the host realm used for repository authentication
      */
     public String getAuthHost() {
         return authHost;
@@ -173,6 +194,7 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * metadata setter
+     * 
      * @param metadata whether to retrieve rdf metadata for non-rdf nodes
      */
     public void setMetadata(final Boolean metadata) {
@@ -181,6 +203,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * metadata getter
+     *
+     * @return whether to retrieve the rdf metadata for non-rdf nodes
      */
     public Boolean getMetadata() {
         return metadata;
@@ -188,7 +212,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * throwExceptionOnFailure setter
-     * @param throwOnFailure whether non-2xx HTTP response codes throw exceptions
+     *
+     * @param throwOnFailure whether HTTP response errors throw exceptions
      */
     public void setThrowExceptionOnFailure(final Boolean throwOnFailure) {
         this.throwExceptionOnFailure = throwOnFailure;
@@ -196,6 +221,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * throwExceptionOnFailure getter
+     *
+     * @return whether HTTP response errors throw exceptions
      */
     public Boolean getThrowExceptionOnFailure() {
         return throwExceptionOnFailure;
@@ -203,6 +230,7 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * transform setter
+     * 
      * @param transform define an LD-Path transform program for converting RDF to JSON
      */
     public void setTransform(final String transform) {
@@ -211,6 +239,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * transform getter
+     *
+     * @return the name of an LD-Path transform program used to convert RDF to JSON
      */
     public String getTransform() {
         return transform;
@@ -218,6 +248,7 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * tombstone setter
+     * 
      * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
      */
     public void setTombstone(final Boolean tombstone) {
@@ -226,6 +257,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * tombstone getter
+     *
+     * @return whether to access the /fcr:tombstone endpoint for a resource
      */
     public Boolean getTombstone() {
         return tombstone;
@@ -233,13 +266,17 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * preferInclude setter
+     *
+     * @param include the URI(s) that populate the include section in a Prefer header
      */
     public void setPreferInclude(final String include) {
         this.preferInclude = include;
     }
 
     /**
-     * preferOmit getter
+     * preferInclude getter
+     * 
+     * @return the URI(s) that populate the include section in a Prefer header
      */
     public String getPreferInclude() {
         return preferInclude;
@@ -247,6 +284,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * preferOmit setter
+     *
+     * @param omit the URI(s) that populate the omit section in a Prefer header
      */
     public void setPreferOmit(final String omit) {
         this.preferOmit = omit;
@@ -254,6 +293,8 @@ public class FcrepoConfiguration implements Cloneable {
 
     /**
      * preferOmit getter
+     *
+     * @return the URI(s) that populate the omit section in a Prefer header
      */
     public String getPreferOmit() {
         return preferOmit;

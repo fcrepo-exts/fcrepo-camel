@@ -44,7 +44,7 @@ public class FcrepoComponent extends UriEndpointComponent {
 
     /**
      * Given a CamelContext, create a FcrepoComponent instance.
-     * @param context the CamelContext
+     * @param context the camel context for the component.
      */
     public FcrepoComponent(final CamelContext context) {
         super(context, FcrepoEndpoint.class);
@@ -52,7 +52,7 @@ public class FcrepoComponent extends UriEndpointComponent {
 
     /**
      * Given a FcrepoConfiguration, create a FcrepoComponent instance.
-     * @param config the FcrepoConfiguration
+     * @param config the component-wide configuration.
      */
     public FcrepoComponent(final FcrepoConfiguration config) {
         super(FcrepoEndpoint.class);
@@ -61,6 +61,7 @@ public class FcrepoComponent extends UriEndpointComponent {
 
     /**
      * Get the component's configuration.
+     * @return the configuration for the component.
      */
     public FcrepoConfiguration getConfiguration() {
         if (configuration == null) {
@@ -71,6 +72,7 @@ public class FcrepoComponent extends UriEndpointComponent {
 
     /**
      * Set the component's configuration.
+     * @param config the configuration settings for the component.
      */
     public void setConfiguration(final FcrepoConfiguration config) {
         this.configuration = config;
@@ -105,6 +107,7 @@ public class FcrepoComponent extends UriEndpointComponent {
      *  @param uri the fcrepo uri identifying the repository hostname and port
      *  @param remaining the string identifying the repository path
      *  @param parameters any optional attributes added to the endpoint
+     *  @return the camel endpoint
      */
     @Override
     protected Endpoint createEndpoint(final String uri, final String remaining, final Map<String, Object> parameters) {

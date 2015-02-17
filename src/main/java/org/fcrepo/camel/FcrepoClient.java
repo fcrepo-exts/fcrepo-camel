@@ -100,6 +100,7 @@ public class FcrepoClient {
     /**
      * Make a HEAD response
      * @param url the URL of the resource to check
+     * @return the repository response
      */
     public FcrepoResponse head(final URI url)
             throws FcrepoOperationFailedException {
@@ -129,6 +130,7 @@ public class FcrepoClient {
      * @param url the URL of the resource to PUT
      * @param body the contents of the resource to send
      * @param contentType the MIMEType of the resource
+     * @return the repository response
      */
     public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
@@ -156,6 +158,7 @@ public class FcrepoClient {
      * Please note: the body should have an application/sparql-update content-type
      * @param url the URL of the resource to PATCH
      * @param body the body to be sent to the repository
+     * @return the repository response
      */
     public FcrepoResponse patch(final URI url, final InputStream body)
             throws FcrepoOperationFailedException {
@@ -179,6 +182,7 @@ public class FcrepoClient {
      * @param url the URL of the resource to which to POST
      * @param body the content to be sent to the server
      * @param contentType the Content-Type of the body
+     * @return the repository response
      */
     public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
@@ -204,6 +208,7 @@ public class FcrepoClient {
     /**
      * Make a DELETE request
      * @param url the URL of the resource to delete
+     * @return the repository response
      */
     public FcrepoResponse delete(final URI url)
             throws FcrepoOperationFailedException {
@@ -221,6 +226,7 @@ public class FcrepoClient {
      * Make a GET request
      * @param url the URL of the resource to fetch
      * @param accept the requested MIMEType of the resource to be retrieved
+     * @return the repository response
      */
     public FcrepoResponse get(final URI url, final String accept, final String prefer)
             throws FcrepoOperationFailedException {
