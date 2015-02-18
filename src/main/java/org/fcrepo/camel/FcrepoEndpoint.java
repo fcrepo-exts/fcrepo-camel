@@ -40,6 +40,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      * @param uri the endpoint uri (without path values)
      * @param remaining any path values on the endpoint uri
      * @param component an existing component value
+     * @param configuration configuration settings for this endpoint
      */
     public FcrepoEndpoint(final String uri, final String remaining, final FcrepoComponent component,
             final FcrepoConfiguration configuration) {

@@ -48,6 +48,8 @@ public final class ProcessorUtils {
     /**
      * Extract the subject URI from the incoming message headers.
      * @param in the incoming Message
+     * @return the subject URI
+     * @throws IOException when no baseURL header is present
      */
     public static String getSubjectUri(final Message in) throws IOException {
         final StringBuilder base = new StringBuilder("");
@@ -73,6 +75,7 @@ public final class ProcessorUtils {
      *
      * @param subject the subject of the triples to delete.
      * @param namedGraph an optional named graph
+     * @return the delete statement
      */
     public static String deleteWhere(final String subject, final String namedGraph) {
         final StringBuilder stmt = new StringBuilder("DELETE WHERE { ");
@@ -99,6 +102,7 @@ public final class ProcessorUtils {
      *
      *  @param serializedGraph the triples to insert
      *  @param namedGraph an optional named graph
+     *  @return the insert statement
      */
     public static String insertData(final String serializedGraph, final String namedGraph) {
         final StringBuilder query = new StringBuilder("INSERT DATA { ");

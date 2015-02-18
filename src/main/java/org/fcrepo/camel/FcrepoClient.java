@@ -101,6 +101,7 @@ public class FcrepoClient {
      * Make a HEAD response
      * @param url the URL of the resource to check
      * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse head(final URI url)
             throws FcrepoOperationFailedException {
@@ -131,6 +132,7 @@ public class FcrepoClient {
      * @param body the contents of the resource to send
      * @param contentType the MIMEType of the resource
      * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
@@ -159,6 +161,7 @@ public class FcrepoClient {
      * @param url the URL of the resource to PATCH
      * @param body the body to be sent to the repository
      * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse patch(final URI url, final InputStream body)
             throws FcrepoOperationFailedException {
@@ -183,6 +186,7 @@ public class FcrepoClient {
      * @param body the content to be sent to the server
      * @param contentType the Content-Type of the body
      * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
@@ -209,6 +213,7 @@ public class FcrepoClient {
      * Make a DELETE request
      * @param url the URL of the resource to delete
      * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse delete(final URI url)
             throws FcrepoOperationFailedException {
@@ -226,7 +231,9 @@ public class FcrepoClient {
      * Make a GET request
      * @param url the URL of the resource to fetch
      * @param accept the requested MIMEType of the resource to be retrieved
+     * @param prefer the value for a prefer header sent in the request
      * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse get(final URI url, final String accept, final String prefer)
             throws FcrepoOperationFailedException {
