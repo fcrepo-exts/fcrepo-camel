@@ -524,7 +524,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${failsafe.plugin.version}</version>
         <configuration>
-          <argLine>-XX:MaxPermSize=128m ${jacoco.agent.it.arg}</argLine>
+          <argLine>${jacoco.agent.it.arg}</argLine>
           <systemPropertyVariables>
             <fcrepo.dynamic.test.port>${fcrepo.dynamic.test.port}</fcrepo.dynamic.test.port>
             <fuseki.dynamic.test.port>${fuseki.dynamic.test.port}</fuseki.dynamic.test.port>
@@ -550,7 +550,7 @@
             This line enables code-coverage. However, it also blows the build's permgen.
             Fix me!
           -->
-          <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=512m -XX:-UseSplitVerifier ${jacoco.agent.unit.arg}</argLine>
+          <argLine>-Xms512m -Xmx1024m -XX:-UseSplitVerifier ${jacoco.agent.unit.arg}</argLine>
         </configuration>
       </plugin>
 
