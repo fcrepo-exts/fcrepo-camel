@@ -3,6 +3,21 @@
   <feature name="fcrepo-camel" version="${project.version}" resolver="(obr)" start-level="50">
     <details>Installs the fcrepo-camel component</details>
     <bundle>mvn:org.fcrepo.camel/fcrepo-camel/${project.version}</bundle>
+    <bundle dependency="true">mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
+    <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza/rdf.core/${clerezza.rdf.core.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza/utils/${clerezza.utils.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza.ext/com.ibm.icu/${clerezza.ext.icu.version}</bundle>
+    <bundle dependency="true">mvn:org.wymiwyg/wymiwyg-commons-core/${wymiwyg.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza/rdf.jena.serializer/${clerezza.rdf.jena.serializer.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza/rdf.jena.parser/${clerezza.rdf.jena.parser.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza.ext/org.apache.jena.jena-core/${clerezza.ext.jena.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza/rdf.jena.facade/${clerezza.rdf.jena.facade.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.clerezza/rdf.jena.commons/${clerezza.rdf.jena.commons.version}</bundle>
+    <bundle dependency="true">mvn:org.apache.felix/org.osgi.compendium/${felix.osgi.version}</bundle>
     <feature version="${camel.version.range}">camel</feature>
   </feature>
 </features>

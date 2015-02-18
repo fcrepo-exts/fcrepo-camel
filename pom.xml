@@ -25,10 +25,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <camel.version>2.14.0</camel.version>
-    <camel.version.range>[2.14,3)</camel.version.range>
-    <commons.io.version>2.4</commons.io.version>
-    <commons.lang3.version>3.3.2</commons.lang3.version>
+    <project.version>${project.version}</project.version>
 
     <!-- Use ${project_name} instead of ${project.artifactId} to avoid incorrect
       replacements of "fcrepo4" in child modules (for scm, site-distribution, etc -->
@@ -37,8 +34,16 @@
     <!-- https://github.com/github/maven-plugins/blob/master/README.md -->
     <github.global.server>github</github.global.server>
 
-    <project.version>${project.version}</project.version>
+    <!-- dependencies -->
+    <camel.version>2.14.0</camel.version>
+    <camel.version.range>[2.14,3)</camel.version.range>
+    <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
+    <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
+    <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
+    <commons.io.version>2.4</commons.io.version>
+    <commons.lang3.version>3.3.2</commons.lang3.version>
     <grizzly.version>2.3.16</grizzly.version>
+    <guava.version>18.0</guava.version>
     <httpclient.version>4.3.5</httpclient.version>
     <jena.fuseki.version>1.1.0</jena.fuseki.version>
     <jersey.version>2.13</jersey.version>
@@ -46,10 +51,16 @@
     <slf4j.version>1.7.9</slf4j.version>
     <solr.version>4.10.2</solr.version>
     <spring.version>4.0.7.RELEASE</spring.version>
-    <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
-    <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
-    <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
-    <guava.version>18.0</guava.version>
+    <!-- osgi bundle dependencies -->
+    <commons.codec.version>1.9</commons.codec.version>
+    <httpcore.version>4.3.2</httpcore.version>
+    <felix.osgi.version>1.4.0</felix.osgi.version>
+    <wymiwyg.version>0.8</wymiwyg.version>
+    <clerezza.utils.version>0.2</clerezza.utils.version>
+    <clerezza.ext.icu.version>0.6</clerezza.ext.icu.version>
+    <clerezza.ext.jena.version>2.11.1_1</clerezza.ext.jena.version>
+    <clerezza.rdf.jena.facade.version>0.14</clerezza.rdf.jena.facade.version>
+    <clerezza.rdf.jena.commons.version>0.7</clerezza.rdf.jena.commons.version>
     <!-- plugins -->
     <checkstyle.plugin.version>2.12.1</checkstyle.plugin.version>
     <!-- values -->
@@ -663,19 +674,6 @@
               org.fcrepo.camel;version=${project.version},
               org.fcrepo.camel.processor;version=${project.version}
             </Export-Package>
-            <Private-Package>
-              com.google.common.*,
-              com.google.thirdparty.publicsuffix.*,
-              com.hp.hpl.jena.*,
-              com.ibm.icu.*,
-              org.apache.clerezza.rdf.*,
-              org.apache.clerezza.utils.*,
-              org.apache.commons.codec.*,
-              org.apache.commons.lang3.*,
-              org.apache.jena.*,
-              org.osgi.service.component,
-              org.wymiwyg.commons.util.*,
-            </Private-Package>
             <Import-Package>
               org.apache.camel*;version="${camel.version.range}",
               *
