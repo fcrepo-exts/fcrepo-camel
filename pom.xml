@@ -12,7 +12,7 @@
   <groupId>org.fcrepo.camel</groupId>
   <artifactId>fcrepo-camel</artifactId>
   <packaging>bundle</packaging>
-  
+
   <version>4.1.1-SNAPSHOT</version>
 
   <name>Fcrepo Camel Component</name>
@@ -45,7 +45,7 @@
     <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
-    <commons.logging.version>1.2</commons.logging.version>
+    <commons.logging.version>1.1.3</commons.logging.version>
     <grizzly.version>2.3.18</grizzly.version>
     <guava.version>18.0</guava.version>
     <httpclient.version>4.3.5</httpclient.version>
@@ -55,53 +55,41 @@
     <slf4j.version>1.7.10</slf4j.version>
     <solr.version>4.10.2</solr.version>
     <spring.version>4.1.4.RELEASE</spring.version>
-    <!-- osgi bundle dependencies -->
-    <commons.codec.version>1.9</commons.codec.version>
-    <httpcore.version>4.3.2</httpcore.version>
-    <felix.osgi.version>1.4.0</felix.osgi.version>
-    <wymiwyg.version>0.8</wymiwyg.version>
+    <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
     <clerezza.utils.version>0.2</clerezza.utils.version>
     <clerezza.ext.icu.version>0.6</clerezza.ext.icu.version>
     <clerezza.ext.jena.version>2.11.1_1</clerezza.ext.jena.version>
     <clerezza.rdf.jena.facade.version>0.14</clerezza.rdf.jena.facade.version>
     <clerezza.rdf.jena.commons.version>0.7</clerezza.rdf.jena.commons.version>
+    <commons.codec.version>1.9</commons.codec.version>
+    <felix.osgi.version>1.4.0</felix.osgi.version>
+    <httpcore.version>4.3.2</httpcore.version>
+    <wymiwyg.version>0.7.6</wymiwyg.version>
     <!-- plugins -->
     <build.helper.plugin.version>1.9.1</build.helper.plugin.version>
     <bundle.plugin.version>2.5.3</bundle.plugin.version>
-    <checkstyle.plugin.version>2.13</checkstyle.plugin.version>
+    <checkstyle.plugin.version>2.14</checkstyle.plugin.version>
     <compiler.plugin.version>3.2</compiler.plugin.version>
     <dependency.plugin.version>2.10</dependency.plugin.version>
     <doxia.plugin.version>1.3</doxia.plugin.version>
     <failsafe.plugin.version>2.18.1</failsafe.plugin.version>
-    <github.site.plugin.version>0.9</github.site.plugin.version>
+    <github.site.plugin.version>0.11</github.site.plugin.version>
     <gpg.plugin.version>1.6</gpg.plugin.version>
     <graph.plugin.version>1.35</graph.plugin.version>
     <jacoco.plugin.version>0.7.2.201409121644</jacoco.plugin.version>
     <javadoc.plugin.version>2.10.1</javadoc.plugin.version>
     <jetty.plugin.version>9.2.6.v20141205</jetty.plugin.version>
-    <license.plugin.version>2.8</license.plugin.version>    
+    <license.plugin.version>2.9</license.plugin.version>
     <maven.site.plugin.version>3.4</maven.site.plugin.version>
+    <projectinfo.plugin.version>2.8</projectinfo.plugin.version>
     <properties.plugin.version>1.0-alpha-2</properties.plugin.version>
     <release.plugin.version>2.5.1</release.plugin.version>
     <resources.plugin.version>2.7</resources.plugin.version>
     <scmgit.plugin.version>1.8.1</scmgit.plugin.version>
-    <surefire.plugin.version>2.18.1</surefire.plugin.version>    
-    <!-- osgi -->
+    <surefire.plugin.version>2.18.1</surefire.plugin.version>
+    <!-- osgi bundle configuration -->
     <fcrepo.osgi.export.pkg>org.fcrepo.camel.*</fcrepo.osgi.export.pkg>
-    <fcrepo.osgi.private.pkg>
-      com.google.common.*,
-      com.google.thirdparty.publicsuffix.*,
-      com.hp.hpl.jena.*,
-      com.ibm.icu.*,
-      org.apache.clerezza.rdf.*,
-      org.apache.clerezza.utils.*,
-      org.apache.commons.codec.*,
-      org.apache.commons.lang3.*,
-      org.apache.jena.*,
-      org.apache.http.*,
-      org.osgi.service.component,
-      org.wymiwyg.commons.util.*,
-    </fcrepo.osgi.private.pkg>
+    <fcrepo.osgi.import.pkg></fcrepo.osgi.import.pkg>
     <!-- code coverage -->
     <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
     <jacoco.out.unit.file>jacoco-ut.exec</jacoco.out.unit.file>
@@ -144,7 +132,7 @@
 
   <distributionManagement>
     <site>
-      <id>gh-pages</id>
+      <id>github-pages</id>
       <name>Deployment through GitHub's site deployment plugin</name>
       <url>site/${project.version}</url>
     </site>
@@ -219,7 +207,7 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
-    
+
     <!-- testing -->
     <dependency>
       <groupId>org.mockito</groupId>
@@ -234,7 +222,7 @@
       <version>${camel.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-http4</artifactId>
@@ -572,7 +560,7 @@
               <append>true</append>
             </configuration>
           </execution>
-          
+
           <execution>
             <id>default-prepare-agent-integration</id>
             <goals>
@@ -720,7 +708,6 @@
             <Bundle-Name>${project.artifactId}</Bundle-Name>
             <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>${fcrepo.osgi.export.pkg};version=${project.version}</Export-Package>
-            <Private-Package>${fcrepo.osgi.private.pkg}</Private-Package>
             <Import-Package>
               ${fcrepo.osgi.import.pkg},
               org.apache.camel*;version="${camel.version.range}",
@@ -756,7 +743,7 @@
 
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
+        <version>${projectinfo.plugin.version}</version>
         <configuration>
           <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
           <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
@@ -767,11 +754,9 @@
         <groupId>com.github.github</groupId>
         <artifactId>site-maven-plugin</artifactId>
         <version>${github.site.plugin.version}</version>
-        <!--<version>${github.site.plugin.version}</version>-->
         <configuration>
           <message>Creating site for ${project.artifactId}, ${project.version}</message>
-          <!-- this does the trick to place every module in the correct 
-            subfolder -->
+          <!-- this does the trick to place every module in the correct subfolder -->
           <path>${project.distributionManagement.site.url}</path>
           <merge>true</merge>
           <excludes>
@@ -807,9 +792,26 @@
           </dependency>
         </dependencies>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${javadoc.plugin.version}</version>
+        <configuration>
+          <linksource>true</linksource>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+            <phase>site</phase>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
-
 
   <profiles>
     <profile>
@@ -822,20 +824,6 @@
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>${javadoc.plugin.version}</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>${gpg.plugin.version}</version>
@@ -855,7 +843,7 @@
         </plugins>
       </build>
     </profile>
-    
+
     <!--
       build a PNG representation of the dependency graph
       $ mvn -P graph-dependencies graph:project -Dhide-scope=test -Dhide-optional=true -->
