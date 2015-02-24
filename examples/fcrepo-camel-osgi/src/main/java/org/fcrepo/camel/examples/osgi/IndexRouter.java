@@ -60,7 +60,7 @@ public class IndexRouter extends RouteBuilder {
             .setHeader(MessageHeaders.BASE_URL)
                 .constant("http://{{fcrepo.baseUrl}}")
             .process(new IndexPathProcessor())
-            .to("seda:enqueue?waitForTaskToComplete=Never&blockWhenFull=true")
+            .inOnly("seda:enqueue?waitForTaskToComplete=Never&blockWhenFull=true")
             .setHeader(Exchange.CONTENT_TYPE)
                 .constant("text/plain")
             .transform()
@@ -72,24 +72,23 @@ public class IndexRouter extends RouteBuilder {
         from("seda:enqueue")
             .routeId("FcrepoEnqueue")
             .removeHeaders("CamelHttp*")
-            .to("activemq:queue:index");
+            .removeHeader("JMSCorrelationID")
+            .inOnly("activemq:queue:index?disableTimeToLive=true");
 
         /**
          *  Process indexing requests from the index queue
          */
         from("activemq:queue:index")
             .routeId("FcrepoIndexer")
-            .streamCaching()
-            .to("seda:update?waitForTaskToComplete=Never&blockWhenFull=true")
+            .inOnly("seda:update?waitForTaskToComplete=Never&blockWhenFull=true")
             .removeHeaders("CamelHttp*")
             .setHeader(Exchange.HTTP_METHOD)
                 .constant("GET")
             .to("fcrepo:{{fcrepo.baseUrl}}?preferInclude=PreferContainment&preferOmit=ServerManaged")
-            .convertBodyTo(StreamSource.class)
-            .split(children).streaming()
+            .split(children)
                 .transform()
                     .xpath("/ldp:contains/@rdf:resource", String.class, ns)
                 .process(new NodePathProcessor())
-                .to("seda:enqueue?waitForTaskToComplete=Never&blockWhenFull=true");
+                .inOnly("seda:enqueue?waitForTaskToComplete=Never&blockWhenFull=true");
     }
 }
