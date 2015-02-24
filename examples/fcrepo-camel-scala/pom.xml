@@ -3,13 +3,12 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <name>A Camel Scala Route to integrate Fedora4 with Solr</name>
   <groupId>org.fcrepo.camel.examples</groupId>
   <artifactId>fcrepo-camel-solr-scala</artifactId>
-  <packaging>bundle</packaging>
-  <version>1.0-SNAPSHOT</version>
-
-  <name>A Camel Scala Route to integrate Fedora4 with Solr</name>
   <url>http://fcrepo.org</url>
+  <version>4.1.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
 
   <organization>
     <name>DuraSpace, Inc.</name>
@@ -20,7 +19,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <activemq.version>5.10.0</activemq.version>
-    <camel.version>2.14.0</camel.version>
+    <camel.version>2.14.1</camel.version>
     <scala.version>2.11.2</scala.version>
     <logback.version>1.1.2</logback.version>
   </properties>
@@ -29,7 +28,7 @@
     <license>
       <name>Apache License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      <comments>Copyright (c) 2014 DuraSpace</comments>
+      <comments>Copyright (c) 2015 DuraSpace</comments>
     </license>
   </licenses>
 
@@ -173,9 +172,6 @@
           </instructions>
         </configuration>
       </plugin>
-
-
-
     </plugins>
   </build>
 
