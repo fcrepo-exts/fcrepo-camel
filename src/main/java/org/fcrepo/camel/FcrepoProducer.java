@@ -353,22 +353,25 @@ public class FcrepoProducer extends DefaultProducer {
         }
     }
 
-    private static InputStream extractResponseBodyAsStream(final InputStream is, final Exchange exchange) {
+    private static Object extractResponseBodyAsStream(final InputStream is, final Exchange exchange) {
         // As httpclient is using a AutoCloseInputStream, it will be closed when the connection is closed
         // we need to cache the stream for it.
         if (is == null) {
             return null;
+        }
+
+        // convert the input stream to StreamCache if the stream cache is not disabled
+        if (exchange.getProperty(Exchange.DISABLE_HTTP_STREAM_CACHE, Boolean.FALSE, Boolean.class)) {
+            return is;
         } else {
-            try (final CachedOutputStream cos = new CachedOutputStream(exchange, false)) {
+            try (final CachedOutputStream cos = new CachedOutputStream(exchange)) {
                 // This CachedOutputStream will not be closed when the exchange is onCompletion
-                IOHelper.copy(is, cos);
+                IOHelper.copyAndCloseInput(is, cos);
                 // When the InputStream is closed, the CachedOutputStream will be closed
-                return cos.getWrappedInputStream();
+                return cos.newStreamCache();
             } catch (IOException ex) {
                 LOGGER.debug("Error extracting body from http request", ex);
                 return null;
-            } finally {
-                IOHelper.close(is, "Extracting response body", LOGGER);
             }
         }
     }
