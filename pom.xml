@@ -39,7 +39,7 @@
     <!-- dependencies -->
     <camel.version>2.14.1</camel.version>
     <camel.version.range>[2.14,3)</camel.version.range>
-    <clerezza.ext.icu.version>0.6</clerezza.ext.icu.version>
+    <clerezza.ext.jena.version>2.11.1_1</clerezza.ext.jena.version>
     <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
     <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
     <clerezza.rdf.core.version>0.14</clerezza.rdf.core.version>
@@ -58,7 +58,7 @@
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
     <clerezza.utils.version>0.2</clerezza.utils.version>
     <clerezza.ext.icu.version>0.6</clerezza.ext.icu.version>
-    <clerezza.ext.jena.version>2.11.1_1</clerezza.ext.jena.version>
+    <clerezza.ext.jena.iri.version>1.0.1_1</clerezza.ext.jena.iri.version>
     <clerezza.rdf.jena.facade.version>0.14</clerezza.rdf.jena.facade.version>
     <clerezza.rdf.jena.commons.version>0.7</clerezza.rdf.jena.commons.version>
     <commons.codec.version>1.9</commons.codec.version>
@@ -175,6 +175,12 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
       <version>${clerezza.rdf.jena.serializer.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.clerezza.ext</groupId>
+      <artifactId>org.apache.jena.jena-core</artifactId>
+      <version>${clerezza.ext.jena.version}</version>
     </dependency>
 
     <dependency>
