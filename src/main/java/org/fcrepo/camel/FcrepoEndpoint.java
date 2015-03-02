@@ -64,7 +64,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      */
     @Override
     public Consumer createConsumer(final Processor processor) {
-        throw new RuntimeCamelException("Cannot produce to a FcrepoEndpoint: " + getEndpointUri());
+        throw new RuntimeCamelException("Cannot consume from a FcrepoEndpoint: " + getEndpointUri());
     }
 
     /**
