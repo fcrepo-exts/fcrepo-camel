@@ -44,6 +44,8 @@ import java.io.ByteArrayOutputStream;
 public class SparqlUpdateProcessor implements Processor {
     /**
      * Define how the message is processed.
+     *
+     * @param exchange the current camel message exchange
      */
     public void process(final Exchange exchange) throws IOException {
 

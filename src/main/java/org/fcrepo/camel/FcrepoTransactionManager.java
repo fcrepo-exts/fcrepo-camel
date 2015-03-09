@@ -23,6 +23,7 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
@@ -127,8 +128,7 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
     }
 
     @Override
-    protected void doBegin(final Object transaction, final TransactionDefinition definition)
-            throws CannotCreateTransactionException {
+    protected void doBegin(final Object transaction, final TransactionDefinition definition) {
         final FcrepoResponse response;
         final InputStream is = null;
         final String contentType = null;
@@ -160,7 +160,7 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
             getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + "/fcr:tx/fcr:commit"), is, contentType);
         } catch (FcrepoOperationFailedException ex) {
             LOGGER.debug("Transaction commit failed: ", ex);
-            throw new CannotCreateTransactionException("Could not commit fcrepo transaction");
+            throw new TransactionSystemException("Could not commit fcrepo transaction");
         } finally {
             tx.setSessionId(null);
         }
@@ -174,7 +174,7 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
             getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + "/fcr:tx/fcr:rollback"), null, null);
         } catch (FcrepoOperationFailedException ex) {
             LOGGER.debug("Transaction rollback failed: ", ex);
-            throw new CannotCreateTransactionException("Could not rollback fcrepo transaction");
+            throw new TransactionSystemException("Could not rollback fcrepo transaction");
         } finally {
             tx.setSessionId(null);
         }

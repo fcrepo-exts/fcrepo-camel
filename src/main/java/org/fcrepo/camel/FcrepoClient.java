@@ -15,7 +15,6 @@
  */
 package org.fcrepo.camel;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.InputStream;
@@ -26,23 +25,12 @@ import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 
 /**
@@ -75,28 +63,10 @@ public class FcrepoClient {
     public FcrepoClient(final String username, final String password, final String host,
             final Boolean throwExceptionOnFailure) {
 
-        final CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        AuthScope scope = null;
+        final FcrepoHttpClientBuilder client = new FcrepoHttpClientBuilder(username, password, host);
 
         this.throwExceptionOnFailure = throwExceptionOnFailure;
-
-        if (isBlank(username) || isBlank(password)) {
-            this.httpclient = HttpClients.createDefault();
-        } else {
-            LOGGER.debug("Accessing fcrepo with user credentials");
-
-            if (isBlank(host)) {
-                scope = new AuthScope(AuthScope.ANY);
-            } else {
-                scope = new AuthScope(new HttpHost(host));
-            }
-            credsProvider.setCredentials(
-                    scope,
-                    new UsernamePasswordCredentials(username, password));
-            this.httpclient = HttpClients.custom()
-                    .setDefaultCredentialsProvider(credsProvider)
-                    .build();
-        }
+        this.httpclient = client.build();
     }
 
     /**
@@ -108,7 +78,7 @@ public class FcrepoClient {
     public FcrepoResponse head(final URI url)
             throws FcrepoOperationFailedException {
 
-        final HttpHead request = new HttpHead(url);
+        final HttpRequestBase request = HttpMethods.HEAD.createRequest(url);
         final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
@@ -139,7 +109,8 @@ public class FcrepoClient {
     public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
 
-        final HttpPut request = new HttpPut(url);
+        final HttpMethods method = HttpMethods.PUT;
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
 
         if (contentType != null) {
             request.addHeader(CONTENT_TYPE, contentType);
@@ -148,7 +119,7 @@ public class FcrepoClient {
             request.setEntity(new InputStreamEntity(body));
         }
 
-        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+        LOGGER.debug("Fcrepo PUT request headers: {}", request.getAllHeaders());
 
         final HttpResponse response = executeRequest(request);
 
@@ -168,12 +139,13 @@ public class FcrepoClient {
     public FcrepoResponse patch(final URI url, final InputStream body)
             throws FcrepoOperationFailedException {
 
-        final HttpPatch request = new HttpPatch(url);
+        final HttpMethods method = HttpMethods.PATCH;
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
 
         request.addHeader(CONTENT_TYPE, "application/sparql-update");
         request.setEntity(new InputStreamEntity(body));
 
-        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+        LOGGER.debug("Fcrepo PATCH request headers: {}", request.getAllHeaders());
 
         final HttpResponse response = executeRequest(request);
 
@@ -193,7 +165,8 @@ public class FcrepoClient {
     public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
 
-        final HttpPost request = new HttpPost(url);
+        final HttpMethods method = HttpMethods.POST;
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
 
         if (contentType != null) {
             request.addHeader(CONTENT_TYPE, contentType);
@@ -202,7 +175,7 @@ public class FcrepoClient {
             request.setEntity(new InputStreamEntity(body));
         }
 
-        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+        LOGGER.debug("Fcrepo POST request headers: {}", request.getAllHeaders());
 
         final HttpResponse response = executeRequest(request);
 
@@ -220,8 +193,7 @@ public class FcrepoClient {
     public FcrepoResponse delete(final URI url)
             throws FcrepoOperationFailedException {
 
-        final HttpDelete request = new HttpDelete(url);
-
+        final HttpRequestBase request = HttpMethods.DELETE.createRequest(url);
         final HttpResponse response = executeRequest(request);
 
         LOGGER.debug("Fcrepo DELETE request returned status [{}]", response.getStatusLine().getStatusCode());
@@ -240,7 +212,7 @@ public class FcrepoClient {
     public FcrepoResponse get(final URI url, final String accept, final String prefer)
             throws FcrepoOperationFailedException {
 
-        final HttpGet request = new HttpGet(url);
+        final HttpRequestBase request = HttpMethods.GET.createRequest(url);
 
         if (accept != null) {
             request.setHeader("Accept", accept);
@@ -250,7 +222,7 @@ public class FcrepoClient {
             request.setHeader("Prefer", prefer);
         }
 
-        LOGGER.debug("Fcrepo request headers: {}", request.getAllHeaders());
+        LOGGER.debug("Fcrepo GET request headers: {}", request.getAllHeaders());
 
         final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();

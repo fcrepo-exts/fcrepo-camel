@@ -35,6 +35,8 @@ import java.io.IOException;
 public class SparqlDeleteProcessor implements Processor {
     /**
      * Define how the message should be processed.
+     *
+     * @param exchange the current camel message exchange
      */
     public void process(final Exchange exchange) throws IOException {
 

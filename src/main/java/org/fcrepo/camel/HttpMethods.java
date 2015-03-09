@@ -15,6 +15,9 @@
  */
 package org.fcrepo.camel;
 
+import java.net.URI;
+
+import org.apache.camel.RuntimeCamelException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -47,5 +50,19 @@ public enum HttpMethods {
     HttpMethods(final Class<? extends HttpRequestBase> clazz) {
         this.clazz = clazz;
         entity = HttpEntityEnclosingRequestBase.class.isAssignableFrom(clazz);
+    }
+
+    /**
+     * Instantiate a new HttpRequst object from the method type
+     *
+     * @param url the URI that is part of the request
+     * @return an instance of the corresponding request class
+     */
+    public HttpRequestBase createRequest(final URI url) {
+        try {
+            return clazz.getDeclaredConstructor(URI.class).newInstance(url);
+        } catch (ReflectiveOperationException ex) {
+            throw new RuntimeCamelException(ex);
+        }
     }
 }

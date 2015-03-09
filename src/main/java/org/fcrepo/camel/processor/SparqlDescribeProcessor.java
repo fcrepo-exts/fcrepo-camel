@@ -43,6 +43,8 @@ import java.io.IOException;
 public class SparqlDescribeProcessor implements Processor {
     /**
      *  Define how this message should be processed
+     *
+     *  @param exchange the current camel message exchange
      */
     public void process(final Exchange exchange) throws IOException {
 

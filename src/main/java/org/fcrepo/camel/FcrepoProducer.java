@@ -29,6 +29,7 @@ import org.apache.camel.impl.DefaultProducer;
 import org.apache.camel.util.ExchangeHelper;
 import org.apache.camel.util.IOHelper;
 import org.slf4j.Logger;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -85,7 +86,8 @@ public class FcrepoProducer extends DefaultProducer {
                     try {
                         doRequest(exchange, tx.getSessionId());
                     } catch (FcrepoOperationFailedException ex) {
-                        throw new RuntimeException("Error executing fcrepo request in transaction: ", ex);
+                        throw new TransactionSystemException(
+                            "Error executing fcrepo request in transaction: ", ex);
                     }
                 }
             });
