@@ -15,15 +15,12 @@
  */
 package org.fcrepo.camel.processor;
 
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.Exchange.CONTENT_TYPE;
+import java.io.IOException;
 
-import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.Processor;
 import org.fcrepo.camel.FcrepoHeaders;
-
-import java.io.IOException;
 
 /**
  * Represends a message processor that deletes objects from an
@@ -67,8 +64,8 @@ public class SparqlDeleteProcessor implements Processor {
         query.append(ProcessorUtils.deleteWhere(subject + "/fcr:export?format=jcr/xml", namedGraph));
 
         in.setBody(query.toString());
-        in.setHeader(HTTP_METHOD, "POST");
-        in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
+        in.setHeader(Exchange.HTTP_METHOD, "POST");
+        in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
    }
 
 }

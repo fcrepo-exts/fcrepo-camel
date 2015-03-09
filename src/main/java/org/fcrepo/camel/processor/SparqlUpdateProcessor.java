@@ -15,24 +15,21 @@
  */
 package org.fcrepo.camel.processor;
 
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.apache.camel.Processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
-import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
+import org.apache.camel.Processor;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
+import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.fcrepo.camel.FcrepoHeaders;
-
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 
 /**
  * Represents a processor for creating the sparql-update message to
@@ -89,7 +86,7 @@ public class SparqlUpdateProcessor implements Processor {
         query.append(ProcessorUtils.insertData(serializedGraph.toString("UTF-8"), namedGraph));
 
         in.setBody(query.toString());
-        in.setHeader(HTTP_METHOD, "POST");
-        in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
+        in.setHeader(Exchange.HTTP_METHOD, "POST");
+        in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
     }
 }

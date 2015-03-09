@@ -18,9 +18,9 @@ package org.fcrepo.camel;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.net.URI;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -29,8 +29,8 @@ import org.apache.camel.impl.DefaultProducer;
 import org.apache.camel.util.ExchangeHelper;
 import org.apache.camel.util.IOHelper;
 import org.slf4j.Logger;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
