@@ -20,8 +20,8 @@ import java.io.IOException;
 import org.apache.camel.Message;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.lang3.StringUtils;
-import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.FcrepoHeaders;
+import org.fcrepo.camel.JmsHeaders;
 
 /**
  * Utility functions for fcrepo processor classes

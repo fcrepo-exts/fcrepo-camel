@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -212,7 +213,7 @@ public class FcrepoTransactionManagerTest {
         txMgr.getTransaction(txDef);
     }
 
-    @Test (expected = CannotCreateTransactionException.class)
+    @Test (expected = TransactionSystemException.class)
     public void testTransactionCommitError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
@@ -244,7 +245,7 @@ public class FcrepoTransactionManagerTest {
         txMgr.commit(status);
     }
 
-    @Test (expected = CannotCreateTransactionException.class)
+    @Test (expected = TransactionSystemException.class)
     public void testTransactionRollbackError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";

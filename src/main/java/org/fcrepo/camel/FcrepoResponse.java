@@ -15,8 +15,8 @@
  */
 package org.fcrepo.camel;
 
-import java.net.URI;
 import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Represents a response from a fedora repository using a {@link FcrepoClient}.

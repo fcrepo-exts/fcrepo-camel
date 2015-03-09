@@ -15,16 +15,12 @@
  */
 package org.fcrepo.camel.processor;
 
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import java.io.IOException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.clerezza.rdf.core.UriRef;
-
-import java.io.IOException;
 
 /**
  * Represents a Processor class that formulates a Sparql DESCRIBE query
@@ -43,6 +39,8 @@ import java.io.IOException;
 public class SparqlDescribeProcessor implements Processor {
     /**
      *  Define how this message should be processed
+     *
+     *  @param exchange the current camel message exchange
      */
     public void process(final Exchange exchange) throws IOException {
 
@@ -50,8 +48,8 @@ public class SparqlDescribeProcessor implements Processor {
         final UriRef subject = new UriRef(ProcessorUtils.getSubjectUri(in));
 
         exchange.getIn().setBody("query=DESCRIBE " + subject);
-        exchange.getIn().setHeader(HTTP_METHOD, "POST");
-        exchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, "application/rdf+xml");
-        exchange.getIn().setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
+        exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
+        exchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, "application/rdf+xml");
+        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
     }
 }
