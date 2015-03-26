@@ -13,7 +13,7 @@
   <artifactId>fcrepo-camel</artifactId>
   <packaging>bundle</packaging>
 
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.1</version>
 
   <name>Fcrepo Camel Component</name>
   <description>Camel Component for interacting with a Fedora Repository</description>
@@ -89,7 +89,7 @@
     <surefire.plugin.version>2.18.1</surefire.plugin.version>
     <!-- osgi bundle configuration -->
     <fcrepo.osgi.export.pkg>org.fcrepo.camel.*</fcrepo.osgi.export.pkg>
-    <fcrepo.osgi.import.pkg></fcrepo.osgi.import.pkg>
+    <fcrepo.osgi.import.pkg />
     <!-- code coverage -->
     <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
     <jacoco.out.unit.file>jacoco-ut.exec</jacoco.out.unit.file>
@@ -114,7 +114,7 @@
     <connection>scm:git:git://github.com/fcrepo4/${project_name}.git</connection>
     <developerConnection>scm:git:git@github.com:fcrepo4/${project_name}.git</developerConnection>
     <url>https://github.com/fcrepo4/fcrepo-camel</url>
-    <tag>HEAD</tag>
+    <tag>fcrepo-camel-4.1.1</tag>
   </scm>
 
   <repositories>
@@ -309,42 +309,42 @@
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-jms</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-http-api</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-configs</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-transform</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-auth-common</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-http-commons</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>
@@ -352,7 +352,7 @@
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-metrics</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
