@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoConfiguration.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoConfiguration.java</span></div><h1>FcrepoConfiguration.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.spi.UriParam;
+import org.apache.camel.spi.UriParams;
+import org.springframework.transaction.PlatformTransactionManager;
+
+/**
+ * An FcrepoConfiguration class.
+ *
+ * @author Aaron Coburn
+ * @since Jan 20, 2015
+ */
+@UriParams
+public class FcrepoConfiguration implements Cloneable {
+
+<span class="fc" id="L32">    private String baseUrl = &quot;&quot;;</span>
+
+<span class="fc" id="L34">    @UriParam</span>
+    private String contentType = null;
+
+<span class="fc" id="L37">    @UriParam</span>
+    private String accept = null;
+
+<span class="fc" id="L40">    @UriParam</span>
+    private String transform = null;
+
+<span class="fc" id="L43">    @UriParam</span>
+    private String authUsername = null;
+
+<span class="fc" id="L46">    @UriParam</span>
+    private String authPassword = null;
+
+<span class="fc" id="L49">    @UriParam</span>
+    private String authHost = null;
+
+<span class="fc" id="L52">    @UriParam</span>
+    private Boolean tombstone = false;
+
+<span class="fc" id="L55">    @UriParam</span>
+    private Boolean metadata = true;
+
+<span class="fc" id="L58">    @UriParam</span>
+    private Boolean throwExceptionOnFailure = true;
+
+<span class="fc" id="L61">    @UriParam</span>
+    private String preferInclude = null;
+
+<span class="fc" id="L64">    @UriParam</span>
+    private String preferOmit = null;
+
+<span class="fc" id="L67">    @UriParam</span>
+    private PlatformTransactionManager transactionManager = null;
+
+    /**
+     * Create a new FcrepoConfiguration object
+     */
+    public FcrepoConfiguration() {
+<span class="fc" id="L74">        super();</span>
+<span class="fc" id="L75">    }</span>
+
+    /**
+     * Copy an FcrepoConfiguration object.
+     *
+     * @return a copy of the component-wide configuration
+     */
+    @Override
+    public FcrepoConfiguration clone() {
+        try {
+<span class="nc" id="L85">            return (FcrepoConfiguration) super.clone();</span>
+<span class="nc" id="L86">        } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L87">            throw new RuntimeCamelException(e);</span>
+        }
+    }
+
+   /**
+     * baseUrl setter
+     * 
+     * @param url the baseUrl string
+     */
+    public void setBaseUrl(final String url) {
+<span class="fc" id="L97">        this.baseUrl = url;</span>
+<span class="fc" id="L98">    }</span>
+
+    /**
+     * baseUrl getter
+     *
+     * @return the fedora base url
+     */
+    public String getBaseUrl() {
+<span class="fc" id="L106">        return baseUrl;</span>
+    }
+
+    /**
+     * accept setter
+     *
+     * @param type the mime-type for Accept headers
+     */
+    public void setAccept(final String type) {
+<span class="fc" id="L115">        this.accept = type.replaceAll(&quot; &quot;, &quot;+&quot;);</span>
+<span class="fc" id="L116">    }</span>
+
+    /**
+     * accept getter
+     *
+     * @return the mime-type for Accept headers
+     */
+    public String getAccept() {
+<span class="fc" id="L124">        return accept;</span>
+    }
+
+    /**
+     * contentType setter
+     *
+     * @param type the mime-type used with Content-Type headers
+     */
+    public void setContentType(final String type) {
+<span class="fc" id="L133">        this.contentType = type.replaceAll(&quot; &quot;, &quot;+&quot;);</span>
+<span class="fc" id="L134">    }</span>
+
+    /**
+     * contentType getter
+     *
+     * @return the mime-type used with Content-Type headers
+     */
+    public String getContentType() {
+<span class="fc" id="L142">        return contentType;</span>
+    }
+
+    /**
+     * authUsername setter
+     * 
+     * @param username used for repository authentication
+     */
+    public void setAuthUsername(final String username) {
+<span class="nc" id="L151">        this.authUsername = username;</span>
+<span class="nc" id="L152">    }</span>
+
+    /**
+     * authUsername getter
+     *
+     * @return the username used for repository authentication
+     */
+    public String getAuthUsername() {
+<span class="fc" id="L160">        return authUsername;</span>
+    }
+
+    /**
+     * authPassword setter
+     * 
+     * @param password used for repository authentication
+     */
+    public void setAuthPassword(final String password) {
+<span class="nc" id="L169">        this.authPassword = password;</span>
+<span class="nc" id="L170">    }</span>
+
+    /**
+     * authPassword getter
+     *
+     * @return the password used for repository authentication
+     */
+    public String getAuthPassword() {
+<span class="fc" id="L178">        return authPassword;</span>
+    }
+
+    /**
+     * authHost setter
+     * 
+     * @param host used for authentication
+     */
+    public void setAuthHost(final String host) {
+<span class="nc" id="L187">        this.authHost = host;</span>
+<span class="nc" id="L188">    }</span>
+
+    /**
+     * authHost getter
+     *
+     * @return the host realm used for repository authentication
+     */
+    public String getAuthHost() {
+<span class="fc" id="L196">        return authHost;</span>
+    }
+
+    /**
+     * metadata setter
+     * 
+     * @param metadata whether to retrieve rdf metadata for non-rdf nodes
+     */
+    public void setMetadata(final Boolean metadata) {
+<span class="fc" id="L205">        this.metadata = metadata;</span>
+<span class="fc" id="L206">    }</span>
+
+    /**
+     * metadata getter
+     *
+     * @return whether to retrieve the rdf metadata for non-rdf nodes
+     */
+    public Boolean getMetadata() {
+<span class="fc" id="L214">        return metadata;</span>
+    }
+
+    /**
+     * throwExceptionOnFailure setter
+     *
+     * @param throwOnFailure whether HTTP response errors throw exceptions
+     */
+    public void setThrowExceptionOnFailure(final Boolean throwOnFailure) {
+<span class="fc" id="L223">        this.throwExceptionOnFailure = throwOnFailure;</span>
+<span class="fc" id="L224">    }</span>
+
+    /**
+     * throwExceptionOnFailure getter
+     *
+     * @return whether HTTP response errors throw exceptions
+     */
+    public Boolean getThrowExceptionOnFailure() {
+<span class="fc" id="L232">        return throwExceptionOnFailure;</span>
+    }
+
+    /**
+     * transform setter
+     * 
+     * @param transform define an LD-Path transform program for converting RDF to JSON
+     */
+    public void setTransform(final String transform) {
+<span class="fc" id="L241">        this.transform = transform;</span>
+<span class="fc" id="L242">    }</span>
+
+    /**
+     * transform getter
+     *
+     * @return the name of an LD-Path transform program used to convert RDF to JSON
+     */
+    public String getTransform() {
+<span class="fc" id="L250">        return transform;</span>
+    }
+
+    /**
+     * tombstone setter
+     * 
+     * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
+     */
+    public void setTombstone(final Boolean tombstone) {
+<span class="fc" id="L259">        this.tombstone = tombstone;</span>
+<span class="fc" id="L260">    }</span>
+
+    /**
+     * tombstone getter
+     *
+     * @return whether to access the /fcr:tombstone endpoint for a resource
+     */
+    public Boolean getTombstone() {
+<span class="fc" id="L268">        return tombstone;</span>
+    }
+
+    /**
+     * preferInclude setter
+     *
+     * @param include the URI(s) that populate the include section in a Prefer header
+     */
+    public void setPreferInclude(final String include) {
+<span class="fc" id="L277">        this.preferInclude = include;</span>
+<span class="fc" id="L278">    }</span>
+
+    /**
+     * preferInclude getter
+     * 
+     * @return the URI(s) that populate the include section in a Prefer header
+     */
+    public String getPreferInclude() {
+<span class="fc" id="L286">        return preferInclude;</span>
+    }
+
+    /**
+     * preferOmit setter
+     *
+     * @param omit the URI(s) that populate the omit section in a Prefer header
+     */
+    public void setPreferOmit(final String omit) {
+<span class="fc" id="L295">        this.preferOmit = omit;</span>
+<span class="fc" id="L296">    }</span>
+
+    /**
+     * preferOmit getter
+     *
+     * @return the URI(s) that populate the omit section in a Prefer header
+     */
+    public String getPreferOmit() {
+<span class="fc" id="L304">        return preferOmit;</span>
+    }
+
+
+    /**
+     * transactionManager setter
+     *
+     * @param transactionManager the transaction manager for handling transactions
+     */
+    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
+<span class="nc" id="L314">        this.transactionManager = transactionManager;</span>
+<span class="nc" id="L315">    }</span>
+
+    /**
+     * transactionManger getter
+     *
+     * @return the transaction manager for handling transactions
+     */
+    public PlatformTransactionManager getTransactionManager() {
+<span class="nc" id="L323">        return transactionManager;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>

@@ -1,0 +1,23 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlUpdateProcessor,2,112,1,1,0,21,1,2,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlDescribeProcessor,0,39,0,0,0,8,0,2,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlInsertProcessor,0,90,0,2,0,17,0,3,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,SparqlDeleteProcessor,0,56,0,0,0,12,0,2,0,2
+Fcrepo Camel Component,org.fcrepo.camel.processor,ProcessorUtils,31,144,5,13,6,32,5,9,1,4
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoProducer.new TransactionCallbackWithoutResult() {...},0,32,0,0,0,8,0,2,0,2
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoProducer.new Object() {...},6,41,0,0,0,1,0,1,0,1
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoConfiguration,29,123,0,0,12,45,6,22,6,22
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoEndpoint,48,197,3,5,13,56,9,29,6,28
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoLink,6,93,9,9,3,20,9,6,0,6
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoProducer,39,590,10,68,3,124,8,49,0,16
+Fcrepo Camel Component,org.fcrepo.camel,HttpMethods,6,121,0,0,2,13,0,5,0,5
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoResponse,3,50,0,0,1,21,1,10,1,10
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoOperationFailedException,10,32,1,1,3,5,4,1,3,1
+Fcrepo Camel Component,org.fcrepo.camel,RdfNamespaces,3,22,0,0,2,1,1,1,1,1
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoTransactionObject,0,10,0,0,0,4,0,3,0,3
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoClient,39,419,7,37,8,92,7,29,0,14
+Fcrepo Camel Component,org.fcrepo.camel,JmsHeaders,3,0,0,0,2,0,1,0,1,0
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoTransactionManager,59,160,3,5,14,38,7,12,4,11
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoHttpClientBuilder,47,22,5,1,8,8,3,3,0,3
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoComponent,50,36,3,1,19,10,10,4,8,4
+Fcrepo Camel Component,org.fcrepo.camel,FcrepoHeaders,3,0,0,0,2,0,1,0,1,0

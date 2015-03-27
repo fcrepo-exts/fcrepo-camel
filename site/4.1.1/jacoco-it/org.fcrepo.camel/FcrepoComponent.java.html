@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoComponent.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoComponent.java</span></div><h1>FcrepoComponent.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.util.Map;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.Endpoint;
+import org.apache.camel.impl.UriEndpointComponent;
+import org.slf4j.Logger;
+import org.springframework.transaction.PlatformTransactionManager;
+
+/**
+ * Represents the component that manages {@link FcrepoEndpoint}.
+ * @author Aaron Coburn
+ * @since October 20, 2014
+ */
+public class FcrepoComponent extends UriEndpointComponent {
+
+    private FcrepoConfiguration configuration;
+
+    private PlatformTransactionManager transactionManager;
+
+<span class="fc" id="L39">    private static final Logger LOGGER  = getLogger(FcrepoComponent.class);</span>
+
+    /**
+     * Create a FcrepoComponent independent of a CamelContext.
+     */
+    public FcrepoComponent() {
+<span class="fc" id="L45">        super(FcrepoEndpoint.class);</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Given a CamelContext, create a FcrepoComponent instance.
+     * @param context the camel context for the component.
+     */
+    public FcrepoComponent(final CamelContext context) {
+<span class="nc" id="L53">        super(context, FcrepoEndpoint.class);</span>
+<span class="nc" id="L54">    }</span>
+
+    /**
+     * Given a FcrepoConfiguration, create a FcrepoComponent instance.
+     * @param config the component-wide configuration.
+     */
+    public FcrepoComponent(final FcrepoConfiguration config) {
+<span class="nc" id="L61">        super(FcrepoEndpoint.class);</span>
+<span class="nc" id="L62">        this.configuration = config;</span>
+<span class="nc" id="L63">    }</span>
+
+    /**
+     * Get the component's configuration.
+     * @return the configuration for the component.
+     */
+    public FcrepoConfiguration getConfiguration() {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (configuration == null) {</span>
+<span class="nc" id="L71">            configuration = new FcrepoConfiguration();</span>
+        }
+<span class="nc" id="L73">        return configuration;</span>
+    }
+
+    /**
+     * Set the component's configuration.
+     * @param config the configuration settings for the component.
+     */
+    public void setConfiguration(final FcrepoConfiguration config) {
+<span class="nc" id="L81">        this.configuration = config;</span>
+<span class="nc" id="L82">    }</span>
+
+    /**
+     * Set the transaction manager for the component
+     *
+     * @param transactionManager the transaction manager for this component
+     */
+    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
+<span class="nc" id="L90">        this.transactionManager = transactionManager;</span>
+<span class="nc" id="L91">    }</span>
+
+    /**
+     * Get the transaction manager for the component
+     *
+     * @return the transaction manager for this component
+     */
+    public PlatformTransactionManager getTransactionManager() {
+<span class="fc" id="L99">        return transactionManager;</span>
+    }
+
+    /**
+     * set the authUsername value component-wide.
+     * @param username the authentication username.
+     */
+    public void setAuthUsername(final String username) {
+<span class="nc" id="L107">        getConfiguration().setAuthUsername(username);</span>
+<span class="nc" id="L108">    }</span>
+
+    /**
+     * set the authPassword value component-wide.
+     * @param password the authentication password.
+     */
+    public void setAuthPassword(final String password) {
+<span class="nc" id="L115">        getConfiguration().setAuthPassword(password);</span>
+<span class="nc" id="L116">    }</span>
+
+    /**
+     * set the authHost value component-wide.
+     * @param host the authentication host realm.
+     */
+    public void setAuthHost(final String host) {
+<span class="nc" id="L123">        getConfiguration().setAuthHost(host);</span>
+<span class="nc" id="L124">    }</span>
+
+    /**
+     *  Create an Endpoint from a fcrepo uri along with an optional path value and attributes.
+     *  @param uri the fcrepo uri identifying the repository hostname and port
+     *  @param remaining the string identifying the repository path
+     *  @param parameters any optional attributes added to the endpoint
+     *  @return the camel endpoint
+     */
+    @Override
+    protected Endpoint createEndpoint(final String uri, final String remaining, final Map&lt;String, Object&gt; parameters) {
+
+        FcrepoConfiguration newConfig;
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (configuration == null) {</span>
+<span class="fc" id="L138">            newConfig = new FcrepoConfiguration();</span>
+        } else {
+<span class="nc" id="L140">            newConfig = configuration.clone();</span>
+        }
+
+<span class="fc" id="L143">        final Endpoint endpoint = new FcrepoEndpoint(uri, remaining, this, newConfig);</span>
+<span class="fc" id="L144">        endpoint.configureProperties(parameters);</span>
+<span class="fc" id="L145">        LOGGER.debug(&quot;Created Fcrepo Endpoint [{}]&quot;, endpoint);</span>
+<span class="fc" id="L146">        return endpoint;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>
