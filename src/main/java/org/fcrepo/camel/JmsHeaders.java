@@ -32,6 +32,10 @@ public final class JmsHeaders {
 
     public static final String BASE_URL = PREFIX + "baseURL";
 
+    public static final String USER = PREFIX + "user";
+
+    public static final String USER_AGENT = PREFIX + "userAgent";
+
     private JmsHeaders() {
         // prevent instantiation
     }
