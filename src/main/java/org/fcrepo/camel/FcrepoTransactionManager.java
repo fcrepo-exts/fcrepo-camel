@@ -136,7 +136,7 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
 
         if (tx.getSessionId() == null) {
             try {
-                response = getClient().post(URI.create(baseUrl + "/fcr:tx"), is, contentType);
+                response = getClient().post(URI.create(baseUrl + FcrepoConstants.TRANSACTION), is, contentType);
             } catch (FcrepoOperationFailedException ex) {
                 LOGGER.debug("HTTP Operation failed: ", ex);
                 throw new CannotCreateTransactionException("Could not create fcrepo transaction");
@@ -157,7 +157,7 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
         final String contentType = null;
 
         try {
-            getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + "/fcr:tx/fcr:commit"), is, contentType);
+            getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + FcrepoConstants.COMMIT), is, contentType);
         } catch (FcrepoOperationFailedException ex) {
             LOGGER.debug("Transaction commit failed: ", ex);
             throw new TransactionSystemException("Could not commit fcrepo transaction");
@@ -171,7 +171,7 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
         final FcrepoTransactionObject tx = (FcrepoTransactionObject)status.getTransaction();
 
         try {
-            getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + "/fcr:tx/fcr:rollback"), null, null);
+            getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + FcrepoConstants.ROLLBACK), null, null);
         } catch (FcrepoOperationFailedException ex) {
             LOGGER.debug("Transaction rollback failed: ", ex);
             throw new TransactionSystemException("Could not rollback fcrepo transaction");

@@ -40,6 +40,11 @@ public class FcrepoConstantsTest {
     @Test
     public void testConstants() {
         assertEquals(FcrepoProducer.DEFAULT_CONTENT_TYPE, "application/rdf+xml");
+        assertEquals(FcrepoConstants.TRANSACTION, "/fcr:tx");
+        assertEquals(FcrepoConstants.ROLLBACK, "/fcr:tx/fcr:rollback");
+        assertEquals(FcrepoConstants.COMMIT, "/fcr:tx/fcr:commit");
+        assertEquals(FcrepoConstants.TOMBSTONE, "/fcr:tombstone");
+        assertEquals(FcrepoConstants.TRANSFORM, "/fcr:transform");
     }
 
     @Test

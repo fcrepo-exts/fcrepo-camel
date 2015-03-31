@@ -338,7 +338,7 @@ public class FcrepoProducerTest {
 
     @Test
     public void testDeleteTombstoneProducer() throws Exception {
-        final URI uri = create(TestUtils.baseUrl + "/fcr:tombstone");
+        final URI uri = create(TestUtils.baseUrl + FcrepoConstants.TOMBSTONE);
         final int status = 204;
         final FcrepoResponse deleteResponse = new FcrepoResponse(uri, status, null, null, null);
 
@@ -374,7 +374,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.GET);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
+        when(mockClient.get(create(TestUtils.baseUrl + FcrepoConstants.TRANSFORM + "/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -405,7 +405,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setBody(body);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.post(create(TestUtils.baseUrl + "/fcr:transform"), body, TestUtils.RDF_LDPATH))
+        when(mockClient.post(create(TestUtils.baseUrl + FcrepoConstants.TRANSFORM), body, TestUtils.RDF_LDPATH))
             .thenReturn(postResponse);
 
         testProducer.process(testExchange);
@@ -431,7 +431,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_TRANSFORM, "default");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
+        when(mockClient.get(create(TestUtils.baseUrl + FcrepoConstants.TRANSFORM + "/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -457,7 +457,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_TRANSFORM, "default");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
+        when(mockClient.get(create(TestUtils.baseUrl + FcrepoConstants.TRANSFORM + "/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -482,7 +482,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrl + "/fcr:transform/default"), TestUtils.JSON, null))
+        when(mockClient.get(create(TestUtils.baseUrl + FcrepoConstants.TRANSFORM + "/default"), TestUtils.JSON, null))
             .thenReturn(getResponse);
 
         testProducer.process(testExchange);
@@ -718,8 +718,8 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
-        when(mockClient.get(create(TestUtils.baseUrlSecure + "/fcr:transform/default"), TestUtils.JSON, null))
-            .thenReturn(getResponse);
+        when(mockClient.get(create(TestUtils.baseUrlSecure + FcrepoConstants.TRANSFORM + "/default"),
+                    TestUtils.JSON, null)).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
@@ -736,8 +736,8 @@ public class FcrepoProducerTest {
         final String tx = "tx:12345";
         final URI uri = create(baseUrl + "/" + tx + path);
         final URI uri2 = create(baseUrl + "/" + tx + path2);
-        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
         final ByteArrayInputStream body2 = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
@@ -793,8 +793,8 @@ public class FcrepoProducerTest {
         final String tx = "tx:12345";
         final URI uri = create(baseUrl + "/" + tx + path);
         final URI uri2 = create(baseUrl + "/" + tx + path2);
-        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
         final ByteArrayInputStream body2 = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
