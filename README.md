@@ -248,14 +248,16 @@ Fcrepo messaging
 Fedora4 uses an internal [ActiveMQ](https://activemq.apache.org) message
 broker to send messages about any updates to the repository content. By
 default, all events are published to a `topic` called `fedora` on the
-local broker. Each message contains an empty body and five different
+local broker. Each message contains an empty body and up to seven different
 header values:
 
-  * `org.fcrepo.jms.identifier`
+  * `org.fcrepo.jms.baseURL`
   * `org.fcrepo.jms.eventType`
+  * `org.fcrepo.jms.identifier`
   * `org.fcrepo.jms.properties`
   * `org.fcrepo.jms.timestamp`
-  * `org.fcrepo.jms.baseURL`
+  * `org.fcrepo.jms.user`
+  * `org.fcrepo.jms.userAgent`
 
 Both `eventType` and `properties` are comma-delimited lists of events or properties.
 The `eventType` values follow the JCR 2.0 specification and include:
