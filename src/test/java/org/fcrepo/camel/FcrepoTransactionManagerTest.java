@@ -76,8 +76,8 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionCommit() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
@@ -114,8 +114,8 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionRollback() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
@@ -152,7 +152,7 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionBeginError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
@@ -174,7 +174,7 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionBeginNoLocationError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
@@ -196,7 +196,7 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionNullResponseError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
@@ -217,8 +217,8 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionCommitError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI commitUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:commit");
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
@@ -249,8 +249,8 @@ public class FcrepoTransactionManagerTest {
     public void testTransactionRollbackError() throws FcrepoOperationFailedException {
         final String baseUrl = "http://localhost:8080/rest";
         final String tx = "tx:1234567890";
-        final URI rollbackUri = URI.create(baseUrl + "/" + tx + "/fcr:tx/fcr:rollback");
-        final URI beginUri = URI.create(baseUrl + "/fcr:tx");
+        final URI rollbackUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.ROLLBACK);
+        final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(baseUrl);
         TestUtils.setField(txMgr, "client", mockClient);
