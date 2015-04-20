@@ -38,15 +38,44 @@ A simple example for sending messages to an external Solr service:
     xpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
     from("activemq:topic:fedora")
+      .choice()
+        .when(header("org.fcrepo.jms.eventType").isEqualTo("http://fedora.info/definitions/v4/repository#NODE_REMOVED"))
+          .to("direct:remove")
+        .otherwise()
+          .to("direct:update");
+
+    from("direct:update")
       .to("fcrepo:localhost:8080/rest")
-      .filter(xpath)
-      .to("fcrepo:localhost:8080/rest?transform=mytransform")
-      .to("http4:solr-host:8080/solr/core/update")
+      .choice()
+        .when(xpath)
+          .to("fcrepo:localhost:8080/rest?transform=mytransform")
+          .to("http4:solr-host:8080/solr/core/update")
+        .otherwise()
+          .to("direct:remove");
+
+    from("direct:remove")
+      .transform()
+        .simple("{\"delete\":{\"id\":\"${header[org.fcrepo.jms.identifier]}\"}}")
+      .setHeader(Exchange.CONTENT_TYPE, "application/json")
+      .setHeader(Exchange.HTTP_METHOD, "POST")
+      .to("http4:solr-host:8080/solr/core/update");
 
 Or, using the Spring DSL:
 
-    <route id="solr-indexer">
+    <route id="solr-router">
       <from uri="activemq:topic:fedora"/>
+      <choice>
+        <when>
+          <simple>${header[org.fcrepo.jms.eventType]} == 'http://fedora.info/definitions/v4/repository#NODE_REMOVED'</simple>
+          <to uri="direct:update"/>
+        </when>
+        <otherwise>
+          <to uri="direct:remove"/>
+        </otherwise>
+      </choice>
+    </route>
+
+    <route id="solr-updater">
       <to uri="fcrepo:localhost:8080/rest"/>
       <filter>
         <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#Indexable']</xpath>
@@ -55,6 +84,22 @@ Or, using the Spring DSL:
       </filter>
     </route>
 
+    <route id="solr-remover">
+      <transform>
+        <simple>{"delete":{"id":"${header[org.fcrepo.jms.identifier]}"}}</simple>
+      </transform>
+      <setHeader headerName="Content-Type">
+        <constant>application/json</constant>
+      </setHeader>
+      <setHeader headerName="CamelHttpMethod">
+        <constant>POST</constant>
+      </setHeader>
+      <to uri="http4:solr-host:8080/solr/core/update"/>
+    </route>
+
+**Please Note**: as in this example, if you plan to handle `NODE_REMOVED` events, you should expect any requests
+back to fedora (via `fcrepo:`) to respond with a `410 Gone` error, so it is recommended that you route your
+messages accordingly.
 
 Setting basic authentication
 ----------------------------
