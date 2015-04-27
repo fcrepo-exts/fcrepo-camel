@@ -67,15 +67,16 @@ Or, using the Spring DSL:
       <choice>
         <when>
           <simple>${header[org.fcrepo.jms.eventType]} == 'http://fedora.info/definitions/v4/repository#NODE_REMOVED'</simple>
-          <to uri="direct:update"/>
+          <to uri="direct:remove"/>
         </when>
         <otherwise>
-          <to uri="direct:remove"/>
+          <to uri="direct:update"/>
         </otherwise>
       </choice>
     </route>
 
     <route id="solr-updater">
+      <from uri="direct:update"/>
       <to uri="fcrepo:localhost:8080/rest"/>
       <filter>
         <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#Indexable']</xpath>
@@ -85,8 +86,9 @@ Or, using the Spring DSL:
     </route>
 
     <route id="solr-remover">
+      <from uri="direct:remove"/>
       <transform>
-        <simple>{"delete":{"id":"${header[org.fcrepo.jms.identifier]}"}}</simple>
+        <simple>{"delete":{"id":"${header[org.fcrepo.jms.baseURL]}${header[org.fcrepo.jms.identifier]}"}}</simple>
       </transform>
       <setHeader headerName="Content-Type">
         <constant>application/json</constant>
@@ -155,7 +157,7 @@ These headers can be removed as a group like this in the Java DSL: `removeHeader
 Message body
 ------------
 
-Camel will store the HTTP response from the Fedora4 server on the 
+Camel will store the HTTP response from the Fedora4 server on the
 OUT body. All headers from the IN message will be copied to the OUT
 message, so headers are preserved during routing. Additionally,
 Camel will add the HTTP response headers to the OUT message headers.
@@ -215,7 +217,7 @@ How to set the HTTP method
 
 The endpoint will always use the `GET` method unless explicitly set
 in the `Exchange.HTTP_METHOD` header. Other methods, such as `PUT`,
-`PATCH`, `POST`, and `DELETE` are available and will be passed through 
+`PATCH`, `POST`, and `DELETE` are available and will be passed through
 to the Fedora server. Here is an example:
 
     from("direct:start")
@@ -324,4 +326,3 @@ There are several example projects in the `examples` directory of this distribut
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
 [fedora project wiki](https://wiki.duraspace.org/display/FEDORA4x/Setup+Camel+Message+Integrations).
-
