@@ -7,7 +7,7 @@
   <groupId>org.fcrepo.camel.examples</groupId>
   <artifactId>fcrepo-camel-solr-scala</artifactId>
   <url>http://fcrepo.org</url>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <organization>
@@ -90,8 +90,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
