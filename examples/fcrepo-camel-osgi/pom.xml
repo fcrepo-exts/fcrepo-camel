@@ -6,7 +6,7 @@
   <groupId>org.fcrepo.camel.examples</groupId>
   <artifactId>fcrepo-camel-osgi</artifactId>
   <packaging>bundle</packaging>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.2-SNAPSHOT</version>
 
   <name>A Camel Route to connect Fedora with Solr</name>
   <url>http://fcrepo.org</url>
@@ -79,8 +79,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
