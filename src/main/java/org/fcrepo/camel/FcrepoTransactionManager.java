@@ -142,9 +142,14 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
                 throw new CannotCreateTransactionException("Could not create fcrepo transaction");
             }
 
-            if (response != null && response.getLocation() != null) {
-                tx.setSessionId(response.getLocation().toString().substring(baseUrl.length() + 1));
-            } else {
+            if (response != null) {
+                response.getLocation()
+                    .map(x -> x.toString())
+                    .map(x -> x.substring(baseUrl.length() + 1))
+                    .ifPresent(x -> tx.setSessionId(x));
+            }
+
+            if (tx.getSessionId() == null) {
                 throw new CannotCreateTransactionException("Invalid response while creating transaction");
             }
         }

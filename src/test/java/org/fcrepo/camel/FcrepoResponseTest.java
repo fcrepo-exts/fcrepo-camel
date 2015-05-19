@@ -19,10 +19,11 @@ import static org.junit.Assert.assertEquals;
 import static java.net.URI.create;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.net.URI;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,12 +44,13 @@ public class FcrepoResponseTest {
         final URI location = create("http://localhost/path/a/b/c");
         final String body = "Text response";
         final InputStream bodyStream = new ByteArrayInputStream(body.getBytes(UTF_8));
-        final FcrepoResponse response = new FcrepoResponse(uri, status, contentType, location, bodyStream);
+        final FcrepoResponse response = new FcrepoResponse(uri, status,
+                Optional.of(contentType), Optional.of(location), bodyStream);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), contentType);
-        assertEquals(response.getLocation(), location);
+        assertEquals(response.getContentType().get(), contentType);
+        assertEquals(response.getLocation().get(), location);
         assertEquals(IOUtils.toString(response.getBody(), UTF_8), body);
 
         response.setUrl(create("http://example.org/path/a/b"));
@@ -57,11 +59,11 @@ public class FcrepoResponseTest {
         response.setStatusCode(301);
         assertEquals(response.getStatusCode(), 301);
 
-        response.setContentType("application/n-triples");
-        assertEquals(response.getContentType(), "application/n-triples");
+        response.setContentType(Optional.of("application/n-triples"));
+        assertEquals(response.getContentType().get(), "application/n-triples");
 
-        response.setLocation(create("http://example.org/path/a/b/c"));
-        assertEquals(response.getLocation(), create("http://example.org/path/a/b/c"));
+        response.setLocation(Optional.of(create("http://example.org/path/a/b/c")));
+        assertEquals(response.getLocation().get(), create("http://example.org/path/a/b/c"));
 
         response.setBody(new ByteArrayInputStream(
                     "<http://example.org/book/3> <dc:title> \"Title\" .".getBytes(UTF_8)));

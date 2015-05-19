@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,9 +91,9 @@ public class FcrepoTransactionManagerTest {
         transactionTemplate.afterPropertiesSet();
 
         when(mockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+                new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.of(URI.create(baseUrl + "/" + tx)), null));
         when(mockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(commitUri, 201, null, null, null));
+                new FcrepoResponse(commitUri, 201, Optional.empty(), Optional.empty(), null));
 
         DefaultTransactionStatus status = (DefaultTransactionStatus)txMgr.getTransaction(txDef);
         FcrepoTransactionObject txObj = (FcrepoTransactionObject)status.getTransaction();
@@ -128,9 +129,9 @@ public class FcrepoTransactionManagerTest {
         transactionTemplate.afterPropertiesSet();
 
         when(mockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+                new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.of(URI.create(baseUrl + "/" + tx)), null));
         when(mockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(commitUri, 201, null, null, null));
+                new FcrepoResponse(commitUri, 201, Optional.empty(), Optional.empty(), null));
 
         DefaultTransactionStatus status = (DefaultTransactionStatus)txMgr.getTransaction(txDef);
         FcrepoTransactionObject txObj = (FcrepoTransactionObject)status.getTransaction();
@@ -187,7 +188,7 @@ public class FcrepoTransactionManagerTest {
         transactionTemplate.afterPropertiesSet();
 
         when(mockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, null, null));
+                new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.empty(), null));
 
         txMgr.getTransaction(txDef);
     }
@@ -231,7 +232,7 @@ public class FcrepoTransactionManagerTest {
         transactionTemplate.afterPropertiesSet();
 
         when(mockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+                new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.of(URI.create(baseUrl + "/" + tx)), null));
         when(mockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenThrow(
                 new FcrepoOperationFailedException(commitUri, 400, "Bad Request"));
 
@@ -263,7 +264,7 @@ public class FcrepoTransactionManagerTest {
         transactionTemplate.afterPropertiesSet();
 
         when(mockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+                new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.of(URI.create(baseUrl + "/" + tx)), null));
         when(mockClient.post(eq(rollbackUri), any(InputStream.class), anyString())).thenThrow(
                 new FcrepoOperationFailedException(rollbackUri, 400, "Bad Request"));
 

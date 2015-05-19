@@ -21,6 +21,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Optional;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -99,10 +100,10 @@ public class FcrepoProducer extends DefaultProducer {
     private void doRequest(final Exchange exchange, final String transaction) throws FcrepoOperationFailedException {
         final Message in = exchange.getIn();
         final HttpMethods method = getMethod(exchange);
-        final String contentType = getContentType(exchange);
-        final String accept = getAccept(exchange);
         final String url = getUrl(exchange, transaction);
-        final String prefer = getPrefer(exchange);
+        final String contentType = Optional.ofNullable(endpoint.getContentType())
+                                           .filter(x -> x.length() > 0)
+                                           .orElse(ExchangeHelper.getContentType(exchange));
 
         LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
 
@@ -131,11 +132,13 @@ public class FcrepoProducer extends DefaultProducer {
             break;
         case GET:
         default:
-            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url), accept, prefer);
+            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url),
+                    getAccept(exchange), getPrefer(exchange).orElse(null));
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
 
-        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
+        response.getContentType()
+                .ifPresent(x -> exchange.getIn().setHeader(Exchange.CONTENT_TYPE, x));
         exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
 
@@ -144,14 +147,9 @@ public class FcrepoProducer extends DefaultProducer {
     /**
      * Retrieve the resource location from a HEAD request.
      */
-    private URI getMetadataUri(final String url)
-            throws FcrepoOperationFailedException {
+    private URI getMetadataUri(final String url) throws FcrepoOperationFailedException {
         final FcrepoResponse headResponse = client.head(URI.create(url));
-        if (headResponse.getLocation() != null) {
-            return headResponse.getLocation();
-        } else {
-            return URI.create(url);
-        }
+        return headResponse.getLocation().orElse(URI.create(url));
     }
 
     /**
@@ -162,29 +160,8 @@ public class FcrepoProducer extends DefaultProducer {
      * @param exchange the incoming message exchange
      */
     private HttpMethods getMethod(final Exchange exchange) {
-        final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
-        if (method == null) {
-            return HttpMethods.GET;
-        } else {
-            return method;
-        }
-    }
-
-    /**
-     * Given an exchange, extract the contentType value for use with a Content-Type header. The order of preference is
-     * so: 1) a contentType value set on the endpoint 2) a contentType value set on the Exchange.CONTENT_TYPE header
-     *
-     * @param exchange the incoming message exchange
-     */
-    private String getContentType(final Exchange exchange) {
-        final String contentTypeString = ExchangeHelper.getContentType(exchange);
-        if (!isBlank(endpoint.getContentType())) {
-            return endpoint.getContentType();
-        } else if (!isBlank(contentTypeString)) {
-            return contentTypeString;
-        } else {
-            return null;
-        }
+        return Optional.ofNullable(exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class))
+                       .orElse(HttpMethods.GET);
     }
 
     /**
@@ -198,7 +175,8 @@ public class FcrepoProducer extends DefaultProducer {
     private String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
         final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
-        final String acceptHeader = getAcceptHeader(exchange);
+        final String acceptHeader = Optional.ofNullable(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))
+                                            .orElse(in.getHeader("Accept", String.class));
 
         if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
             return "application/json";
@@ -212,42 +190,6 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
-     * Given an exchange, extract the value of an incoming Accept header.
-     *
-     * @param exchange the incoming message exchange
-     */
-    private String getAcceptHeader(final Exchange exchange) {
-        final Message in = exchange.getIn();
-        if (!isBlank(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))) {
-            return in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class);
-        } else if (!isBlank(in.getHeader("Accept", String.class))) {
-            return in.getHeader("Accept", String.class);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * The resource path can be set either by the Camel header (CamelFcrepoIdentifier)
-     * or by fedora's jms headers (org.fcrepo.jms.identifier). This method extracts
-     * a path from the appropriate header (the camel header overrides the jms header).
-     *
-     * @param exchange The camel exchange
-     * @return String
-     */
-    private String getPathFromHeaders(final Exchange exchange) {
-        final Message in = exchange.getIn();
-
-        if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
-            return in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class);
-        } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
-            return in.getHeader(JmsHeaders.IDENTIFIER, String.class);
-        } else {
-            return "";
-        }
-    }
-
-    /**
      *  Extract a transformation path from the exchange if the appropriate headers
      *  are set. This will format the URL to use the transform program defined
      *  in the CamelFcrepoTransform header or the transform uri option (in that
@@ -256,24 +198,27 @@ public class FcrepoProducer extends DefaultProducer {
      *  @param exchange the camel message exchange
      *  @return String
      */
-    private String getTransformPath(final Exchange exchange) {
+    private Optional<String> getTransformPath(final Exchange exchange) {
         final Message in = exchange.getIn();
         final HttpMethods method = getMethod(exchange);
-        final String transformProgram = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
-        final String fcrTransform = "/fcr:transform";
+        final Optional<String> transformProgram = Optional.ofNullable(
+                in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class));
 
-        if (!isBlank(endpoint.getTransform()) || !isBlank(transformProgram)) {
+        if (!isBlank(endpoint.getTransform()) || transformProgram.isPresent()) {
             if (method == HttpMethods.POST) {
-                return fcrTransform;
+                return Optional.of(FcrepoConstants.TRANSFORM);
             } else if (method == HttpMethods.GET) {
-                if (!isBlank(transformProgram)) {
-                    return fcrTransform + "/" + transformProgram;
+                final Optional<String> maybe = transformProgram
+                            .filter(x -> x.length() > 0)
+                            .map(x -> FcrepoConstants.TRANSFORM + "/" + x);
+                if (maybe.isPresent()) {
+                    return maybe;
                 } else {
-                    return fcrTransform + "/" + endpoint.getTransform();
+                    return Optional.of(FcrepoConstants.TRANSFORM + "/" + endpoint.getTransform());
                 }
             }
         }
-        return "";
+        return Optional.empty();
     }
 
     /**
@@ -285,23 +230,32 @@ public class FcrepoProducer extends DefaultProducer {
      */
     private String getUrl(final Exchange exchange, final String transaction) {
         final StringBuilder url = new StringBuilder();
-        final String transformPath = getTransformPath(exchange);
-        final HttpMethods method = getMethod(exchange);
 
         url.append(endpoint.getBaseUrlWithScheme());
-        if (transaction != null) {
-            url.append("/");
-            url.append(transaction);
-        }
-        url.append(getPathFromHeaders(exchange));
 
-        if (!isBlank(transformPath)) {
-            url.append(transformPath);
-        } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
-            url.append("/fcr:tombstone");
+        url.append(Optional.ofNullable(transaction).map(x -> "/" + x).orElse(""));
+
+        url.append(Optional.of(getIdentifierPath(exchange)).filter(x -> !isBlank(x)).orElse(""));
+
+        getTransformPath(exchange).ifPresent(x -> url.append(x));
+
+        if (getMethod(exchange) == HttpMethods.DELETE && endpoint.getTombstone()) {
+            url.append(FcrepoConstants.TOMBSTONE);
         }
 
         return url.toString();
+    }
+
+    /**
+     *  Given an exchange, extract the Fcrepo node path, if any.
+     *
+     *  @param exchange the incoming message exchange
+     */
+    private String getIdentifierPath(final Exchange exchange) {
+        final Message in = exchange.getIn();
+
+        return Optional.ofNullable(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))
+            .orElse(in.getHeader(JmsHeaders.IDENTIFIER, "", String.class));
     }
 
     /**
@@ -309,49 +263,46 @@ public class FcrepoProducer extends DefaultProducer {
      *
      *  @param exchange the incoming message exchange
      */
-    private String getPrefer(final Exchange exchange) {
+    private Optional<String> getPrefer(final Exchange exchange) {
         final Message in = exchange.getIn();
 
         if (getMethod(exchange) == HttpMethods.GET) {
-            if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class))) {
-                return in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class);
+            final Optional<String> maybe = Optional.ofNullable(
+                    in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class));
+            if (maybe.isPresent()) {
+                return maybe;
             } else {
                 return buildPreferHeader(endpoint.getPreferInclude(), endpoint.getPreferOmit());
             }
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
     /**
      *  Build the prefer header from include and/or omit endpoint values
      */
-    private String buildPreferHeader(final String include, final String omit) {
+    private Optional<String> buildPreferHeader(final String include, final String omit) {
         if (isBlank(include) && isBlank(omit)) {
-            return null;
+            return Optional.empty();
         } else {
             final StringBuilder prefer = new StringBuilder("return=representation;");
 
             if (!isBlank(include)) {
-                prefer.append(" include=\"" + addPreferNamespace(include) + "\";");
+                prefer.append(" include=\"");
+                prefer.append(
+                    Optional.ofNullable(RdfNamespaces.PREFER_PROPERTIES.get(include))
+                            .orElse(include));
+                prefer.append("\";");
             }
             if (!isBlank(omit)) {
-                prefer.append(" omit=\"" + addPreferNamespace(omit) + "\";");
+                prefer.append(" omit=\"");
+                prefer.append(
+                    Optional.ofNullable(RdfNamespaces.PREFER_PROPERTIES.get(omit))
+                            .orElse(omit));
+                prefer.append("\";");
             }
-            return prefer.toString();
-        }
-    }
-
-    /**
-     *  Add the appropriate namespace to the prefer header in case the
-     *  short form was supplied.
-     */
-    private String addPreferNamespace(final String property) {
-        final String prefer = RdfNamespaces.PREFER_PROPERTIES.get(property);
-        if (!isBlank(prefer)) {
-            return prefer;
-        } else {
-            return property;
+            return Optional.of(prefer.toString());
         }
     }
 
