@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.component.http4.HttpMethods;
@@ -78,8 +79,9 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         init();
 
@@ -99,8 +101,9 @@ public class FcrepoProducerTest {
     public void testGetAcceptHeaderProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
 
         init();
 
@@ -120,8 +123,9 @@ public class FcrepoProducerTest {
     public void testGetPreferHeaderProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
         final String prefer = "return=representation; omit=\"http://www.w3.org/ns/ldp#PreferContainment\";";
 
         init();
@@ -142,8 +146,9 @@ public class FcrepoProducerTest {
     public void testGetPreferIncludeLongEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
         final String prefer = "return=representation; " +
                     "include=\"http://fedora.info/definitions/v4/repository#ServerManaged\";";
 
@@ -166,8 +171,9 @@ public class FcrepoProducerTest {
     public void testGetPreferIncludeShortEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
         final String prefer = "return=representation; include=\"http://www.w3.org/ns/ldp#PreferMembership\";";
 
         testEndpoint.setPreferInclude("PreferMembership");
@@ -189,8 +195,9 @@ public class FcrepoProducerTest {
     public void testGetPreferOmitLongEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
         final String prefer = "return=representation; " +
                     "omit=\"http://fedora.info/definitions/v4/repository#EmbedResources\";";
 
@@ -213,8 +220,9 @@ public class FcrepoProducerTest {
     public void testGetPreferOmitShortEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
         final String prefer = "return=representation; omit=\"http://www.w3.org/ns/ldp#PreferContainment\";";
 
         testEndpoint.setPreferOmit("PreferContainment");
@@ -236,8 +244,9 @@ public class FcrepoProducerTest {
     public void testGetAcceptEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body);
 
         testEndpoint.setAccept(TestUtils.N_TRIPLES);
 
@@ -258,8 +267,9 @@ public class FcrepoProducerTest {
     public void testGetRootProducer() throws Exception {
         final URI uri = create("http://localhost:8080/rest");
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         init();
 
@@ -277,7 +287,8 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final String content = "Foo";
         final ByteArrayInputStream body = new ByteArrayInputStream(content.getBytes());
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.TEXT_PLAIN, null, body);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                        Optional.of(TestUtils.TEXT_PLAIN), Optional.empty(), body);
 
         testEndpoint.setMetadata(false);
 
@@ -300,7 +311,8 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final URI metadata = create(TestUtils.baseUrl + "/bar");
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, status, TestUtils.N_TRIPLES, metadata, null);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, status,
+                        Optional.of(TestUtils.N_TRIPLES), Optional.of(metadata), null);
 
         init();
 
@@ -320,7 +332,8 @@ public class FcrepoProducerTest {
     public void testDeleteProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 204;
-        final FcrepoResponse deleteResponse = new FcrepoResponse(uri, status, null, null, null);
+        final FcrepoResponse deleteResponse = new FcrepoResponse(uri, status,
+                        Optional.empty(), Optional.empty(), null);
 
         init();
 
@@ -340,7 +353,8 @@ public class FcrepoProducerTest {
     public void testDeleteTombstoneProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl + FcrepoConstants.TOMBSTONE);
         final int status = 204;
-        final FcrepoResponse deleteResponse = new FcrepoResponse(uri, status, null, null, null);
+        final FcrepoResponse deleteResponse = new FcrepoResponse(uri, status,
+                        Optional.empty(), Optional.empty(), null);
 
         testEndpoint.setTombstone(true);
 
@@ -362,8 +376,9 @@ public class FcrepoProducerTest {
     public void testTransformGetProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.JSON), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
         testEndpoint.setTransform("default");
@@ -391,8 +406,9 @@ public class FcrepoProducerTest {
                             "title = dc:title :: xsd:string;";
         final ByteArrayInputStream body = new ByteArrayInputStream(ldpathText.getBytes());
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse postResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse postResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.JSON), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
         testEndpoint.setTransform("default");
@@ -419,8 +435,9 @@ public class FcrepoProducerTest {
     public void testTransformHeaderProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.JSON), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
         testEndpoint.setTransform("true");
@@ -445,8 +462,9 @@ public class FcrepoProducerTest {
     public void testTransformHeaderOnlyProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.JSON), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
         testEndpoint.setTransform("");
@@ -471,8 +489,9 @@ public class FcrepoProducerTest {
     public void testTransformProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.JSON), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
         testEndpoint.setTransform("default");
@@ -497,7 +516,8 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final String responseText = TestUtils.baseUrl + "/e8/0b/ab/e80bab60";
         final int status = 201;
-        final FcrepoResponse postResponse = new FcrepoResponse(uri, status, TestUtils.TEXT_PLAIN, null,
+        final FcrepoResponse postResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.TEXT_PLAIN), Optional.empty(),
                 new ByteArrayInputStream(responseText.getBytes()));
 
         init();
@@ -518,8 +538,8 @@ public class FcrepoProducerTest {
     public void testPostContentTypeEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 204;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse postResponse = new FcrepoResponse(uri, status, null, null, null);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse postResponse = new FcrepoResponse(uri, status, Optional.empty(), Optional.empty(), null);
 
         testEndpoint.setContentType(TestUtils.SPARQL_UPDATE);
 
@@ -544,8 +564,8 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final URI metadata = create(TestUtils.baseUrl + "/bar");
         final int status = 204;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, metadata, null);
-        final FcrepoResponse patchResponse = new FcrepoResponse(uri, status, null, null, null);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.of(metadata), null);
+        final FcrepoResponse patchResponse = new FcrepoResponse(uri, status, Optional.empty(), Optional.empty(), null);
 
         init();
 
@@ -567,8 +587,10 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final URI metadata = create(TestUtils.baseUrl + "/bar");
         final int status = 204;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, TestUtils.RDF_XML, metadata, null);
-        final FcrepoResponse patchResponse = new FcrepoResponse(uri, status, null, null, null);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200,
+                Optional.of(TestUtils.RDF_XML), Optional.of(metadata), null);
+        final FcrepoResponse patchResponse = new FcrepoResponse(uri, status,
+                Optional.empty(), Optional.empty(), null);
 
         testEndpoint.setTransform("default");
 
@@ -591,7 +613,8 @@ public class FcrepoProducerTest {
     public void testPutProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 201;
-        final FcrepoResponse patchResponse = new FcrepoResponse(uri, status, TestUtils.TEXT_PLAIN, null,
+        final FcrepoResponse patchResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.TEXT_PLAIN), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.baseUrl.getBytes()));
 
         init();
@@ -631,8 +654,9 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         // set the baseUrl with an explicit http:// scheme
         testEndpoint.setBaseUrl("http://localhost:8080/rest");
@@ -656,8 +680,9 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrlSecure);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         // set the baseUrl with no scheme but with a secure port
         testEndpoint.setBaseUrl("localhost:443/rest");
@@ -681,8 +706,9 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrlSecureWithoutPort);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         // set the baseUrl with explicit scheme but no port
         testEndpoint.setBaseUrl("https://localhost/rest");
@@ -705,8 +731,9 @@ public class FcrepoProducerTest {
     public void testSecureTransformProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrlSecure);
         final int status = 200;
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.JSON, null,
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.JSON), Optional.empty(),
                 new ByteArrayInputStream(TestUtils.serializedJson.getBytes()));
 
         // set the baseUrl with no scheme but explicit secure port
@@ -758,15 +785,16 @@ public class FcrepoProducerTest {
         testExchange.setUnitOfWork(uow);
 
         when(otherMockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+            new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.of(URI.create(baseUrl + "/" + tx)), null));
         when(otherMockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(commitUri, 201, null, null, null));
+            new FcrepoResponse(commitUri, 201, Optional.empty(), Optional.empty(), null));
 
-        when(mockClient.head(any(URI.class))).thenReturn(new FcrepoResponse(uri, 200, null, null, null));
+        when(mockClient.head(any(URI.class))).thenReturn(
+            new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null));
         when(mockClient.get(eq(uri), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(
-            new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body));
+            new FcrepoResponse(uri, status, Optional.of(TestUtils.RDF_XML), Optional.empty(), body));
         when(mockClient.get(eq(uri2), eq(TestUtils.N_TRIPLES), any(String.class))).thenReturn(
-            new FcrepoResponse(uri2, status, TestUtils.N_TRIPLES, null, body2));
+            new FcrepoResponse(uri2, status, Optional.of(TestUtils.N_TRIPLES), Optional.empty(), body2));
 
         testProducer.process(testExchange);
 
@@ -815,13 +843,14 @@ public class FcrepoProducerTest {
         testExchange.setUnitOfWork(uow);
 
         when(otherMockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(beginUri, 201, null, URI.create(baseUrl + "/" + tx), null));
+            new FcrepoResponse(beginUri, 201, Optional.empty(), Optional.of(URI.create(baseUrl + "/" + tx)), null));
         when(otherMockClient.post(eq(commitUri), any(InputStream.class), anyString())).thenReturn(
-                new FcrepoResponse(commitUri, 201, null, null, null));
+            new FcrepoResponse(commitUri, 201, Optional.empty(), Optional.empty(), null));
 
-        when(mockClient.head(any(URI.class))).thenReturn(new FcrepoResponse(uri, 200, null, null, null));
+        when(mockClient.head(any(URI.class))).thenReturn(
+            new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null));
         when(mockClient.get(eq(uri), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(
-            new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body));
+            new FcrepoResponse(uri, status, Optional.of(TestUtils.RDF_XML), Optional.empty(), body));
         when(mockClient.get(eq(uri2), eq(TestUtils.N_TRIPLES), any(String.class))).thenThrow(
             new FcrepoOperationFailedException(uri2, 400, "Bad Request"));
 
@@ -843,8 +872,9 @@ public class FcrepoProducerTest {
         final URI uri = create(TestUtils.baseUrl);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         init();
 
@@ -867,8 +897,9 @@ public class FcrepoProducerTest {
         final int status = 200;
         final String rdfConcat = StringUtils.repeat(TestUtils.rdfXml, 10000);
         final ByteArrayInputStream body = new ByteArrayInputStream(rdfConcat.getBytes());
-        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
-        final FcrepoResponse getResponse = new FcrepoResponse(uri, status, TestUtils.RDF_XML, null, body);
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, Optional.empty(), Optional.empty(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, status,
+                Optional.of(TestUtils.RDF_XML), Optional.empty(), body);
 
         init();
 

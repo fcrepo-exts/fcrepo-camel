@@ -86,8 +86,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
@@ -128,8 +128,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), create(redirect));
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().get(), create(redirect));
         assertEquals(response.getBody(), null);
     }
 
@@ -144,8 +144,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -160,8 +160,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), TEXT_TURTLE);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), TEXT_TURTLE);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -183,8 +183,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -199,8 +199,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), null);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().isPresent(), false);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -215,8 +215,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), null);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().isPresent(), false);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), uri.toString());
     }
 
@@ -241,8 +241,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), SPARQL_UPDATE);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), SPARQL_UPDATE);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -258,8 +258,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), null);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().isPresent(), false);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
@@ -284,8 +284,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), SPARQL_UPDATE);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), SPARQL_UPDATE);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -311,7 +311,7 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), SPARQL_UPDATE);
+        assertEquals(response.getContentType().get(), SPARQL_UPDATE);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
@@ -337,8 +337,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), SPARQL_UPDATE);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), SPARQL_UPDATE);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 
@@ -355,8 +355,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), SPARQL_UPDATE);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), SPARQL_UPDATE);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
@@ -372,8 +372,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), null);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().isPresent(), false);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), responseText);
     }
 
@@ -441,8 +441,8 @@ public class FcrepoClientTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(response.getBody(), null);
     }
 

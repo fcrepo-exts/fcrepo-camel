@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -81,7 +82,7 @@ public class FcrepoClient {
         final HttpRequestBase request = HttpMethods.HEAD.createRequest(url);
         final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
-        final String contentType = getContentTypeHeader(response);
+        final Optional<String> maybeContentType = getContentTypeHeader(response);
 
         LOGGER.debug("Fcrepo HEAD request returned status [{}]", status);
 
@@ -91,7 +92,7 @@ public class FcrepoClient {
             if (links.size() == 1) {
                 describedBy = links.get(0);
             }
-            return new FcrepoResponse(url, status, contentType, describedBy, null);
+            return new FcrepoResponse(url, status, maybeContentType, Optional.ofNullable(describedBy), null);
         } else {
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
@@ -112,12 +113,8 @@ public class FcrepoClient {
         final HttpMethods method = HttpMethods.PUT;
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
 
-        if (contentType != null) {
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
-        if (body != null) {
-            request.setEntity(new InputStreamEntity(body));
-        }
+        Optional.ofNullable(contentType).ifPresent(x -> request.addHeader(CONTENT_TYPE, x));
+        Optional.ofNullable(body).ifPresent(x -> request.setEntity(new InputStreamEntity(x)));
 
         LOGGER.debug("Fcrepo PUT request headers: {}", request.getAllHeaders());
 
@@ -168,12 +165,8 @@ public class FcrepoClient {
         final HttpMethods method = HttpMethods.POST;
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
 
-        if (contentType != null) {
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
-        if (body != null) {
-            request.setEntity(new InputStreamEntity(body));
-        }
+        Optional.ofNullable(contentType).ifPresent(x -> request.addHeader(CONTENT_TYPE, x));
+        Optional.ofNullable(body).ifPresent(x -> request.setEntity(new InputStreamEntity(x)));
 
         LOGGER.debug("Fcrepo POST request headers: {}", request.getAllHeaders());
 
@@ -190,8 +183,7 @@ public class FcrepoClient {
      * @return the repository response
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse delete(final URI url)
-            throws FcrepoOperationFailedException {
+    public FcrepoResponse delete(final URI url) throws FcrepoOperationFailedException {
 
         final HttpRequestBase request = HttpMethods.DELETE.createRequest(url);
         final HttpResponse response = executeRequest(request);
@@ -214,19 +206,14 @@ public class FcrepoClient {
 
         final HttpRequestBase request = HttpMethods.GET.createRequest(url);
 
-        if (accept != null) {
-            request.setHeader("Accept", accept);
-        }
-
-        if (prefer != null) {
-            request.setHeader("Prefer", prefer);
-        }
+        Optional.ofNullable(accept).ifPresent(x -> request.setHeader("Accept", x));
+        Optional.ofNullable(prefer).ifPresent(x -> request.setHeader("Prefer", x));
 
         LOGGER.debug("Fcrepo GET request headers: {}", request.getAllHeaders());
 
         final HttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
-        final String contentType = getContentTypeHeader(response);
+        final Optional<String> maybeContentType = getContentTypeHeader(response);
 
         LOGGER.debug("Fcrepo GET request returned status [{}]", status);
 
@@ -236,7 +223,7 @@ public class FcrepoClient {
             if (links.size() == 1) {
                 describedBy = links.get(0);
             }
-            return new FcrepoResponse(url, status, contentType, describedBy,
+            return new FcrepoResponse(url, status, maybeContentType, Optional.ofNullable(describedBy),
                     getEntityContent(response));
         } else {
             throw new FcrepoOperationFailedException(url, status,
@@ -262,17 +249,15 @@ public class FcrepoClient {
     private FcrepoResponse fcrepoGenericResponse(final URI url, final HttpResponse response,
             final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
         final int status = response.getStatusLine().getStatusCode();
-        final URI locationHeader = getLocationHeader(response);
-        final String contentTypeHeader = getContentTypeHeader(response);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
-            return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
+            return new FcrepoResponse(url, status, getContentTypeHeader(response),
+                    getLocationHeader(response), getEntityContent(response));
         } else {
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
     }
-
 
     /**
      * Extract the response body as an input stream
@@ -294,25 +279,15 @@ public class FcrepoClient {
     /**
      * Extract the location header value
      */
-    private static URI getLocationHeader(final HttpResponse response) {
-        final Header location = response.getFirstHeader(LOCATION);
-        if (location != null) {
-            return URI.create(location.getValue());
-        } else {
-            return null;
-        }
+    private static Optional<URI> getLocationHeader(final HttpResponse response) {
+        return Optional.ofNullable(response.getFirstHeader(LOCATION)).map(x -> URI.create(x.getValue()));
     }
 
     /**
      * Extract the content-type header value
      */
-    private static String getContentTypeHeader(final HttpResponse response) {
-        final Header contentType = response.getFirstHeader(CONTENT_TYPE);
-        if (contentType != null) {
-            return contentType.getValue();
-        } else {
-            return null;
-        }
+    private static Optional<String> getContentTypeHeader(final HttpResponse response) {
+        return Optional.ofNullable(response.getFirstHeader(CONTENT_TYPE)).map(x -> x.getValue());
     }
 
     /**

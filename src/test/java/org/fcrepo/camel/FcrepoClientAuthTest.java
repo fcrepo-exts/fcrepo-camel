@@ -72,8 +72,8 @@ public class FcrepoClientAuthTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
@@ -92,8 +92,8 @@ public class FcrepoClientAuthTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 
@@ -112,8 +112,8 @@ public class FcrepoClientAuthTest {
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
-        assertEquals(response.getContentType(), RDF_XML);
-        assertEquals(response.getLocation(), null);
+        assertEquals(response.getContentType().get(), RDF_XML);
+        assertEquals(response.getLocation().isPresent(), false);
         assertEquals(IOUtils.toString(response.getBody()), rdfXml);
     }
 

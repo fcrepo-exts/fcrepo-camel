@@ -17,6 +17,7 @@ package org.fcrepo.camel;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Optional;
 
 /**
  * Represents a response from a fedora repository using a {@link FcrepoClient}.
@@ -30,11 +31,11 @@ public class FcrepoResponse {
 
     private int statusCode;
 
-    private URI location;
-
     private InputStream body;
 
-    private String contentType;
+    private Optional<URI> location;
+
+    private Optional<String> contentType;
 
     /**
      * Create a FcrepoResponse object from the http response
@@ -46,7 +47,7 @@ public class FcrepoResponse {
      * @param body the response body stream
      */
     public FcrepoResponse(final URI url, final int statusCode,
-            final String contentType, final URI location, final InputStream body) {
+            final Optional<String> contentType, final Optional<URI> location, final InputStream body) {
         this.setUrl(url);
         this.setStatusCode(statusCode);
         this.setLocation(location);
@@ -113,7 +114,7 @@ public class FcrepoResponse {
      * 
      * @return the location of a related resource
      */
-    public URI getLocation() {
+    public Optional<URI> getLocation() {
         return location;
     }
 
@@ -122,7 +123,7 @@ public class FcrepoResponse {
      * 
      * @param location the value of a related resource
      */
-    public void setLocation(final URI location) {
+    public void setLocation(final Optional<URI> location) {
         this.location = location;
     }
 
@@ -131,7 +132,7 @@ public class FcrepoResponse {
      *
      * @return the mime-type of response
      */
-    public String getContentType() {
+    public Optional<String> getContentType() {
         return contentType;
     }
 
@@ -140,7 +141,7 @@ public class FcrepoResponse {
      *
      * @param contentType the mime-type of the response
      */
-    public void setContentType(final String contentType) {
+    public void setContentType(final Optional<String> contentType) {
         this.contentType = contentType;
     }
 }
