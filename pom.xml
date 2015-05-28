@@ -77,7 +77,7 @@
     <gpg.plugin.version>1.6</gpg.plugin.version>
     <graph.plugin.version>1.35</graph.plugin.version>
     <jacoco.plugin.version>0.7.2.201409121644</jacoco.plugin.version>
-    <javadoc.plugin.version>2.10.1</javadoc.plugin.version>
+    <javadoc.plugin.version>2.10.3</javadoc.plugin.version>
     <jetty.plugin.version>9.2.6.v20141205</jetty.plugin.version>
     <license.plugin.version>2.9</license.plugin.version>
     <maven.site.plugin.version>3.4</maven.site.plugin.version>

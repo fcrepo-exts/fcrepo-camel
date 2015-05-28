@@ -36,6 +36,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve the baseUrl for the fcrepo instance
+     *
+     * @return string containing base url
      */
     public static String getFcrepoBaseUrl() {
         if (FCREPO_PORT == 80) {
@@ -46,6 +48,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve the endpoint uri for fcrepo
+     *
+     * @return string containing endpoint uri
      */
     public static String getFcrepoEndpointUri() {
         if (FCREPO_PORT == 80) {
@@ -56,6 +60,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve the endpoint uri with an explicit scheme
+     *
+     * @return string containing endpoint uri
      */
     public static String getFcrepoEndpointUriWithScheme() {
         if (FCREPO_PORT == 80) {
@@ -66,6 +72,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve an RDF document serialized in TTL
+     *
+     * @return string containing RDF doc in TTL
      */
     public static String getTurtleDocument() {
         return "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n\n" +
@@ -74,6 +82,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve an N3 document
+     *
+     * @return string containing NS document
      */
     public static String getN3Document() {
         return "<http://localhost/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/author> \"Author\" .\n" +
@@ -82,6 +92,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve a simple text document
+     *
+     * @return string containing text document
      */
     public static String getTextDocument() {
         return "Simple plain text document";
@@ -89,6 +101,8 @@ public final class FcrepoTestUtils {
 
     /**
      * Retrieve a sparql-update document
+     *
+     * @return string containing sparql document
      */
     public static String getPatchDocument() {
         return "PREFIX dc: <http://purl.org/dc/elements/1.1/> \n\n" +
