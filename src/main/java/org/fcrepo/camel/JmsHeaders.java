@@ -36,6 +36,8 @@ public final class JmsHeaders {
 
     public static final String USER_AGENT = PREFIX + "userAgent";
 
+    public static final String EVENT_ID = PREFIX + "eventID";
+
     private JmsHeaders() {
         // prevent instantiation
     }
