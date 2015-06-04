@@ -32,6 +32,7 @@ public class FcrepoConstantsTest {
         assertEquals(JmsHeaders.BASE_URL, "org.fcrepo.jms.baseURL");
         assertEquals(JmsHeaders.IDENTIFIER, "org.fcrepo.jms.identifier");
         assertEquals(JmsHeaders.EVENT_TYPE, "org.fcrepo.jms.eventType");
+        assertEquals(JmsHeaders.EVENT_ID, "org.fcrepo.jms.eventID");
         assertEquals(JmsHeaders.PROPERTIES, "org.fcrepo.jms.properties");
         assertEquals(JmsHeaders.TIMESTAMP, "org.fcrepo.jms.timestamp");
         assertEquals(JmsHeaders.USER, "org.fcrepo.jms.user");

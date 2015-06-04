@@ -36,6 +36,7 @@ public class FcrepoConstantsIT {
         assertEquals(JmsHeaders.BASE_URL, DefaultMessageFactory.BASE_URL_HEADER_NAME);
         assertEquals(JmsHeaders.IDENTIFIER, DefaultMessageFactory.IDENTIFIER_HEADER_NAME);
         assertEquals(JmsHeaders.EVENT_TYPE, DefaultMessageFactory.EVENT_TYPE_HEADER_NAME);
+        assertEquals(JmsHeaders.EVENT_ID, DefaultMessageFactory.EVENT_ID_HEADER_NAME);
         assertEquals(JmsHeaders.PROPERTIES, DefaultMessageFactory.PROPERTIES_HEADER_NAME);
         assertEquals(JmsHeaders.TIMESTAMP, DefaultMessageFactory.TIMESTAMP_HEADER_NAME);
         assertEquals(JmsHeaders.USER, DefaultMessageFactory.USER_HEADER_NAME);
