@@ -139,6 +139,14 @@ public class FcrepoEndpointTest {
     }
 
     @Test
+    public void testFixity() {
+        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
+        assertEquals(false, testEndpoint.getFixity());
+        testEndpoint.setFixity(true);
+        assertEquals(true, testEndpoint.getFixity());
+    }
+
+    @Test
     public void testMetadata() {
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
         assertEquals(true, testEndpoint.getMetadata());

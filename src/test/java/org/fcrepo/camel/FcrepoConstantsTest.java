@@ -48,6 +48,7 @@ public class FcrepoConstantsTest {
         assertEquals(FcrepoConstants.COMMIT, "/fcr:tx/fcr:commit");
         assertEquals(FcrepoConstants.TOMBSTONE, "/fcr:tombstone");
         assertEquals(FcrepoConstants.TRANSFORM, "/fcr:transform");
+        assertEquals(FcrepoConstants.FIXITY, "/fcr:fixity");
     }
 
     @Test
@@ -63,6 +64,7 @@ public class FcrepoConstantsTest {
     public void testRdfLexicon() {
         assertEquals(RdfNamespaces.REPOSITORY, "http://fedora.info/definitions/v4/repository#");
         assertEquals(RdfNamespaces.INDEXING, "http://fedora.info/definitions/v4/indexing#");
+        assertEquals(RdfNamespaces.PREMIS, "http://www.loc.gov/premis/rdf/v1#");
         assertEquals(RdfNamespaces.RDF, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         assertEquals(RdfNamespaces.LDP, "http://www.w3.org/ns/ldp#");
     }

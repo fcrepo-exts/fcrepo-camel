@@ -32,6 +32,8 @@ public final class RdfNamespaces {
 
     public static final String LDP = "http://www.w3.org/ns/ldp#";
 
+    public static final String PREMIS = "http://www.loc.gov/premis/rdf/v1#";
+
     public static final Map<String, String> PREFER_PROPERTIES = ImmutableMap.<String, String>builder()
         .put("PreferContainment", LDP + "PreferContainment")
         .put("PreferMembership", LDP + "PreferMembership")

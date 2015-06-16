@@ -357,6 +357,27 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     }
 
     /**
+     * fixity setter
+     *
+     * @param fixity whether to access the /fcr:fixity endpoint for a resource
+     */
+    @ManagedAttribute(description = "Whether to access the /fcr:fixity endpoint for a resource")
+    public void setFixity(final Boolean fixity) {
+        getConfiguration().setFixity(fixity);
+    }
+
+    /**
+     * fixity getter
+     *
+     * @return whether to access the /fcr:fixity endpoint for a resource
+     */
+    @ManagedAttribute(description = "Whether to access the /fcr:fixity endpoint for a resource")
+    public Boolean getFixity() {
+        return getConfiguration().getFixity();
+    }
+
+
+    /**
      * tombstone setter
      * 
      * @param tombstone whether to access the /fcr:tombstone endpoint for a resource

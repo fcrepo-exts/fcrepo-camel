@@ -58,6 +58,9 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
     @EndpointInject(uri = "mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
+    @EndpointInject(uri = "mock:fixity")
+    protected MockEndpoint fixityEndpoint;
+
     @EndpointInject(uri = "mock:verifyNotFound")
     protected MockEndpoint notFoundEndpoint;
 
@@ -86,6 +89,9 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         goneEndpoint.expectedMessageCount(2);
         goneEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 410);
 
+        fixityEndpoint.expectedMessageCount(3);
+        fixityEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+
         notFoundEndpoint.expectedMessageCount(2);
         notFoundEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 404);
 
@@ -112,8 +118,11 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
 
+        template.sendBodyAndHeader("direct:getFixity", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
+
         template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
         template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+
 
         // Confirm that assertions passed
         createdEndpoint.assertIsSatisfied();
@@ -122,6 +131,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         goneEndpoint.assertIsSatisfied();
         notFoundEndpoint.assertIsSatisfied();
         deletedEndpoint.assertIsSatisfied();
+        fixityEndpoint.assertIsSatisfied();
 
         // Additional assertions
         // skip first message, as we've already extracted the body
@@ -149,6 +159,8 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
                 final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                ns.add("premis", RdfNamespaces.PREMIS);
+                ns.add("fedora", RdfNamespaces.REPOSITORY);
 
                 from("direct:create")
                     .to(fcrepo_uri)
@@ -162,6 +174,21 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to("mock:filter")
                     .to(fcrepo_uri + "?metadata=false")
                     .to("mock:binary");
+
+                from("direct:getFixity")
+                    .to(fcrepo_uri + "?fixity=true")
+                    .filter().xpath(
+                        "/rdf:RDF/rdf:Description/rdf:type" +
+                        "[@rdf:resource='" + RdfNamespaces.PREMIS + "Fixity']", ns)
+                    .to("mock:fixity")
+                    .filter().xpath(
+                        "/rdf:RDF/rdf:Description/premis:hasMessageDigest" +
+                        "[@rdf:resource='urn:sha1:12f68888e3beff267deae42ea86058c9c0565e36']", ns)
+                    .to("mock:fixity")
+                    .filter().xpath(
+                        "/rdf:RDF/rdf:Description/fedora:status" +
+                        "[text()='SUCCESS']", ns)
+                    .to("mock:fixity");
 
                 from("direct:delete")
                     .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))

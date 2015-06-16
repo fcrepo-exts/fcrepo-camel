@@ -50,6 +50,7 @@ public class FcrepoConstantsIT {
         assertEquals(RdfNamespaces.INDEXING, RdfLexicon.INDEXING_NAMESPACE);
         assertEquals(RdfNamespaces.RDF, RdfLexicon.RDF_NAMESPACE);
         assertEquals(RdfNamespaces.LDP, RdfLexicon.LDP_NAMESPACE);
+        assertEquals(RdfNamespaces.PREMIS, RdfLexicon.PREMIS_NAMESPACE);
         assertEquals(RdfNamespaces.REPOSITORY + "ServerManaged", RdfLexicon.SERVER_MANAGED.toString());
         assertEquals(RdfNamespaces.REPOSITORY + "EmbedResources", RdfLexicon.EMBED_CONTAINS.toString());
         assertEquals(RdfNamespaces.REPOSITORY + "InboundReferences", RdfLexicon.INBOUND_REFERENCES.toString());
