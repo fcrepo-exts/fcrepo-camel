@@ -20,6 +20,8 @@ package org.fcrepo.camel;
  */
 public final class FcrepoConstants {
 
+    public static final String FIXITY = "/fcr:fixity";
+
     public static final String TRANSACTION = "/fcr:tx";
 
     public static final String COMMIT = TRANSACTION + "/fcr:commit";

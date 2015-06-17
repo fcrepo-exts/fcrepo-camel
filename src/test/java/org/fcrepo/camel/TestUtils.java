@@ -38,6 +38,23 @@ class TestUtils {
               "</rdf:Description>" +
             "</rdf:RDF>";
 
+    public static final String fixityTriples =
+            "<http://localhost:8080/rest/binary> " +
+                "<http://www.loc.gov/premis/rdf/v1#hasFixity> " +
+                "<http://localhost:8080/rest/binary#fixity/1434565188010> .\n" +
+            "<http://localhost:8080/rest/binary#fixity/1434565188010> " +
+                "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> " +
+                "<http://www.loc.gov/premis/rdf/v1#Fixity> .\n" +
+            "<http://localhost:8080/rest/binary#fixity/1434565188010> " +
+                "<http://fedora.info/definitions/v4/repository#status> " +
+                "\"SUCCESS\"^^<http://www.w3.org/2001/XMLSchema#string> .\n" +
+            "<http://localhost:8080/rest/binary#fixity/1434565188010> " +
+                "<http://www.loc.gov/premis/rdf/v1#hasMessageDigest> " +
+                "<urn:sha1:a8069665cdee87b7963676cfcc759ef0f0c9a0e9> .\n" +
+            "<http://localhost:8080/rest/binary#fixity/1434565188010> " +
+                "<http://www.loc.gov/premis/rdf/v1#hasSize> " +
+                "\"1636261\"^^<http://www.w3.org/2001/XMLSchema#long> .\n";
+
     public static final String serializedJson = "[{\"title\": \"Test title\"}]";
 
     public static final String rdfTriples = "<http://localhost:8080/rest/foo> " +

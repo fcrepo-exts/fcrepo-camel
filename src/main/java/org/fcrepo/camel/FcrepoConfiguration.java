@@ -53,6 +53,9 @@ public class FcrepoConfiguration implements Cloneable {
     private Boolean tombstone = false;
 
     @UriParam
+    private Boolean fixity = false;
+
+    @UriParam
     private Boolean metadata = true;
 
     @UriParam
@@ -322,4 +325,24 @@ public class FcrepoConfiguration implements Cloneable {
     public PlatformTransactionManager getTransactionManager() {
         return transactionManager;
     }
+
+    /**
+     * fixity setter
+     *
+     * @param fixity whether to run a fixity check on the fcrepo resource
+     */
+    public void setFixity(final Boolean fixity) {
+        this.fixity = fixity;
+    }
+
+    /**
+     * fixity getter
+     *
+     * @return whether to access the /fcr:fixity endpoint for a resource
+     */
+    public Boolean getFixity() {
+        return fixity;
+    }
+
+
 }

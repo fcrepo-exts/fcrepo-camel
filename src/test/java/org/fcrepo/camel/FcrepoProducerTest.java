@@ -139,6 +139,31 @@ public class FcrepoProducerTest {
     }
 
     @Test
+    public void testGetFixity() throws Exception {
+        final String baseUrl = "http://localhost:8080/rest";
+        final String path = "/binary";
+        final URI uri = create(baseUrl + path);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.fixityTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, null, null, null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200, TestUtils.N_TRIPLES, null, body);
+
+        testEndpoint.setFixity(true);
+
+        init();
+
+        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+
+        when(mockClient.head(eq(create(baseUrl + path)))).thenReturn(headResponse);
+        when(mockClient.get(eq(create(baseUrl + path + FcrepoConstants.FIXITY)),
+                    any(String.class), any(String.class))).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.fixityTriples);
+        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+    }
+
+    @Test
     public void testGetPreferIncludeLongEndpointProducer() throws Exception {
         final URI uri = create(TestUtils.baseUrl);
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());

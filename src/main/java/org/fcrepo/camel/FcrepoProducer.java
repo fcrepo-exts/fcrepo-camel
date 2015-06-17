@@ -131,14 +131,19 @@ public class FcrepoProducer extends DefaultProducer {
             break;
         case GET:
         default:
-            response = client.get(endpoint.getMetadata() ? getMetadataUri(url) : URI.create(url), accept, prefer);
+            if (endpoint.getFixity()) {
+                response = client.get(URI.create(url + FcrepoConstants.FIXITY), accept, prefer);
+            } else if (endpoint.getMetadata()) {
+                response = client.get(getMetadataUri(url), accept, prefer);
+            } else {
+                response = client.get(URI.create(url), accept, prefer);
+            }
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
 
         exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
         exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
-
 
 
     /**
@@ -153,6 +158,7 @@ public class FcrepoProducer extends DefaultProducer {
             return URI.create(url);
         }
     }
+
 
     /**
      * Given an exchange, determine which HTTP method to use. Basically, use GET unless the value of the
