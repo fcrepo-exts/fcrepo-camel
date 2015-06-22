@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since October 20, 2014
  */
 @ManagedResource(description = "Managed FcrepoEndpoint")
-@UriEndpoint(scheme = "fcrepo")
+@UriEndpoint(scheme = "fcrepo", title = "Fedora Commons Repository", syntax = "fcrepo:host:port/path")
 public class FcrepoEndpoint extends DefaultEndpoint {
 
     private FcrepoConfiguration configuration;
