@@ -37,8 +37,8 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <camel.version>2.14.1</camel.version>
-    <camel.version.range>[2.14,3)</camel.version.range>
+    <camel.version>2.15.1</camel.version>
+    <camel.version.range>[2.15,3)</camel.version.range>
     <clerezza.ext.jena.version>2.11.1_1</clerezza.ext.jena.version>
     <clerezza.rdf.jena.serializer.version>0.11</clerezza.rdf.jena.serializer.version>
     <clerezza.rdf.jena.parser.version>0.12</clerezza.rdf.jena.parser.version>
