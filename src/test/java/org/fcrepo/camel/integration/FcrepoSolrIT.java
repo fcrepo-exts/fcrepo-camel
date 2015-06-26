@@ -66,8 +66,7 @@ public class FcrepoSolrIT extends CamelTestSupport {
         template.sendBodyAndHeader(null, FcrepoHeaders.FCREPO_IDENTIFIER,
                 identifier);
 
-        final String ldpath = "@prefix fcrepo : <http://fedora.info/definitions/v4/repository#>\n" +
-            "id      = . :: xsd:string ;\n" +
+        final String ldpath = "id      = . :: xsd:string ;\n" +
             "title = dc:title :: xsd:string;";
 
         headers.clear();

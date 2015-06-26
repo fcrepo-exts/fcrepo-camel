@@ -184,6 +184,20 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                         "/rdf:RDF/rdf:Description/ldp:contains", ns)
                     .to("mock:filter");
 
+                from("direct:preferHeadersCheckServerManaged")
+                    .to(fcrepo_uri)
+                    .filter().xpath(
+                        "/rdf:RDF/rdf:Description/fedora:createdBy", ns)
+                    .to("mock:filter");
+
+                from("direct:includeServerManaged")
+                    .to(fcrepo_uri + "?preferInclude=ServerManaged")
+                    .filter().xpath(
+                        "/rdf:RDF/rdf:Description/fedora:createdBy", ns)
+                    .to("mock:filter")
+                    .to(fcrepo_uri)
+                    .to("mock:container");
+
                 from("direct:includeContainmentOmitManaged")
                     .to(fcrepo_uri + "?preferOmit=ServerManaged&preferInclude=PreferContainment")
                     .filter().xpath(
@@ -193,7 +207,7 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                 from("direct:omitServerManaged")
                     .to(fcrepo_uri + "?preferOmit=ServerManaged")
                     .filter().xpath(
-                        "/rdf:RDF/rdf:Description/fedora:uuid", ns)
+                        "/rdf:RDF/rdf:Description/fedora:createdBy", ns)
                     .to("mock:filter")
                     .to(fcrepo_uri)
                     .to("mock:container");
