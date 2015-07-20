@@ -308,6 +308,20 @@
      <!--fcrepo testing -->
     <dependency>
       <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-kernel-api</artifactId>
+      <version>4.2.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fcrepo</groupId>
+      <artifactId>fcrepo-kernel-modeshape</artifactId>
+      <version>4.2.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-jms</artifactId>
       <version>4.2.1-SNAPSHOT</version>
       <scope>test</scope>

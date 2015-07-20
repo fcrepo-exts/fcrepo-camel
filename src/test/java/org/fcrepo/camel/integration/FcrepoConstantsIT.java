@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.RdfNamespaces;
 import org.fcrepo.jms.headers.DefaultMessageFactory;
-import org.fcrepo.kernel.RdfLexicon;
+import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
