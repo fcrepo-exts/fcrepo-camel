@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoProducer.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoProducer.java</span></div><h1>FcrepoProducer.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.converter.stream.CachedOutputStream;
+import org.apache.camel.impl.DefaultProducer;
+import org.apache.camel.util.ExchangeHelper;
+import org.apache.camel.util.IOHelper;
+import org.slf4j.Logger;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
+
+/**
+ * The Fedora producer.
+ *
+ * @author Aaron Coburn
+ * @since October 20, 2014
+ */
+public class FcrepoProducer extends DefaultProducer {
+
+    public static final String DEFAULT_CONTENT_TYPE = &quot;application/rdf+xml&quot;;
+
+<span class="fc" id="L48">    private static final Logger LOGGER = getLogger(FcrepoProducer.class);</span>
+
+    private FcrepoEndpoint endpoint;
+
+    private FcrepoClient client;
+
+    private TransactionTemplate transactionTemplate;
+
+    /**
+     * Create a FcrepoProducer object
+     *
+     * @param endpoint the FcrepoEndpoint corresponding to the exchange.
+     */
+    public FcrepoProducer(final FcrepoEndpoint endpoint) {
+<span class="fc" id="L62">        super(endpoint);</span>
+<span class="fc" id="L63">        this.endpoint = endpoint;</span>
+<span class="fc" id="L64">        this.transactionTemplate = endpoint.createTransactionTemplate();</span>
+<span class="fc" id="L65">        this.client = new FcrepoClient(</span>
+<span class="fc" id="L66">                endpoint.getAuthUsername(),</span>
+<span class="fc" id="L67">                endpoint.getAuthPassword(),</span>
+<span class="fc" id="L68">                endpoint.getAuthHost(),</span>
+<span class="fc" id="L69">                endpoint.getThrowExceptionOnFailure());</span>
+
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Define how message exchanges are processed.
+     *
+     * @param exchange the InOut message exchange
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    @Override
+    public void process(final Exchange exchange) throws FcrepoOperationFailedException {
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (exchange.isTransacted()) {</span>
+<span class="fc" id="L82">            transactionTemplate.execute(new TransactionCallbackWithoutResult() {</span>
+                protected void doInTransactionWithoutResult(final TransactionStatus status) {
+<span class="fc" id="L84">                    final DefaultTransactionStatus st = (DefaultTransactionStatus)status;</span>
+<span class="fc" id="L85">                    final FcrepoTransactionObject tx = (FcrepoTransactionObject)st.getTransaction();</span>
+                    try {
+<span class="fc" id="L87">                        doRequest(exchange, tx.getSessionId());</span>
+<span class="fc" id="L88">                    } catch (FcrepoOperationFailedException ex) {</span>
+<span class="fc" id="L89">                        throw new TransactionSystemException(</span>
+                            &quot;Error executing fcrepo request in transaction: &quot;, ex);
+<span class="fc" id="L91">                    }</span>
+<span class="fc" id="L92">                }</span>
+            });
+        } else {
+<span class="fc" id="L95">            doRequest(exchange, null);</span>
+        }
+<span class="fc" id="L97">    }</span>
+
+    private void doRequest(final Exchange exchange, final String transaction) throws FcrepoOperationFailedException {
+<span class="fc" id="L100">        final Message in = exchange.getIn();</span>
+<span class="fc" id="L101">        final HttpMethods method = getMethod(exchange);</span>
+<span class="fc" id="L102">        final String contentType = getContentType(exchange);</span>
+<span class="fc" id="L103">        final String accept = getAccept(exchange);</span>
+<span class="fc" id="L104">        final String url = getUrl(exchange, transaction);</span>
+<span class="fc" id="L105">        final String prefer = getPrefer(exchange);</span>
+
+<span class="fc" id="L107">        LOGGER.debug(&quot;Fcrepo Request [{}] with method [{}]&quot;, url, method);</span>
+
+        FcrepoResponse response;
+
+<span class="pc bfc" id="L111" title="All 6 branches covered.">        switch (method) {</span>
+        case PATCH:
+<span class="fc" id="L113">            response = client.patch(getMetadataUri(url), in.getBody(InputStream.class));</span>
+<span class="fc" id="L114">            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));</span>
+<span class="fc" id="L115">            break;</span>
+        case PUT:
+<span class="fc" id="L117">            response = client.put(URI.create(url), in.getBody(InputStream.class), contentType);</span>
+<span class="fc" id="L118">            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));</span>
+<span class="fc" id="L119">            break;</span>
+        case POST:
+<span class="fc" id="L121">            response = client.post(URI.create(url), in.getBody(InputStream.class), contentType);</span>
+<span class="fc" id="L122">            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));</span>
+<span class="fc" id="L123">            break;</span>
+        case DELETE:
+<span class="fc" id="L125">            response = client.delete(URI.create(url));</span>
+<span class="fc" id="L126">            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));</span>
+<span class="fc" id="L127">            break;</span>
+        case HEAD:
+<span class="fc" id="L129">            response = client.head(URI.create(url));</span>
+<span class="fc" id="L130">            exchange.getIn().setBody(null);</span>
+<span class="fc" id="L131">            break;</span>
+        case GET:
+        default:
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            if (endpoint.getFixity()) {</span>
+<span class="fc" id="L135">                response = client.get(URI.create(url + FcrepoConstants.FIXITY), accept, prefer);</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            } else if (endpoint.getMetadata()) {</span>
+<span class="fc" id="L137">                response = client.get(getMetadataUri(url), accept, prefer);</span>
+            } else {
+<span class="fc" id="L139">                response = client.get(URI.create(url), accept, prefer);</span>
+            }
+<span class="fc" id="L141">            exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));</span>
+        }
+
+<span class="fc" id="L144">        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());</span>
+<span class="fc" id="L145">        exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());</span>
+<span class="fc" id="L146">    }</span>
+
+
+    /**
+     * Retrieve the resource location from a HEAD request.
+     */
+    private URI getMetadataUri(final String url)
+            throws FcrepoOperationFailedException {
+<span class="fc" id="L154">        final FcrepoResponse headResponse = client.head(URI.create(url));</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (headResponse.getLocation() != null) {</span>
+<span class="fc" id="L156">            return headResponse.getLocation();</span>
+        } else {
+<span class="fc" id="L158">            return URI.create(url);</span>
+        }
+    }
+
+
+    /**
+     * Given an exchange, determine which HTTP method to use. Basically, use GET unless the value of the
+     * Exchange.HTTP_METHOD header is defined. Unlike the http4: component, the request does not use POST if there is
+     * a message body defined. This is so in order to avoid inadvertant changes to the repository.
+     *
+     * @param exchange the incoming message exchange
+     */
+    private HttpMethods getMethod(final Exchange exchange) {
+<span class="fc" id="L171">        final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (method == null) {</span>
+<span class="fc" id="L173">            return HttpMethods.GET;</span>
+        } else {
+<span class="fc" id="L175">            return method;</span>
+        }
+    }
+
+    /**
+     * Given an exchange, extract the contentType value for use with a Content-Type header. The order of preference is
+     * so: 1) a contentType value set on the endpoint 2) a contentType value set on the Exchange.CONTENT_TYPE header
+     *
+     * @param exchange the incoming message exchange
+     */
+    private String getContentType(final Exchange exchange) {
+<span class="fc" id="L186">        final String contentTypeString = ExchangeHelper.getContentType(exchange);</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (!isBlank(endpoint.getContentType())) {</span>
+<span class="fc" id="L188">            return endpoint.getContentType();</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        } else if (!isBlank(contentTypeString)) {</span>
+<span class="fc" id="L190">            return contentTypeString;</span>
+        } else {
+<span class="fc" id="L192">            return null;</span>
+        }
+    }
+
+    /**
+     * Given an exchange, extract the value for use with an Accept header. The order of preference is:
+     * 1) whether a transform is being requested 2) an accept value is set on the endpoint 3) a value set on
+     * the Exchange.ACCEPT_CONTENT_TYPE header 4) a value set on an &quot;Accept&quot; header 5) the endpoint
+     * DEFAULT_CONTENT_TYPE (i.e. application/rdf+xml)
+     *
+     * @param exchange the incoming message exchange
+     */
+    private String getAccept(final Exchange exchange) {
+<span class="fc" id="L205">        final Message in = exchange.getIn();</span>
+<span class="fc" id="L206">        final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);</span>
+<span class="fc" id="L207">        final String acceptHeader = getAcceptHeader(exchange);</span>
+
+<span class="pc bpc" id="L209" title="1 of 4 branches missed.">        if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {</span>
+<span class="fc" id="L210">            return &quot;application/json&quot;;</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        } else if (!isBlank(endpoint.getAccept())) {</span>
+<span class="fc" id="L212">            return endpoint.getAccept();</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        } else if (!isBlank(acceptHeader)) {</span>
+<span class="fc" id="L214">            return acceptHeader;</span>
+        } else {
+<span class="fc" id="L216">            return DEFAULT_CONTENT_TYPE;</span>
+        }
+    }
+
+    /**
+     * Given an exchange, extract the value of an incoming Accept header.
+     *
+     * @param exchange the incoming message exchange
+     */
+    private String getAcceptHeader(final Exchange exchange) {
+<span class="fc" id="L226">        final Message in = exchange.getIn();</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (!isBlank(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))) {</span>
+<span class="fc" id="L228">            return in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class);</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        } else if (!isBlank(in.getHeader(&quot;Accept&quot;, String.class))) {</span>
+<span class="fc" id="L230">            return in.getHeader(&quot;Accept&quot;, String.class);</span>
+        } else {
+<span class="fc" id="L232">            return null;</span>
+        }
+    }
+
+    /**
+     * The resource path can be set either by the Camel header (CamelFcrepoIdentifier)
+     * or by fedora's jms headers (org.fcrepo.jms.identifier). This method extracts
+     * a path from the appropriate header (the camel header overrides the jms header).
+     *
+     * @param exchange The camel exchange
+     * @return String
+     */
+    private String getPathFromHeaders(final Exchange exchange) {
+<span class="fc" id="L245">        final Message in = exchange.getIn();</span>
+
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {</span>
+<span class="fc" id="L248">            return in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class);</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {</span>
+<span class="fc" id="L250">            return in.getHeader(JmsHeaders.IDENTIFIER, String.class);</span>
+        } else {
+<span class="fc" id="L252">            return &quot;&quot;;</span>
+        }
+    }
+
+    /**
+     *  Extract a transformation path from the exchange if the appropriate headers
+     *  are set. This will format the URL to use the transform program defined
+     *  in the CamelFcrepoTransform header or the transform uri option (in that
+     *  order of precidence).
+     *
+     *  @param exchange the camel message exchange
+     *  @return String
+     */
+    private String getTransformPath(final Exchange exchange) {
+<span class="fc" id="L266">        final Message in = exchange.getIn();</span>
+<span class="fc" id="L267">        final HttpMethods method = getMethod(exchange);</span>
+<span class="fc" id="L268">        final String transformProgram = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);</span>
+<span class="fc" id="L269">        final String fcrTransform = &quot;/fcr:transform&quot;;</span>
+
+<span class="pc bpc" id="L271" title="1 of 4 branches missed.">        if (!isBlank(endpoint.getTransform()) || !isBlank(transformProgram)) {</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">            if (method == HttpMethods.POST) {</span>
+<span class="fc" id="L273">                return fcrTransform;</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">            } else if (method == HttpMethods.GET) {</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">                if (!isBlank(transformProgram)) {</span>
+<span class="fc" id="L276">                    return fcrTransform + &quot;/&quot; + transformProgram;</span>
+                } else {
+<span class="fc" id="L278">                    return fcrTransform + &quot;/&quot; + endpoint.getTransform();</span>
+                }
+            }
+        }
+<span class="fc" id="L282">        return &quot;&quot;;</span>
+    }
+
+    /**
+     * Given an exchange, extract the fully qualified URL for a fedora resource. By default, this will use the entire
+     * path set on the endpoint. If either of the following headers are defined, they will be appended to that path in
+     * this order of preference: 1) FCREPO_IDENTIFIER 2) org.fcrepo.jms.identifier
+     *
+     * @param exchange the incoming message exchange
+     */
+    private String getUrl(final Exchange exchange, final String transaction) {
+<span class="fc" id="L293">        final StringBuilder url = new StringBuilder();</span>
+<span class="fc" id="L294">        final String transformPath = getTransformPath(exchange);</span>
+<span class="fc" id="L295">        final HttpMethods method = getMethod(exchange);</span>
+
+<span class="fc" id="L297">        url.append(endpoint.getBaseUrlWithScheme());</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">        if (transaction != null) {</span>
+<span class="fc" id="L299">            url.append(&quot;/&quot;);</span>
+<span class="fc" id="L300">            url.append(transaction);</span>
+        }
+<span class="fc" id="L302">        url.append(getPathFromHeaders(exchange));</span>
+
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        if (!isBlank(transformPath)) {</span>
+<span class="fc" id="L305">            url.append(transformPath);</span>
+<span class="fc bfc" id="L306" title="All 4 branches covered.">        } else if (method == HttpMethods.DELETE &amp;&amp; endpoint.getTombstone()) {</span>
+<span class="fc" id="L307">            url.append(&quot;/fcr:tombstone&quot;);</span>
+        }
+
+<span class="fc" id="L310">        return url.toString();</span>
+    }
+
+    /**
+     *  Given an exchange, extract the Prefer headers, if any.
+     *
+     *  @param exchange the incoming message exchange
+     */
+    private String getPrefer(final Exchange exchange) {
+<span class="fc" id="L319">        final Message in = exchange.getIn();</span>
+
+<span class="fc bfc" id="L321" title="All 2 branches covered.">        if (getMethod(exchange) == HttpMethods.GET) {</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">            if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class))) {</span>
+<span class="fc" id="L323">                return in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class);</span>
+            } else {
+<span class="fc" id="L325">                return buildPreferHeader(endpoint.getPreferInclude(), endpoint.getPreferOmit());</span>
+            }
+        } else {
+<span class="fc" id="L328">            return null;</span>
+        }
+    }
+
+    /**
+     *  Build the prefer header from include and/or omit endpoint values
+     */
+    private String buildPreferHeader(final String include, final String omit) {
+<span class="fc bfc" id="L336" title="All 4 branches covered.">        if (isBlank(include) &amp;&amp; isBlank(omit)) {</span>
+<span class="fc" id="L337">            return null;</span>
+        } else {
+<span class="fc" id="L339">            final StringBuilder prefer = new StringBuilder(&quot;return=representation;&quot;);</span>
+
+<span class="fc bfc" id="L341" title="All 2 branches covered.">            if (!isBlank(include)) {</span>
+<span class="fc" id="L342">                prefer.append(&quot; include=\&quot;&quot; + addPreferNamespace(include) + &quot;\&quot;;&quot;);</span>
+            }
+<span class="fc bfc" id="L344" title="All 2 branches covered.">            if (!isBlank(omit)) {</span>
+<span class="fc" id="L345">                prefer.append(&quot; omit=\&quot;&quot; + addPreferNamespace(omit) + &quot;\&quot;;&quot;);</span>
+            }
+<span class="fc" id="L347">            return prefer.toString();</span>
+        }
+    }
+
+    /**
+     *  Add the appropriate namespace to the prefer header in case the
+     *  short form was supplied.
+     */
+    private String addPreferNamespace(final String property) {
+<span class="fc" id="L356">        final String prefer = RdfNamespaces.PREFER_PROPERTIES.get(property);</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        if (!isBlank(prefer)) {</span>
+<span class="fc" id="L358">            return prefer;</span>
+        } else {
+<span class="fc" id="L360">            return property;</span>
+        }
+    }
+
+    private static Object extractResponseBodyAsStream(final InputStream is, final Exchange exchange) {
+        // As httpclient is using a AutoCloseInputStream, it will be closed when the connection is closed
+        // we need to cache the stream for it.
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if (is == null) {</span>
+<span class="fc" id="L368">            return null;</span>
+        }
+
+        // convert the input stream to StreamCache if the stream cache is not disabled
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">        if (exchange.getProperty(Exchange.DISABLE_HTTP_STREAM_CACHE, Boolean.FALSE, Boolean.class)) {</span>
+<span class="nc" id="L373">            return is;</span>
+        } else {
+<span class="pc" id="L375">            try (final CachedOutputStream cos = new CachedOutputStream(exchange)) {</span>
+                // This CachedOutputStream will not be closed when the exchange is onCompletion
+<span class="fc" id="L377">                IOHelper.copyAndCloseInput(is, cos);</span>
+                // When the InputStream is closed, the CachedOutputStream will be closed
+<span class="fc" id="L379">                return cos.newStreamCache();</span>
+<span class="pc bpc" id="L380" title="6 of 8 branches missed.">            } catch (IOException ex) {</span>
+<span class="nc" id="L381">                LOGGER.debug(&quot;Error extracting body from http request&quot;, ex);</span>
+<span class="nc" id="L382">                return null;</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>

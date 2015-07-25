@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SparqlUpdateProcessor.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel.processor</a> &gt; <span class="el_source">SparqlUpdateProcessor.java</span></div><h1>SparqlUpdateProcessor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel.processor;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.Processor;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
+import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
+import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
+import org.fcrepo.camel.FcrepoHeaders;
+
+/**
+ * Represents a processor for creating the sparql-update message to
+ * be passed to an external triplestore.
+ *
+ * @author Aaron Coburn
+ * @since Nov 8, 2014
+ */
+<span class="fc" id="L41">public class SparqlUpdateProcessor implements Processor {</span>
+    /**
+     * Define how the message is processed.
+     *
+     * @param exchange the current camel message exchange
+     */
+    public void process(final Exchange exchange) throws IOException {
+
+<span class="fc" id="L49">        final Message in = exchange.getIn();</span>
+<span class="fc" id="L50">        final ParsingProvider parser = new JenaParserProvider();</span>
+<span class="fc" id="L51">        final SerializingProvider serializer = new JenaSerializerProvider();</span>
+<span class="fc" id="L52">        final MGraph graph = new SimpleMGraph();</span>
+<span class="fc" id="L53">        final String contentType = in.getHeader(Exchange.CONTENT_TYPE, String.class);</span>
+<span class="fc" id="L54">        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);</span>
+<span class="fc" id="L55">        final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();</span>
+<span class="fc" id="L56">        final String subject = ProcessorUtils.getSubjectUri(in);</span>
+
+        /* the text/rdf+nt mimetype will be removed in the next version of clerezza
+         * at which point they will be using application/n-triples. Once that happens,
+         * this ternary expression can be removed. */
+<span class="fc" id="L61">        parser.parse(graph, in.getBody(InputStream.class),</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">                &quot;application/n-triples&quot;.equals(contentType) ? &quot;text/rdf+nt&quot; : contentType, new UriRef(subject));</span>
+<span class="fc" id="L63">        serializer.serialize(serializedGraph, graph.getGraph(), &quot;text/rdf+nt&quot;);</span>
+
+        /*
+         * Before inserting updated triples, the Sparql update command
+         * below deletes all triples with the defined subject uri
+         * (coming from the FCREPO_IDENTIFIER and FCREPO_BASE_URL headers).
+         * It also deletes triples that have a subject corresponding to
+         * that Fcrepo URI plus the &quot;/fcr:export?format=jcr/xml&quot; string
+         * appended to it. This makes it possible to more completely
+         * remove any triples for a given resource that were added
+         * earlier. If fcrepo ever stops producing triples that are
+         * appended with /fcr:export?format..., then that extra line
+         * can be removed. It would also be possible to recursively delete
+         * triples (by removing any triple whose subject is also an object
+         * of the starting (or context) URI, but that approach tends to
+         * delete too many triples from the triplestore. This command does
+         * not delete blank nodes.
+         */
+<span class="fc" id="L81">        final StringBuilder query = new StringBuilder(&quot;update=&quot;);</span>
+<span class="fc" id="L82">        query.append(ProcessorUtils.deleteWhere(subject, namedGraph));</span>
+<span class="fc" id="L83">        query.append(&quot;;\n&quot;);</span>
+<span class="fc" id="L84">        query.append(ProcessorUtils.deleteWhere(subject + &quot;/fcr:export?format=jcr/xml&quot;, namedGraph));</span>
+<span class="fc" id="L85">        query.append(&quot;;\n&quot;);</span>
+<span class="fc" id="L86">        query.append(ProcessorUtils.insertData(serializedGraph.toString(&quot;UTF-8&quot;), namedGraph));</span>
+
+<span class="fc" id="L88">        in.setBody(query.toString());</span>
+<span class="fc" id="L89">        in.setHeader(Exchange.HTTP_METHOD, &quot;POST&quot;);</span>
+<span class="fc" id="L90">        in.setHeader(Exchange.CONTENT_TYPE, &quot;application/x-www-form-urlencoded&quot;);</span>
+<span class="fc" id="L91">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>

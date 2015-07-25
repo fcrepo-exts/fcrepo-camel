@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoTransactionManager.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoTransactionManager.java</span></div><h1>FcrepoTransactionManager.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.InputStream;
+import java.net.URI;
+
+import org.slf4j.Logger;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+
+/**
+ * A Transaction Manager for interacting with fedora-based transactions
+ *
+ * @author Aaron Coburn
+ * @since Feb 16, 2015
+ */
+public class FcrepoTransactionManager extends AbstractPlatformTransactionManager {
+
+    private FcrepoClient client;
+
+    private String baseUrl;
+
+    private String authUsername;
+
+    private String authPassword;
+
+    private String authHost;
+
+<span class="fc" id="L48">    private static final Logger LOGGER = getLogger(FcrepoTransactionManager.class);</span>
+
+    /**
+     * Create a FcrepoTransactionManager
+     */
+    public FcrepoTransactionManager() {
+<span class="fc" id="L54">        super();</span>
+<span class="fc" id="L55">        setNestedTransactionAllowed(false);</span>
+<span class="fc" id="L56">    }</span>
+
+    /**
+     * Set the baseUrl for the transaction manager.
+     *
+     * @param baseUrl the fcrepo base url
+     */
+    public void setBaseUrl(final String baseUrl) {
+<span class="fc" id="L64">        this.baseUrl = baseUrl;</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Get the base url for the transaction manager.
+     *
+     * @return the fcrepo base url
+     */
+    public String getBaseUrl() {
+<span class="nc" id="L73">        return baseUrl;</span>
+    }
+
+    /**
+     * Set the authUsername for the transaction manager.
+     *
+     * @param authUsername the username for authentication
+     */
+    public void setAuthUsername(final String authUsername) {
+<span class="fc" id="L82">        this.authUsername = authUsername;</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * Get the authUsername for the transaction manager.
+     *
+     * @return the username for authentication
+     */
+    public String getAuthUsername() {
+<span class="nc" id="L91">        return authUsername;</span>
+    }
+
+    /**
+     * Set the authPassword for the transaction manager.
+     *
+     * @param authPassword the password used for authentication
+     */
+    public void setAuthPassword(final String authPassword) {
+<span class="fc" id="L100">        this.authPassword = authPassword;</span>
+<span class="fc" id="L101">    }</span>
+
+    /**
+     * Get the authPassword for the transaction manager.
+     *
+     * @return the password used for authentication
+     */
+    public String getAuthPassword() {
+<span class="nc" id="L109">        return authPassword;</span>
+    }
+
+    /**
+     * Set the authHost for the transaction manager.
+     *
+     * @param authHost the host realm used for authentication
+     */
+    public void setAuthHost(final String authHost) {
+<span class="fc" id="L118">        this.authHost = authHost;</span>
+<span class="fc" id="L119">    }</span>
+
+    /**
+     * Get the authHost for the transaction manager.
+     *
+     * @return the host realm used for authentication
+     */
+    public String getAuthHost() {
+<span class="nc" id="L127">        return authHost;</span>
+    }
+
+    @Override
+    protected void doBegin(final Object transaction, final TransactionDefinition definition) {
+        final FcrepoResponse response;
+<span class="fc" id="L133">        final InputStream is = null;</span>
+<span class="fc" id="L134">        final String contentType = null;</span>
+<span class="fc" id="L135">        final FcrepoTransactionObject tx = (FcrepoTransactionObject)transaction;</span>
+
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (tx.getSessionId() == null) {</span>
+            try {
+<span class="fc" id="L139">                response = getClient().post(URI.create(baseUrl + FcrepoConstants.TRANSACTION), is, contentType);</span>
+<span class="nc" id="L140">            } catch (FcrepoOperationFailedException ex) {</span>
+<span class="nc" id="L141">                LOGGER.debug(&quot;HTTP Operation failed: &quot;, ex);</span>
+<span class="nc" id="L142">                throw new CannotCreateTransactionException(&quot;Could not create fcrepo transaction&quot;);</span>
+<span class="fc" id="L143">            }</span>
+
+<span class="pc bpc" id="L145" title="2 of 4 branches missed.">            if (response != null &amp;&amp; response.getLocation() != null) {</span>
+<span class="fc" id="L146">                tx.setSessionId(response.getLocation().toString().substring(baseUrl.length() + 1));</span>
+            } else {
+<span class="nc" id="L148">                throw new CannotCreateTransactionException(&quot;Invalid response while creating transaction&quot;);</span>
+            }
+        }
+<span class="fc" id="L151">    }</span>
+
+    @Override
+    protected void doCommit(final DefaultTransactionStatus status) {
+<span class="fc" id="L155">        final FcrepoTransactionObject tx = (FcrepoTransactionObject)status.getTransaction();</span>
+<span class="fc" id="L156">        final InputStream is = null;</span>
+<span class="fc" id="L157">        final String contentType = null;</span>
+
+        try {
+<span class="fc" id="L160">            getClient().post(URI.create(baseUrl + &quot;/&quot; + tx.getSessionId() + FcrepoConstants.COMMIT), is, contentType);</span>
+<span class="nc" id="L161">        } catch (FcrepoOperationFailedException ex) {</span>
+<span class="nc" id="L162">            LOGGER.debug(&quot;Transaction commit failed: &quot;, ex);</span>
+<span class="nc" id="L163">            throw new TransactionSystemException(&quot;Could not commit fcrepo transaction&quot;);</span>
+        } finally {
+<span class="pc" id="L165">            tx.setSessionId(null);</span>
+<span class="fc" id="L166">        }</span>
+<span class="fc" id="L167">    }</span>
+
+    @Override
+    protected void doRollback(final DefaultTransactionStatus status) {
+<span class="fc" id="L171">        final FcrepoTransactionObject tx = (FcrepoTransactionObject)status.getTransaction();</span>
+
+        try {
+<span class="fc" id="L174">            getClient().post(URI.create(baseUrl + &quot;/&quot; + tx.getSessionId() + FcrepoConstants.ROLLBACK), null, null);</span>
+<span class="nc" id="L175">        } catch (FcrepoOperationFailedException ex) {</span>
+<span class="nc" id="L176">            LOGGER.debug(&quot;Transaction rollback failed: &quot;, ex);</span>
+<span class="nc" id="L177">            throw new TransactionSystemException(&quot;Could not rollback fcrepo transaction&quot;);</span>
+        } finally {
+<span class="pc" id="L179">            tx.setSessionId(null);</span>
+<span class="fc" id="L180">        }</span>
+<span class="fc" id="L181">    }</span>
+
+    @Override
+    protected Object doGetTransaction() {
+<span class="fc" id="L185">        return new FcrepoTransactionObject();</span>
+    }
+
+    private FcrepoClient getClient() {
+<span class="fc" id="L189">        final Boolean throwExceptionOnFailure = true;</span>
+
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (client == null) {</span>
+<span class="fc" id="L192">            client = new FcrepoClient(</span>
+                    authUsername,
+                    authPassword,
+                    authHost,
+                    throwExceptionOnFailure);
+        }
+<span class="fc" id="L198">        return client;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>

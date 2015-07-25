@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoEndpoint.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoEndpoint.java</span></div><h1>FcrepoEndpoint.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import java.net.URI;
+
+import org.apache.camel.Consumer;
+import org.apache.camel.Processor;
+import org.apache.camel.Producer;
+import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.api.management.ManagedAttribute;
+import org.apache.camel.api.management.ManagedResource;
+import org.apache.camel.impl.DefaultEndpoint;
+import org.apache.camel.spi.UriEndpoint;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
+
+/**
+ * Represents a Fcrepo endpoint.
+ * @author Aaron Coburn
+ * @since October 20, 2014
+ */
+@ManagedResource(description = &quot;Managed FcrepoEndpoint&quot;)
+@UriEndpoint(scheme = &quot;fcrepo&quot;, title = &quot;Fedora Commons Repository&quot;, syntax = &quot;fcrepo:host:port/path&quot;)
+public class FcrepoEndpoint extends DefaultEndpoint {
+
+    private FcrepoConfiguration configuration;
+
+    private PlatformTransactionManager transactionManager;
+
+    public static final int DEFAULT_HTTPS_PORT = 443;
+
+    /**
+     * Create a FcrepoEndpoint with a uri, path and component
+     * @param uri the endpoint uri (without path values)
+     * @param remaining any path values on the endpoint uri
+     * @param component an existing component value
+     * @param configuration configuration settings for this endpoint
+     */
+    public FcrepoEndpoint(final String uri, final String remaining, final FcrepoComponent component,
+            final FcrepoConfiguration configuration) {
+<span class="fc" id="L56">        super(uri, component);</span>
+<span class="fc" id="L57">        this.configuration = configuration;</span>
+<span class="fc" id="L58">        this.transactionManager = component.getTransactionManager();</span>
+<span class="fc" id="L59">        setBaseUrl(remaining);</span>
+<span class="fc" id="L60">    }</span>
+
+    /**
+     * Create a producer endpoint.
+     *
+     * @return A new camel producer endpoint
+     */
+    @Override
+    public Producer createProducer() {
+<span class="fc" id="L69">        return new FcrepoProducer(this);</span>
+    }
+
+    /**
+     * This component does not implement a consumer endpoint.
+     */
+    @Override
+    public Consumer createConsumer(final Processor processor) {
+<span class="nc" id="L77">        throw new RuntimeCamelException(&quot;Cannot consume from a FcrepoEndpoint: &quot; + getEndpointUri());</span>
+    }
+
+    /**
+     * Define the component as a singleton
+     *
+     * @return whether the endpoint is implemented as a singleton.
+     */
+    @Override
+    public boolean isSingleton() {
+<span class="fc" id="L87">        return true;</span>
+    }
+
+    /**
+     * Create a template for use in transactions
+     *
+     * @return a transaction template
+     */
+    public TransactionTemplate createTransactionTemplate() {
+        TransactionTemplate transactionTemplate;
+
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        if (getTransactionManager() != null) {</span>
+<span class="nc" id="L99">            transactionTemplate = new TransactionTemplate(getTransactionManager());</span>
+        } else {
+<span class="fc" id="L101">            final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();</span>
+<span class="fc" id="L102">            txMgr.setBaseUrl(getBaseUrlWithScheme());</span>
+<span class="fc" id="L103">            txMgr.setAuthUsername(getAuthUsername());</span>
+<span class="fc" id="L104">            txMgr.setAuthPassword(getAuthPassword());</span>
+<span class="fc" id="L105">            txMgr.setAuthHost(getAuthHost());</span>
+<span class="fc" id="L106">            transactionTemplate = new TransactionTemplate(txMgr);</span>
+        }
+<span class="fc" id="L108">        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);</span>
+<span class="fc" id="L109">        transactionTemplate.afterPropertiesSet();</span>
+<span class="fc" id="L110">        return transactionTemplate;</span>
+    }
+
+    /**
+     * Get the repository baseUrl with a full scheme.
+     * The base URL may be any of the following:
+     * localhost:8080/rest
+     * fedora.institution.org:8983/rest
+     * http://localhost:8080/fcrepo/rest
+     * https://fedora.institution.org/rest
+     * fedora.insitution.org:443/rest
+     *
+     * This method ensures that the url (fragment) is properly prefixed
+     * with either the http or https scheme, suitable for sending to the
+     * httpclient.
+     *
+     * @return String
+     */
+    public String getBaseUrlWithScheme() {
+<span class="fc" id="L129">        final StringBuilder url = new StringBuilder();</span>
+<span class="fc" id="L130">        final String baseUrl = getBaseUrl();</span>
+
+<span class="pc bpc" id="L132" title="1 of 4 branches missed.">        if (!baseUrl.startsWith(&quot;http:&quot;) &amp;&amp; !baseUrl.startsWith(&quot;https:&quot;)) {</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            if (URI.create(&quot;http://&quot; + baseUrl).getPort() == DEFAULT_HTTPS_PORT) {</span>
+<span class="nc" id="L134">                url.append(&quot;https://&quot;);</span>
+            } else {
+<span class="fc" id="L136">                url.append(&quot;http://&quot;);</span>
+            }
+        }
+<span class="fc" id="L139">        url.append(baseUrl);</span>
+<span class="fc" id="L140">        return url.toString();</span>
+    }
+
+    /**
+     * configuration getter
+     *
+     * @return the component configuration
+     */
+    public FcrepoConfiguration getConfiguration() {
+<span class="fc" id="L149">        return configuration;</span>
+    }
+
+    /**
+     * configuration setter
+     * 
+     * @param config The FcrepoConfiguration
+     */
+    public void setConfiguration(final FcrepoConfiguration config) {
+<span class="nc" id="L158">        this.configuration = config;</span>
+<span class="nc" id="L159">    }</span>
+
+    /**
+     * baseUrl setter
+     *
+     * @param url the fcrepo base url
+     */
+    public void setBaseUrl(final String url) {
+<span class="fc" id="L167">        getConfiguration().setBaseUrl(url);</span>
+<span class="fc" id="L168">    }</span>
+
+    /**
+     * baseUrl getter
+     *
+     * @return the fcrepo base url
+     */
+    public String getBaseUrl() {
+<span class="fc" id="L176">        return getConfiguration().getBaseUrl();</span>
+    }
+
+    /**
+     * transactionManager setter
+     *
+     * @param transactionManager the transaction manager for this endpoint
+     */
+    @ManagedAttribute(description = &quot;Transaction Manager&quot;)
+    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
+<span class="nc" id="L186">        this.transactionManager = transactionManager;</span>
+<span class="nc" id="L187">    }</span>
+
+    /**
+     * transactionManager getter
+     *
+     * @return the transaction manager for this endpoint
+     */
+    @ManagedAttribute(description = &quot;Transaction Manager&quot;)
+    public PlatformTransactionManager getTransactionManager() {
+<span class="fc" id="L196">        return transactionManager;</span>
+    }
+
+    /**
+     * accept setter
+     *
+     * @param type the mime-type used with Accept headers
+     */
+    @ManagedAttribute(description = &quot;Accept: Header&quot;)
+    public void setAccept(final String type) {
+<span class="fc" id="L206">        getConfiguration().setAccept(type.replaceAll(&quot; &quot;, &quot;+&quot;));</span>
+<span class="fc" id="L207">    }</span>
+
+    /**
+     * accept getter
+     *
+     * @return the mime-type used with Accept headers
+     */
+    @ManagedAttribute(description = &quot;Accept: Header&quot;)
+    public String getAccept() {
+<span class="fc" id="L216">        return getConfiguration().getAccept();</span>
+    }
+
+    /**
+     * contentType setter
+     * 
+     * @param type the mime-type used with Content-Type headers
+     */
+    @ManagedAttribute(description = &quot;Content-Type: Header&quot;)
+    public void setContentType(final String type) {
+<span class="fc" id="L226">        getConfiguration().setContentType(type);</span>
+<span class="fc" id="L227">    }</span>
+
+    /**
+     * contentType getter
+     *
+     * @return the mime-type used with Content-Type headers
+     */
+    @ManagedAttribute(description = &quot;Content-Type: Header&quot;)
+    public String getContentType() {
+<span class="fc" id="L236">        return getConfiguration().getContentType();</span>
+    }
+
+    /**
+     * authUsername setter
+     * 
+     * @param username used for repository authentication
+     */
+    @ManagedAttribute(description = &quot;Username for authentication&quot;)
+    public void setAuthUsername(final String username) {
+<span class="nc" id="L246">        getConfiguration().setAuthUsername(username);</span>
+<span class="nc" id="L247">    }</span>
+
+    /**
+     * authUsername getter
+     *
+     * @return the username used for repository authentication
+     */
+    @ManagedAttribute(description = &quot;Username for authentication&quot;)
+    public String getAuthUsername() {
+<span class="fc" id="L256">        return getConfiguration().getAuthUsername();</span>
+    }
+
+    /**
+     * authPassword setter
+     * 
+     * @param password used for repository authentication
+     */
+    @ManagedAttribute(description = &quot;Password for authentication&quot;)
+    public void setAuthPassword(final String password) {
+<span class="nc" id="L266">        getConfiguration().setAuthPassword(password);</span>
+<span class="nc" id="L267">    }</span>
+
+    /**
+     * authPassword getter
+     *
+     * @return the password used for repository authentication
+     */
+    @ManagedAttribute(description = &quot;Password for authentication&quot;)
+    public String getAuthPassword() {
+<span class="fc" id="L276">        return getConfiguration().getAuthPassword();</span>
+    }
+
+    /**
+     * authHost setter
+     * 
+     * @param host realm used for repository authentication
+     */
+    @ManagedAttribute(description = &quot;Hostname for authentication&quot;)
+    public void setAuthHost(final String host) {
+<span class="nc" id="L286">        getConfiguration().setAuthHost(host);</span>
+<span class="nc" id="L287">    }</span>
+
+    /**
+     * authHost getter
+     *
+     * @return the host realm used for repository authentication
+     */
+    @ManagedAttribute(description = &quot;Hostname for authentication&quot;)
+    public String getAuthHost() {
+<span class="fc" id="L296">        return getConfiguration().getAuthHost();</span>
+    }
+
+    /**
+     * metadata setter
+     *
+     * @param metadata whether to retrieve rdf metadata for non-rdf nodes
+     */
+    @ManagedAttribute(description = &quot;Whether to retrieve the /fcr:metadata endpoint for Binary nodes&quot;)
+    public void setMetadata(final Boolean metadata) {
+<span class="fc" id="L306">        getConfiguration().setMetadata(metadata);</span>
+<span class="fc" id="L307">    }</span>
+
+    /**
+     * metadata getter
+     *
+     * @return whether to retrieve rdf metadata for non-rdf nodes
+     */
+    @ManagedAttribute(description = &quot;Whether to retrieve the /fcr:metadata endpoint for Binary nodes&quot;)
+    public Boolean getMetadata() {
+<span class="fc" id="L316">        return getConfiguration().getMetadata();</span>
+    }
+
+    /**
+     * throwExceptionOnFailure setter
+     *
+     * @param throwOnFailure whether HTTP error codes throw exceptions
+     */
+    @ManagedAttribute(description = &quot;Whether HTTP response errors should throw an exception&quot;)
+    public void setThrowExceptionOnFailure(final Boolean throwOnFailure) {
+<span class="fc" id="L326">        getConfiguration().setThrowExceptionOnFailure(throwOnFailure);</span>
+<span class="fc" id="L327">    }</span>
+
+    /**
+     * throwExceptionOnFailure getter
+     *
+     * @return whether HTTP error codes throw exceptions
+     */
+    @ManagedAttribute(description = &quot;Whether HTTP response errors should throw an exception&quot;)
+    public Boolean getThrowExceptionOnFailure() {
+<span class="fc" id="L336">        return getConfiguration().getThrowExceptionOnFailure();</span>
+    }
+
+    /**
+     * transform setter
+     * 
+     * @param transform define an LD-Path transform program for converting RDF to JSON
+     */
+    @ManagedAttribute(description = &quot;The LDPath transform program to use&quot;)
+    public void setTransform(final String transform) {
+<span class="fc" id="L346">        getConfiguration().setTransform(transform);</span>
+<span class="fc" id="L347">    }</span>
+
+    /**
+     * transform getter
+     *
+     * @return the LD-Path transform program used to convert RDF to JSON
+     */
+    @ManagedAttribute(description = &quot;The LDPath transform program to use&quot;)
+    public String getTransform() {
+<span class="fc" id="L356">        return getConfiguration().getTransform();</span>
+    }
+
+    /**
+     * fixity setter
+     *
+     * @param fixity whether to access the /fcr:fixity endpoint for a resource
+     */
+    @ManagedAttribute(description = &quot;Whether to access the /fcr:fixity endpoint for a resource&quot;)
+    public void setFixity(final Boolean fixity) {
+<span class="fc" id="L366">        getConfiguration().setFixity(fixity);</span>
+<span class="fc" id="L367">    }</span>
+
+    /**
+     * fixity getter
+     *
+     * @return whether to access the /fcr:fixity endpoint for a resource
+     */
+    @ManagedAttribute(description = &quot;Whether to access the /fcr:fixity endpoint for a resource&quot;)
+    public Boolean getFixity() {
+<span class="fc" id="L376">        return getConfiguration().getFixity();</span>
+    }
+
+
+    /**
+     * tombstone setter
+     * 
+     * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
+     */
+    @ManagedAttribute(description = &quot;Whether to use the /fcr:tombstone endpoint on objects&quot;)
+    public void setTombstone(final Boolean tombstone) {
+<span class="fc" id="L387">        getConfiguration().setTombstone(tombstone);</span>
+<span class="fc" id="L388">    }</span>
+
+    /**
+     * tombstone getter
+     *
+     * @return whether to access the /fcr:tombstone endpoint for a resource
+     */
+    @ManagedAttribute(description = &quot;Whether to use the /fcr:tombstone endpoint on objects&quot;)
+    public Boolean getTombstone() {
+<span class="fc" id="L397">        return getConfiguration().getTombstone();</span>
+    }
+
+    /**
+     * preferInclude setter
+     *
+     * @param include the URI(s) that populate the include section in a Prefer header
+     */
+    @ManagedAttribute(description = &quot;Whether to include a Prefer: return=representation; include=\&quot;URI\&quot; header&quot;)
+    public void setPreferInclude(final String include) {
+<span class="fc" id="L407">        getConfiguration().setPreferInclude(include);</span>
+<span class="fc" id="L408">    }</span>
+
+    /**
+     * preferInclude getter
+     *
+     * @return the URI(s) that populate the include section in a Prefer header
+     */
+    @ManagedAttribute(description = &quot;Whether to include a Prefer: return=representation; include=\&quot;URI\&quot; header&quot;)
+    public String getPreferInclude() {
+<span class="fc" id="L417">        return getConfiguration().getPreferInclude();</span>
+    }
+
+    /**
+     * preferOmit setter
+     *
+     * @param omit the URI(s) that populate the omit section in a Prefer header
+     */
+    @ManagedAttribute(description = &quot;Whether to include a Prefer: return=representation; omit=\&quot;URI\&quot; header&quot;)
+    public void setPreferOmit(final String omit) {
+<span class="fc" id="L427">        getConfiguration().setPreferOmit(omit);</span>
+<span class="fc" id="L428">    }</span>
+
+    /**
+     * preferOmit getter
+     *
+     * @return the URI(s) that populate the omit section in a Prefer header
+     */
+    @ManagedAttribute(description = &quot;Whether to include a Prefer: return=representation; omit=\&quot;URI\&quot; header&quot;)
+    public String getPreferOmit() {
+<span class="fc" id="L437">        return getConfiguration().getPreferOmit();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>

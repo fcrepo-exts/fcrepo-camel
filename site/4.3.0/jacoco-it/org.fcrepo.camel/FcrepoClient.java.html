@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoClient.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoClient.java</span></div><h1>FcrepoClient.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+
+/**
+ * Represents a client to interact with Fedora's HTTP API.
+ *
+ * @author Aaron Coburn
+ * @since October 20, 2014
+ */
+public class FcrepoClient {
+
+    private static final String DESCRIBED_BY = &quot;describedby&quot;;
+
+    private static final String CONTENT_TYPE = &quot;Content-Type&quot;;
+
+    private static final String LOCATION = &quot;Location&quot;;
+
+    private CloseableHttpClient httpclient;
+
+<span class="fc" id="L52">    private Boolean throwExceptionOnFailure = true;</span>
+
+<span class="fc" id="L54">    private static final Logger LOGGER = getLogger(FcrepoClient.class);</span>
+
+    /**
+     * Create a FcrepoClient with a set of authentication values.
+     * @param username the username for the repository
+     * @param password the password for the repository
+     * @param host the authentication hostname (realm) for the repository
+     * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
+     */
+    public FcrepoClient(final String username, final String password, final String host,
+<span class="fc" id="L64">            final Boolean throwExceptionOnFailure) {</span>
+
+<span class="fc" id="L66">        final FcrepoHttpClientBuilder client = new FcrepoHttpClientBuilder(username, password, host);</span>
+
+<span class="fc" id="L68">        this.throwExceptionOnFailure = throwExceptionOnFailure;</span>
+<span class="fc" id="L69">        this.httpclient = client.build();</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * Make a HEAD response
+     * @param url the URL of the resource to check
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse head(final URI url)
+            throws FcrepoOperationFailedException {
+
+<span class="fc" id="L81">        final HttpRequestBase request = HttpMethods.HEAD.createRequest(url);</span>
+<span class="fc" id="L82">        final HttpResponse response = executeRequest(request);</span>
+<span class="fc" id="L83">        final int status = response.getStatusLine().getStatusCode();</span>
+<span class="fc" id="L84">        final String contentType = getContentTypeHeader(response);</span>
+
+<span class="fc" id="L86">        LOGGER.debug(&quot;Fcrepo HEAD request returned status [{}]&quot;, status);</span>
+
+<span class="pc bpc" id="L88" title="2 of 6 branches missed.">        if ((status &gt;= HttpStatus.SC_OK &amp;&amp; status &lt; HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {</span>
+<span class="fc" id="L89">            URI describedBy = null;</span>
+<span class="fc" id="L90">            final List&lt;URI&gt; links = getLinkHeaders(response, DESCRIBED_BY);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            if (links.size() == 1) {</span>
+<span class="fc" id="L92">                describedBy = links.get(0);</span>
+            }
+<span class="fc" id="L94">            return new FcrepoResponse(url, status, contentType, describedBy, null);</span>
+        } else {
+<span class="nc" id="L96">            throw new FcrepoOperationFailedException(url, status,</span>
+<span class="nc" id="L97">                    response.getStatusLine().getReasonPhrase());</span>
+        }
+    }
+
+    /**
+     * Make a PUT request
+     * @param url the URL of the resource to PUT
+     * @param body the contents of the resource to send
+     * @param contentType the MIMEType of the resource
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
+            throws FcrepoOperationFailedException {
+
+<span class="fc" id="L112">        final HttpMethods method = HttpMethods.PUT;</span>
+<span class="fc" id="L113">        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);</span>
+
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (contentType != null) {</span>
+<span class="fc" id="L116">            request.addHeader(CONTENT_TYPE, contentType);</span>
+        }
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (body != null) {</span>
+<span class="fc" id="L119">            request.setEntity(new InputStreamEntity(body));</span>
+        }
+
+<span class="fc" id="L122">        LOGGER.debug(&quot;Fcrepo PUT request headers: {}&quot;, request.getAllHeaders());</span>
+
+<span class="fc" id="L124">        final HttpResponse response = executeRequest(request);</span>
+
+<span class="fc" id="L126">        LOGGER.debug(&quot;Fcrepo PUT request returned status [{}]&quot;, response.getStatusLine().getStatusCode());</span>
+
+<span class="fc" id="L128">        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);</span>
+    }
+
+    /**
+     * Make a PATCH request
+     * Please note: the body should have an application/sparql-update content-type
+     * @param url the URL of the resource to PATCH
+     * @param body the body to be sent to the repository
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse patch(final URI url, final InputStream body)
+            throws FcrepoOperationFailedException {
+
+<span class="fc" id="L142">        final HttpMethods method = HttpMethods.PATCH;</span>
+<span class="fc" id="L143">        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);</span>
+
+<span class="fc" id="L145">        request.addHeader(CONTENT_TYPE, &quot;application/sparql-update&quot;);</span>
+<span class="fc" id="L146">        request.setEntity(new InputStreamEntity(body));</span>
+
+<span class="fc" id="L148">        LOGGER.debug(&quot;Fcrepo PATCH request headers: {}&quot;, request.getAllHeaders());</span>
+
+<span class="fc" id="L150">        final HttpResponse response = executeRequest(request);</span>
+
+<span class="fc" id="L152">        LOGGER.debug(&quot;Fcrepo PATCH request returned status [{}]&quot;, response.getStatusLine().getStatusCode());</span>
+
+<span class="fc" id="L154">        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);</span>
+    }
+
+    /**
+     * Make a POST request
+     * @param url the URL of the resource to which to POST
+     * @param body the content to be sent to the server
+     * @param contentType the Content-Type of the body
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
+            throws FcrepoOperationFailedException {
+
+<span class="fc" id="L168">        final HttpMethods method = HttpMethods.POST;</span>
+<span class="fc" id="L169">        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);</span>
+
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (contentType != null) {</span>
+<span class="fc" id="L172">            request.addHeader(CONTENT_TYPE, contentType);</span>
+        }
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (body != null) {</span>
+<span class="fc" id="L175">            request.setEntity(new InputStreamEntity(body));</span>
+        }
+
+<span class="fc" id="L178">        LOGGER.debug(&quot;Fcrepo POST request headers: {}&quot;, request.getAllHeaders());</span>
+
+<span class="fc" id="L180">        final HttpResponse response = executeRequest(request);</span>
+
+<span class="fc" id="L182">        LOGGER.debug(&quot;Fcrepo POST request returned status [{}]&quot;, response.getStatusLine().getStatusCode());</span>
+
+<span class="fc" id="L184">        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);</span>
+    }
+
+    /**
+     * Make a DELETE request
+     * @param url the URL of the resource to delete
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse delete(final URI url)
+            throws FcrepoOperationFailedException {
+
+<span class="fc" id="L196">        final HttpRequestBase request = HttpMethods.DELETE.createRequest(url);</span>
+<span class="fc" id="L197">        final HttpResponse response = executeRequest(request);</span>
+
+<span class="fc" id="L199">        LOGGER.debug(&quot;Fcrepo DELETE request returned status [{}]&quot;, response.getStatusLine().getStatusCode());</span>
+
+<span class="fc" id="L201">        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);</span>
+    }
+
+    /**
+     * Make a GET request
+     * @param url the URL of the resource to fetch
+     * @param accept the requested MIMEType of the resource to be retrieved
+     * @param prefer the value for a prefer header sent in the request
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse get(final URI url, final String accept, final String prefer)
+            throws FcrepoOperationFailedException {
+
+<span class="fc" id="L215">        final HttpRequestBase request = HttpMethods.GET.createRequest(url);</span>
+
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        if (accept != null) {</span>
+<span class="fc" id="L218">            request.setHeader(&quot;Accept&quot;, accept);</span>
+        }
+
+<span class="fc bfc" id="L221" title="All 2 branches covered.">        if (prefer != null) {</span>
+<span class="fc" id="L222">            request.setHeader(&quot;Prefer&quot;, prefer);</span>
+        }
+
+<span class="fc" id="L225">        LOGGER.debug(&quot;Fcrepo GET request headers: {}&quot;, request.getAllHeaders());</span>
+
+<span class="fc" id="L227">        final HttpResponse response = executeRequest(request);</span>
+<span class="fc" id="L228">        final int status = response.getStatusLine().getStatusCode();</span>
+<span class="fc" id="L229">        final String contentType = getContentTypeHeader(response);</span>
+
+<span class="fc" id="L231">        LOGGER.debug(&quot;Fcrepo GET request returned status [{}]&quot;, status);</span>
+
+<span class="pc bpc" id="L233" title="2 of 6 branches missed.">        if ((status &gt;= HttpStatus.SC_OK &amp;&amp; status &lt; HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {</span>
+<span class="fc" id="L234">            URI describedBy = null;</span>
+<span class="fc" id="L235">            final List&lt;URI&gt; links = getLinkHeaders(response, DESCRIBED_BY);</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">            if (links.size() == 1) {</span>
+<span class="fc" id="L237">                describedBy = links.get(0);</span>
+            }
+<span class="fc" id="L239">            return new FcrepoResponse(url, status, contentType, describedBy,</span>
+<span class="fc" id="L240">                    getEntityContent(response));</span>
+        } else {
+<span class="nc" id="L242">            throw new FcrepoOperationFailedException(url, status,</span>
+<span class="nc" id="L243">                    response.getStatusLine().getReasonPhrase());</span>
+        }
+    }
+
+    /**
+     * Execute the HTTP request
+     */
+    private HttpResponse executeRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
+        try {
+<span class="fc" id="L252">            return httpclient.execute(request);</span>
+<span class="nc" id="L253">        } catch (IOException ex) {</span>
+<span class="nc" id="L254">            LOGGER.debug(&quot;HTTP Operation failed: &quot;, ex);</span>
+<span class="nc" id="L255">            throw new FcrepoOperationFailedException(request.getURI(), -1, ex.getMessage());</span>
+        }
+    }
+
+    /**
+     * Handle the general case with responses.
+     */
+    private FcrepoResponse fcrepoGenericResponse(final URI url, final HttpResponse response,
+            final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
+<span class="fc" id="L264">        final int status = response.getStatusLine().getStatusCode();</span>
+<span class="fc" id="L265">        final URI locationHeader = getLocationHeader(response);</span>
+<span class="fc" id="L266">        final String contentTypeHeader = getContentTypeHeader(response);</span>
+
+<span class="pc bpc" id="L268" title="2 of 6 branches missed.">        if ((status &gt;= HttpStatus.SC_OK &amp;&amp; status &lt; HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {</span>
+<span class="fc" id="L269">            return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));</span>
+        } else {
+<span class="fc" id="L271">            throw new FcrepoOperationFailedException(url, status,</span>
+<span class="fc" id="L272">                    response.getStatusLine().getReasonPhrase());</span>
+        }
+    }
+
+
+    /**
+     * Extract the response body as an input stream
+     */
+    private static InputStream getEntityContent(final HttpResponse response) {
+        try {
+<span class="fc" id="L282">            final HttpEntity entity = response.getEntity();</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">            if (entity == null) {</span>
+<span class="fc" id="L284">                return null;</span>
+            } else {
+<span class="fc" id="L286">                return entity.getContent();</span>
+            }
+<span class="nc" id="L288">        } catch (IOException ex) {</span>
+<span class="nc" id="L289">            LOGGER.debug(&quot;Unable to extract HttpEntity response into an InputStream: &quot;, ex);</span>
+<span class="nc" id="L290">            return null;</span>
+        }
+    }
+
+    /**
+     * Extract the location header value
+     */
+    private static URI getLocationHeader(final HttpResponse response) {
+<span class="fc" id="L298">        final Header location = response.getFirstHeader(LOCATION);</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">        if (location != null) {</span>
+<span class="fc" id="L300">            return URI.create(location.getValue());</span>
+        } else {
+<span class="fc" id="L302">            return null;</span>
+        }
+    }
+
+    /**
+     * Extract the content-type header value
+     */
+    private static String getContentTypeHeader(final HttpResponse response) {
+<span class="fc" id="L310">        final Header contentType = response.getFirstHeader(CONTENT_TYPE);</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">        if (contentType != null) {</span>
+<span class="fc" id="L312">            return contentType.getValue();</span>
+        } else {
+<span class="fc" id="L314">            return null;</span>
+        }
+    }
+
+    /**
+     * Extract any Link headers
+     */
+    private static List&lt;URI&gt; getLinkHeaders(final HttpResponse response, final String relationship) {
+<span class="fc" id="L322">        final List&lt;URI&gt; uris = new ArrayList&lt;URI&gt;();</span>
+<span class="fc" id="L323">        final Header[] links = response.getHeaders(&quot;Link&quot;);</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">        for (Header header: links) {</span>
+<span class="fc" id="L325">            final FcrepoLink link = new FcrepoLink(header.getValue());</span>
+<span class="fc bfc" id="L326" title="All 2 branches covered.">            if (link.getRel().equals(relationship)) {</span>
+<span class="fc" id="L327">                uris.add(link.getUri());</span>
+            }
+        }
+<span class="fc" id="L330">        return uris;</span>
+    }
+ }
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>

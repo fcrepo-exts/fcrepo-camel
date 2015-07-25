@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FcrepoResponse.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fcrepo Camel Component</a> &gt; <a href="index.source.html" class="el_package">org.fcrepo.camel</a> &gt; <span class="el_source">FcrepoResponse.java</span></div><h1>FcrepoResponse.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.fcrepo.camel;
+
+import java.io.InputStream;
+import java.net.URI;
+
+/**
+ * Represents a response from a fedora repository using a {@link FcrepoClient}.
+ *
+ * @author Aaron Coburn
+ * @since October 20, 2014
+ */
+public class FcrepoResponse {
+
+    private URI url;
+
+    private int statusCode;
+
+    private URI location;
+
+    private InputStream body;
+
+    private String contentType;
+
+    /**
+     * Create a FcrepoResponse object from the http response
+     *
+     * @param url the requested URL
+     * @param statusCode the HTTP status code
+     * @param contentType the mime-type of the response
+     * @param location the location of a related resource
+     * @param body the response body stream
+     */
+    public FcrepoResponse(final URI url, final int statusCode,
+<span class="fc" id="L49">            final String contentType, final URI location, final InputStream body) {</span>
+<span class="fc" id="L50">        this.setUrl(url);</span>
+<span class="fc" id="L51">        this.setStatusCode(statusCode);</span>
+<span class="fc" id="L52">        this.setLocation(location);</span>
+<span class="fc" id="L53">        this.setContentType(contentType);</span>
+<span class="fc" id="L54">        this.setBody(body);</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * url getter
+     *
+     * @return the requested URL
+     */
+    public URI getUrl() {
+<span class="nc" id="L63">        return url;</span>
+    }
+
+    /**
+     * url setter
+     * 
+     * @param url the requested URL
+     */
+    public void setUrl(final URI url) {
+<span class="fc" id="L72">        this.url = url;</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * statusCode getter
+     *
+     * @return the HTTP status code
+     */
+    public int getStatusCode() {
+<span class="fc" id="L81">        return statusCode;</span>
+    }
+
+    /**
+     * statusCode setter
+     * 
+     * @param statusCode the HTTP status code
+     */
+    public void setStatusCode(final int statusCode) {
+<span class="fc" id="L90">        this.statusCode = statusCode;</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * body getter
+     *
+     * @return the response body as a stream
+     */
+    public InputStream getBody() {
+<span class="fc" id="L99">        return body;</span>
+    }
+
+    /**
+     * body setter
+     * 
+     * @param body the contents of the response body
+     */
+    public void setBody(final InputStream body) {
+<span class="fc" id="L108">        this.body = body;</span>
+<span class="fc" id="L109">    }</span>
+
+    /**
+     * location getter
+     * 
+     * @return the location of a related resource
+     */
+    public URI getLocation() {
+<span class="fc" id="L117">        return location;</span>
+    }
+
+    /**
+     * location setter
+     * 
+     * @param location the value of a related resource
+     */
+    public void setLocation(final URI location) {
+<span class="fc" id="L126">        this.location = location;</span>
+<span class="fc" id="L127">    }</span>
+
+    /**
+     * contentType getter
+     *
+     * @return the mime-type of response
+     */
+    public String getContentType() {
+<span class="fc" id="L135">        return contentType;</span>
+    }
+
+    /**
+     * contentType setter
+     *
+     * @param contentType the mime-type of the response
+     */
+    public void setContentType(final String contentType) {
+<span class="fc" id="L144">        this.contentType = contentType;</span>
+<span class="fc" id="L145">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span></div></body></html>
