@@ -6,7 +6,7 @@ The **fcrepo:** component provides access to an external
 [API](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers)
 for use with [Apache Camel](https://camel.apache.org).
 
-[![Build Status](https://travis-ci.org/fcrepo4/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4/fcrepo-camel)
+[![Build Status](https://travis-ci.org/fcrepo4-exts/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4-exts/fcrepo-camel)
 
 URI format
 ----------
