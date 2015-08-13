@@ -222,7 +222,7 @@ in the `Exchange.HTTP_METHOD` header. Other methods, such as `PUT`,
 to the Fedora server. Here is an example:
 
     from("direct:start")
-        .setHeader(Exchange.HTTP_HEADER, constant("POST"))
+        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
         .to("fcrepo:localhost:8080/fcrepo4/rest")
         .to("mock:results");
 
@@ -231,7 +231,7 @@ And the equivalent Spring sample:
     <camelContext xmlns="http://activemq.apache.org/camel/schema/spring">
       <route>
         <from uri="direct:start"/>
-        <setHeader headerName="Exchange.HTTP_HEADER">
+        <setHeader headerName="Exchange.HTTP_METHOD">
             <constant>POST</constant>
         </setHeader>
         <to uri="fcrepo:localhost:8080/fcrepo4/rest"/>
