@@ -15,20 +15,18 @@
  */
 package org.fcrepo.camel.processor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
+import static org.fcrepo.camel.processor.ProcessorUtils.insertData;
+import static org.fcrepo.camel.processor.ProcessorUtils.langFromMimeType;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+
+import com.hp.hpl.jena.rdf.model.Model;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
-import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
-import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.fcrepo.camel.FcrepoHeaders;
 
 /**
@@ -47,23 +45,17 @@ public class SparqlInsertProcessor implements Processor {
     public void process(final Exchange exchange) throws IOException {
 
         final Message in = exchange.getIn();
-        final ParsingProvider parser = new JenaParserProvider();
-        final SerializingProvider serializer = new JenaSerializerProvider();
-        final MGraph graph = new SimpleMGraph();
-        final String contentType = in.getHeader(Exchange.CONTENT_TYPE, String.class);
-        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
+
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
         final String subject = ProcessorUtils.getSubjectUri(in);
+        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
+        final Model model = createDefaultModel().read(in.getBody(InputStream.class), subject,
+                langFromMimeType(in.getHeader(Exchange.CONTENT_TYPE, String.class)));
 
-        /* the text/rdf+nt mimetype will be removed in the next version of clerezza
-         * at which point they will be using application/n-triples. Once that happens,
-         * this ternary expression can be removed. */
-        parser.parse(graph, in.getBody(InputStream.class),
-                "application/n-triples".equals(contentType) ? "text/rdf+nt" : contentType, new UriRef(subject));
-        serializer.serialize(serializedGraph, graph.getGraph(), "text/rdf+nt");
+        model.write(serializedGraph, "N-TRIPLE");
 
         final StringBuilder query = new StringBuilder("update=");
-        query.append(ProcessorUtils.insertData(serializedGraph.toString("UTF-8"), namedGraph));
+        query.append(insertData(serializedGraph.toString("UTF-8"), namedGraph));
 
         exchange.getIn().setBody(query.toString());
         exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
