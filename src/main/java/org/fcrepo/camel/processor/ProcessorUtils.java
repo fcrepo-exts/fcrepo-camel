@@ -15,10 +15,10 @@
  */
 package org.fcrepo.camel.processor;
 
+import static com.hp.hpl.jena.util.URIref.encode;
 import java.io.IOException;
 
 import org.apache.camel.Message;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.JmsHeaders;
@@ -43,6 +43,25 @@ public final class ProcessorUtils {
             trimmed = trimmed.substring(0, trimmed.length() - 1);
         }
         return trimmed;
+    }
+
+    /**
+     * Extract a language string suitable for Jena from a MimeType value
+     * @param contentType a MIMEType string
+     * @return a Jena-compatible language string
+     */
+    public static String langFromMimeType(final String contentType) {
+        if (contentType.equals("application/n-triples")) {
+            return "N-TRIPLE";
+        } else if (contentType.equals("text/turtle")) {
+            return "TURTLE";
+        } else if (contentType.equals("application/rdf+xml")) {
+            return "RDF/XML";
+        } else if (contentType.equals("text/rdf+n3") || contentType.equals("text/n3")) {
+            return "N3";
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -82,11 +101,11 @@ public final class ProcessorUtils {
 
         if (!StringUtils.isBlank(namedGraph)) {
             stmt.append("GRAPH ");
-            stmt.append(new UriRef(namedGraph));
+            stmt.append("<" + encode(namedGraph) + ">");
             stmt.append(" { ");
         }
 
-        stmt.append(new UriRef(subject));
+        stmt.append("<" + encode(subject) + ">");
         stmt.append(" ?p ?o ");
 
         if (!StringUtils.isBlank(namedGraph)) {
@@ -108,9 +127,9 @@ public final class ProcessorUtils {
         final StringBuilder query = new StringBuilder("INSERT DATA { ");
 
         if (!StringUtils.isBlank(namedGraph)) {
-            query.append("GRAPH ");
-            query.append(new UriRef(namedGraph));
-            query.append(" { ");
+            query.append("GRAPH <");
+            query.append(encode(namedGraph));
+            query.append("> { ");
         }
 
         query.append(serializedGraph);
