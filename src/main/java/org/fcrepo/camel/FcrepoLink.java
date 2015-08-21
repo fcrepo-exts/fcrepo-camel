@@ -22,7 +22,7 @@ import java.net.URI;
  *
  * @author Aaron Coburn
  */
-class FcrepoLink {
+public class FcrepoLink {
 
     private static final String LINK_DELIM = ";";
 
@@ -52,7 +52,7 @@ class FcrepoLink {
 
     /**
      * Retrieve the REL portion of the link
-     * 
+     *
      * @return the "rel" portion of a Link header
      */
     public String getRel() {
