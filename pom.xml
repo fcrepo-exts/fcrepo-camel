@@ -317,7 +317,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.fcrepo</groupId>
+      <groupId>org.fcrepo.transform</groupId>
       <artifactId>fcrepo-transform</artifactId>
       <version>4.3.1-SNAPSHOT</version>
       <scope>test</scope>
