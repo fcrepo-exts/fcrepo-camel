@@ -327,3 +327,12 @@ There are several example projects in the `examples` directory of this distribut
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
 [fedora project wiki](https://wiki.duraspace.org/display/FEDORA4x/Setup+Camel+Message+Integrations).
+
+Maintainers
+-----------
+
+Current maintainers:
+
+* [Aaron Coburn](https://github.com/acoburn)
+* [Daniel Lamb](https://github.com/daniel-dgi)
+
