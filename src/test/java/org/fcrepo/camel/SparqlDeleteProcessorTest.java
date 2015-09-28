@@ -15,6 +15,8 @@
  */
 package org.fcrepo.camel;
 
+import static java.net.URLEncoder.encode;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,9 +84,9 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
             "</rdf:RDF>";
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived(
-                "update=DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
-                "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }");
+        resultEndpoint.expectedBodiesReceived("update=" +
+                encode("DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
+                "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }", "UTF-8"));
         resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 

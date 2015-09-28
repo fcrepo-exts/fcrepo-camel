@@ -59,7 +59,7 @@ public class FcrepoPostIT extends CamelTestSupport {
     public void testPost() throws InterruptedException {
         // Assertions
         resultEndpoint.expectedMessageCount(1);
-        resultEndpoint.expectedBodiesReceived("some title");
+        resultEndpoint.expectedBodiesReceived("some title &amp; other");
 
         createdEndpoint.expectedMessageCount(1);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);

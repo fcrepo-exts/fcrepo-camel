@@ -19,6 +19,7 @@ import static org.apache.commons.lang3.StringUtils.normalizeSpace;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
+import static java.net.URLEncoder.encode;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -57,18 +58,19 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         // Reverse the lines as the RDF may be serialized in opposite order
 
         final String responsePrefix =
-                  "update=DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "> ?p ?o } }; " +
-                  "DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o } }; " +
-                  "INSERT DATA { GRAPH <" + graph + "> { ";
-        final String responseSuffix = " } }";
+              "DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "> ?p ?o } };\n" +
+              "DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o } };\n" +
+              "INSERT DATA { GRAPH <" + graph + "> { ";
+        final String responseSuffix = "\n} }";
 
         // Assertions
-        resultEndpoint.allMessages().body().contains(responsePrefix);
-        resultEndpoint.allMessages().body().contains(responseSuffix);
+        resultEndpoint.allMessages().body().startsWith("update=" + encode(responsePrefix, "UTF-8"));
+        resultEndpoint.allMessages().body().endsWith(encode(responseSuffix, "UTF-8"));
         for (final String s : document.split("\n")) {
-            resultEndpoint.expectedBodyReceived().body().contains(s);
+            resultEndpoint.expectedBodyReceived().body().contains(encode(s, "UTF-8"));
         }
-        resultEndpoint.expectedBodyReceived().body().contains("<" + base + path + "> dc:title \"some title\" .");
+        resultEndpoint.expectedBodyReceived().body().contains(
+                encode("<" + base + path + "> dc:title \"some title\" .", "UTF-8"));
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
@@ -114,18 +116,19 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
         // Reverse the lines as the RDF may be serialized in opposite order
 
         final String responsePrefix =
-                  "update=DELETE WHERE { <" + base + path + "> ?p ?o }; " +
-                  "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }; " +
+                  "DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
+                  "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o };\n" +
                   "INSERT DATA { ";
-        final String responseSuffix = " }";
+        final String responseSuffix = "\n}";
 
         // Assertions
-        resultEndpoint.allMessages().body().contains(responsePrefix);
-        resultEndpoint.allMessages().body().contains(responseSuffix);
+        resultEndpoint.allMessages().body().startsWith("update=" + encode(responsePrefix, "UTF-8"));
+        resultEndpoint.allMessages().body().endsWith(encode(responseSuffix, "UTF-8"));
         for (final String s : document.split("\n")) {
-            resultEndpoint.expectedBodyReceived().body().contains(s);
+            resultEndpoint.expectedBodyReceived().body().contains(encode(s, "UTF-8"));
         }
-        resultEndpoint.expectedBodyReceived().body().contains("<" + base + path + "> dc:title \"some title\" .");
+        resultEndpoint.expectedBodyReceived().body().contains(
+                encode("<" + base + path + "> dc:title \"some title\" .", "UTF-8"));
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
