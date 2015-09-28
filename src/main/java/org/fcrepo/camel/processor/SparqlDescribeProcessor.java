@@ -15,6 +15,8 @@
  */
 package org.fcrepo.camel.processor;
 
+import static java.net.URLEncoder.encode;
+
 import java.io.IOException;
 
 import org.apache.camel.Exchange;
@@ -46,7 +48,7 @@ public class SparqlDescribeProcessor implements Processor {
         final Message in = exchange.getIn();
         final String subject = ProcessorUtils.getSubjectUri(in);
 
-        exchange.getIn().setBody("query=DESCRIBE <" + subject + ">");
+        exchange.getIn().setBody("query=" + encode("DESCRIBE <" + subject + ">", "UTF-8"));
         exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
         exchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, "application/rdf+xml");
         exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");

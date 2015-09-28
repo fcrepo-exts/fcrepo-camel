@@ -18,6 +18,7 @@ package org.fcrepo.camel;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static java.net.URLEncoder.encode;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         final String path = "/path/a/b/c/d";
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("query=DESCRIBE <" + base + path + ">");
+        resultEndpoint.expectedBodiesReceived("query=" + encode("DESCRIBE <" + base + path + ">", "UTF-8"));
         resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
         resultEndpoint.expectedHeaderReceived(ACCEPT_CONTENT_TYPE, "application/rdf+xml");

@@ -19,6 +19,7 @@ import static org.apache.commons.lang3.StringUtils.normalizeSpace;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
+import static java.net.URLEncoder.encode;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -55,12 +56,13 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
         final String document = getN3Document();
 
         // Assertions
-        resultEndpoint.allMessages().body().contains("update=INSERT DATA { ");
-        resultEndpoint.allMessages().body().contains(" }");
+        resultEndpoint.allMessages().body().startsWith("update=" + encode("INSERT DATA { ", "UTF-8"));
+        resultEndpoint.allMessages().body().endsWith(encode("}", "UTF-8"));
         for (final String s : document.split("\n")) {
-            resultEndpoint.expectedBodyReceived().body().contains(s);
+            resultEndpoint.expectedBodyReceived().body().contains(encode(s, "UTF-8"));
         }
-        resultEndpoint.expectedBodyReceived().body().contains("<" + base + path + "> dc:title \"some title\" .");
+        resultEndpoint.expectedBodyReceived().body().contains(
+                encode("<" + base + path + "> dc:title \"some title\" .", "UTF-8"));
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 

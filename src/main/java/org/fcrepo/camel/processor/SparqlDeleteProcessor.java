@@ -15,6 +15,8 @@
  */
 package org.fcrepo.camel.processor;
 
+import static java.net.URLEncoder.encode;
+
 import java.io.IOException;
 
 import org.apache.camel.Exchange;
@@ -57,13 +59,13 @@ public class SparqlDeleteProcessor implements Processor {
          * too many triples from the triplestore. This command does
          * not remove blank nodes.
          */
-        final StringBuilder query = new StringBuilder("update=");
+        final StringBuilder query = new StringBuilder();
 
         query.append(ProcessorUtils.deleteWhere(subject, namedGraph));
         query.append(";\n");
         query.append(ProcessorUtils.deleteWhere(subject + "/fcr:export?format=jcr/xml", namedGraph));
 
-        in.setBody(query.toString());
+        in.setBody("update=" + encode(query.toString(), "UTF-8"));
         in.setHeader(Exchange.HTTP_METHOD, "POST");
         in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
    }

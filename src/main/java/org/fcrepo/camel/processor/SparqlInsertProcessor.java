@@ -18,6 +18,7 @@ package org.fcrepo.camel.processor;
 import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
 import static org.fcrepo.camel.processor.ProcessorUtils.insertData;
 import static org.fcrepo.camel.processor.ProcessorUtils.langFromMimeType;
+import static java.net.URLEncoder.encode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -54,10 +55,8 @@ public class SparqlInsertProcessor implements Processor {
 
         model.write(serializedGraph, "N-TRIPLE");
 
-        final StringBuilder query = new StringBuilder("update=");
-        query.append(insertData(serializedGraph.toString("UTF-8"), namedGraph));
-
-        exchange.getIn().setBody(query.toString());
+        exchange.getIn().setBody("update=" +
+                encode(insertData(serializedGraph.toString("UTF-8"), namedGraph), "UTF-8"));
         exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
         exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
     }
