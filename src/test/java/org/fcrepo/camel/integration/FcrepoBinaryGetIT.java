@@ -186,7 +186,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                         "[@rdf:resource='urn:sha1:12f68888e3beff267deae42ea86058c9c0565e36']", ns)
                     .to("mock:fixity")
                     .filter().xpath(
-                        "/rdf:RDF/rdf:Description/fedora:status" +
+                        "/rdf:RDF/rdf:Description/premis:hasEventOutcome" +
                         "[text()='SUCCESS']", ns)
                     .to("mock:fixity");
 
