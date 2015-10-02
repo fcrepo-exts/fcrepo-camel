@@ -62,7 +62,7 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
             resultEndpoint.expectedBodyReceived().body().contains(encode(s, "UTF-8"));
         }
         resultEndpoint.expectedBodyReceived().body().contains(
-                encode("<" + base + path + "> dc:title \"some title\" .", "UTF-8"));
+                encode("<" + base + path + "> dc:title \"some title & other\" .", "UTF-8"));
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 

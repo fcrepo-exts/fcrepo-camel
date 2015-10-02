@@ -75,7 +75,8 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
         operationEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         titleEndpoint.expectedMessageCount(3);
-        titleEndpoint.expectedBodiesReceivedInAnyOrder("some title", "some title", "some other title");
+        titleEndpoint.expectedBodiesReceivedInAnyOrder(
+                "some title &amp; other", "some title &amp; other", "some other title");
         titleEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         titleEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 

@@ -77,7 +77,7 @@ public final class FcrepoTestUtils {
      */
     public static String getTurtleDocument() {
         return "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n\n" +
-                "<> dc:title \"some title\" .";
+                "<> dc:title \"some title & other\" .";
     }
 
     /**
@@ -87,7 +87,7 @@ public final class FcrepoTestUtils {
      */
     public static String getN3Document() {
         return "<http://localhost/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/author> \"Author\" .\n" +
-                "<http://localhost/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/title> \"Title\" .";
+                "<http://localhost/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/title> \"This & That\" .";
     }
 
     /**
