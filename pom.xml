@@ -50,8 +50,8 @@
     <mockito.version>1.10.8</mockito.version>
     <slf4j.version>1.7.10</slf4j.version>
     <spring.version>4.1.4.RELEASE</spring.version>
-    <fcrepo.version>4.3.1-SNAPSHOT</fcrepo.version>
-    <fcrepo-transform.version>4.3.1-SNAPSHOT</fcrepo-transform.version>
+    <fcrepo.version>4.4.1-SNAPSHOT</fcrepo.version>
+    <fcrepo-transform.version>4.4.1-SNAPSHOT</fcrepo-transform.version>
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
     <commons.codec.version>1.9</commons.codec.version>
     <commons.csv.version>1.1</commons.csv.version>
@@ -226,56 +226,56 @@
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-kernel-api</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-kernel-modeshape</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-jms</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-http-api</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-configs</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-transform</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo-transform.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-auth-common</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-http-commons</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>
@@ -283,7 +283,7 @@
     <dependency>
       <groupId>org.fcrepo</groupId>
       <artifactId>fcrepo-metrics</artifactId>
-      <version>4.4.1-SNAPSHOT</version>
+      <version>${fcrepo.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
