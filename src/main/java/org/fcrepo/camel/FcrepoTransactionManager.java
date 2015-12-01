@@ -20,6 +20,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.InputStream;
 import java.net.URI;
 
+import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoOperationFailedException;
+import org.fcrepo.client.FcrepoResponse;
 import org.slf4j.Logger;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
