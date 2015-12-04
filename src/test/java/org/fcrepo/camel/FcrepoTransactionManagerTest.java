@@ -27,6 +27,9 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.net.URI;
 
+import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoOperationFailedException;
+import org.fcrepo.client.FcrepoResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
