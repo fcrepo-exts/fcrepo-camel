@@ -64,7 +64,7 @@
     <jsonld.version>0.5.1</jsonld.version>
     <!-- plugins -->
     <jetty.plugin.version>9.2.6.v20141205</jetty.plugin.version>
-    <depends.plugin.version>1.2</depends.plugin.version>
+    <paxexam.plugin.version>1.2.4</paxexam.plugin.version>
     <!-- osgi bundle configuration -->
     <osgi.export.packages>org.fcrepo.camel.*;version=${project.version}</osgi.export.packages>
     <osgi.import.packages>*</osgi.import.packages>
@@ -212,27 +212,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-      <version>${pax-exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-inject</artifactId>
-      <version>${pax-exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-aether</artifactId>
-      <version>1.6.0</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-arq</artifactId>
       <version>${jena.version}</version>
@@ -333,13 +312,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ops4j.pax.exam.samples</groupId>
-      <artifactId>pax-exam-sample8-ds</artifactId>
-      <version>${pax-exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.karaf</groupId>
       <artifactId>apache-karaf</artifactId>
       <version>${karaf.version}</version>
@@ -414,7 +386,7 @@
       <plugin>
        <groupId>org.ops4j.pax.exam</groupId>
        <artifactId>maven-paxexam-plugin</artifactId>
-       <version>1.2.4</version>
+       <version>${paxexam.plugin.version}</version>
        <executions>
          <execution>
            <id>generate-config</id>
