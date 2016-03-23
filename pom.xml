@@ -54,7 +54,7 @@
     <spring.version>4.1.4.RELEASE</spring.version>
     <fcrepo.version>4.4.0</fcrepo.version>
     <fcrepo-transform.version>4.4.0</fcrepo-transform.version>
-    <fcrepo-java-client.version>0.1.1</fcrepo-java-client.version>
+    <fcrepo-java-client.version>0.1.2</fcrepo-java-client.version>
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
     <commons.codec.version>1.9</commons.codec.version>
     <commons.csv.version>1.1</commons.csv.version>
