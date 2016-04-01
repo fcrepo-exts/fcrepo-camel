@@ -67,7 +67,7 @@ public class KarafIT {
             features(maven().groupId("org.apache.karaf.features").artifactId("standard")
                         .versionAsInProject().classifier("features").type("xml"), "scr"),
             features(maven().groupId("org.apache.camel.karaf").artifactId("apache-camel")
-                        .type("xml").classifier("features").versionAsInProject(), "camel-blueprint"),
+                        .type("xml").classifier("features").versionAsInProject(), "camel-blueprint", "camel-spring"),
             features(bundle(fcrepoFeatures).start(), "fcrepo-camel")
        };
     }

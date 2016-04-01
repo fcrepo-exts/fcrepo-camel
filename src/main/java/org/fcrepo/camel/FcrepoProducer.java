@@ -216,6 +216,8 @@ public class FcrepoProducer extends DefaultProducer {
             return endpoint.getAccept();
         } else if (!isBlank(acceptHeader)) {
             return acceptHeader;
+        } else if (!endpoint.getMetadata()) {
+            return "*/*";
         } else {
             return DEFAULT_CONTENT_TYPE;
         }
