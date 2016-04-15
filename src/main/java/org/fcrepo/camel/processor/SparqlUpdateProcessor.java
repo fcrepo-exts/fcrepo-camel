@@ -79,6 +79,6 @@ public class SparqlUpdateProcessor implements Processor {
 
         in.setBody("update=" + encode(query.toString(), "UTF-8"));
         in.setHeader(Exchange.HTTP_METHOD, "POST");
-        in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
+        in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
     }
 }

@@ -58,6 +58,6 @@ public class SparqlInsertProcessor implements Processor {
         exchange.getIn().setBody("update=" +
                 encode(insertData(serializedGraph.toString("UTF-8"), namedGraph), "UTF-8"));
         exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
-        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
+        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
     }
 }
