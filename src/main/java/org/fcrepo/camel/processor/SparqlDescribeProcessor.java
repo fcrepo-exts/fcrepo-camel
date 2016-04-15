@@ -51,6 +51,6 @@ public class SparqlDescribeProcessor implements Processor {
         exchange.getIn().setBody("query=" + encode("DESCRIBE <" + subject + ">", "UTF-8"));
         exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
         exchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, "application/rdf+xml");
-        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded");
+        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
     }
 }

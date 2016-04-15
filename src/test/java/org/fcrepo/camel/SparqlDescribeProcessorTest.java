@@ -62,7 +62,7 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
 
         // Assertions
         resultEndpoint.expectedBodiesReceived("query=" + encode("DESCRIBE <" + base + path + ">", "UTF-8"));
-        resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/x-www-form-urlencoded");
+        resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
         resultEndpoint.expectedHeaderReceived(ACCEPT_CONTENT_TYPE, "application/rdf+xml");
 
