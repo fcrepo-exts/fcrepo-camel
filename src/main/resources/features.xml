@@ -3,7 +3,9 @@
   <feature name="fcrepo-camel" version="${project.version}" resolver="(obr)" start-level="50">
     <details>Installs the fcrepo-camel component</details>
 
+    <feature>transaction</feature>
     <feature version="${camel.version.range}">camel</feature>
+    <feature version="${camel.version.range}">camel-spring</feature>
 
     <bundle dependency="true">mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
     <bundle dependency="true">mvn:org.apache.commons/commons-csv/${commons.csv.version}</bundle>
