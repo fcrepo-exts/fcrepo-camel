@@ -15,11 +15,17 @@
  */
 package org.fcrepo.camel.integration;
 
+import static org.osgi.framework.Bundle.ACTIVE;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.bundle;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
@@ -38,6 +44,7 @@ import org.ops4j.pax.exam.ConfigurationManager;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 
 /**
@@ -52,12 +59,23 @@ public class KarafIT {
     @Inject
     protected FeaturesService featuresService;
 
+    @Inject
+    protected BundleContext bundleContext;
+
     @Configuration
     public Option[] config() {
         final ConfigurationManager cm = new ConfigurationManager();
-        final String fcrepoFeatures = "file:" + getBaseDir() + "/target/classes/features.xml";
         final String artifactName = cm.getProperty("project.artifactId") + "-" + cm.getProperty("project.version");
         final String fcrepoCamelBundle = "file:" + getBaseDir() + "/target/" + artifactName + ".jar";
+        final String commonsCodecVersion = cm.getProperty("commons.codec.version");
+        final String commonsCsvVersion = cm.getProperty("commons.csv.version");
+        final String httpclientVersion = cm.getProperty("httpclient.version");
+        final String httpcoreVersion = cm.getProperty("httpcore.version");
+        final String thriftVersion = cm.getProperty("thrift.version");
+        final String jenaVersion = cm.getProperty("jena.version");
+        final String rmiRegistryPort = cm.getProperty("karaf.rmiRegistry.port");
+        final String rmiServerPort = cm.getProperty("karaf.rmiServer.port");
+        final String sshPort = cm.getProperty("karaf.ssh.port");
         return new Option[] {
             karafDistributionConfiguration()
                 .frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf")
@@ -67,11 +85,27 @@ public class KarafIT {
             logLevel(LogLevel.WARN),
             keepRuntimeFolder(),
             configureConsole().ignoreLocalConsole(),
+            systemProperty("fcrepo-camel-bundle").value(fcrepoCamelBundle),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
+            editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
             features(maven().groupId("org.apache.karaf.features").artifactId("standard")
                         .versionAsInProject().classifier("features").type("xml"), "scr"),
             features(maven().groupId("org.apache.camel.karaf").artifactId("apache-camel")
                         .type("xml").classifier("features").versionAsInProject(), "camel-blueprint", "camel-spring"),
-            features(bundle(fcrepoFeatures).start(), "fcrepo-camel"),
+            mavenBundle().groupId("commons-codec").artifactId("commons-codec").version(commonsCodecVersion),
+            mavenBundle().groupId("org.apache.commons").artifactId("commons-csv").version(commonsCsvVersion),
+            mavenBundle().groupId("org.apache.commons").artifactId("commons-lang3").versionAsInProject(),
+            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").version(httpclientVersion),
+            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").version(httpcoreVersion),
+            mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").version(jenaVersion),
+            mavenBundle().groupId("com.google.guava").artifactId("guava").versionAsInProject(),
+            mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").versionAsInProject(),
+            mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").versionAsInProject(),
+            mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-databind").versionAsInProject(),
+            mavenBundle().groupId("com.github.jsonld-java").artifactId("jsonld-java").versionAsInProject(),
+            mavenBundle().groupId("org.apache.thrift").artifactId("libthrift").version(thriftVersion),
+            mavenBundle().groupId("org.fcrepo.client").artifactId("fcrepo-java-client").versionAsInProject(),
             bundle(fcrepoCamelBundle).start()
        };
     }
@@ -79,6 +113,7 @@ public class KarafIT {
     @Test
     public void testInstallation() throws Exception {
         assertTrue(featuresService.isInstalled(featuresService.getFeature("camel-core")));
-        assertTrue(featuresService.isInstalled(featuresService.getFeature("fcrepo-camel")));
+        assertNotNull(bundleContext);
+        assertEquals(ACTIVE, bundleContext.getBundle(System.getProperty("fcrepo-camel-bundle")).getState());
     }
 }
