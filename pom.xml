@@ -351,6 +351,9 @@
           <portNames>
             <portName>fcrepo.dynamic.test.port</portName>
             <portName>jetty.dynamic.stop.port</portName>
+            <portName>karaf.ssh.port</portName>
+            <portName>karaf.rmiRegistry.port</portName>
+            <portName>karaf.rmiServer.port</portName>
           </portNames>
         </configuration>
         <executions>
@@ -404,6 +407,15 @@
           <argLine>${jacoco.agent.it.arg}</argLine>
           <systemPropertyVariables>
             <fcrepo.dynamic.test.port>${fcrepo.dynamic.test.port}</fcrepo.dynamic.test.port>
+            <commons.codec.version>${commons.codec.version}</commons.codec.version>
+            <commons.csv.version>${commons.csv.version}</commons.csv.version>
+            <httpclient.version>${httpclient.version}</httpclient.version>
+            <httpcore.version>${httpcore.version}</httpcore.version>
+            <thrift.version>${thrift.version}</thrift.version>
+            <jena.version>${jena.version}</jena.version>
+            <karaf.ssh.port>${karaf.ssh.port}</karaf.ssh.port>
+            <karaf.rmiRegistry.port>${karaf.rmiRegistry.port}</karaf.rmiRegistry.port>
+            <karaf.rmiServer.port>${karaf.rmiServer.port}</karaf.rmiServer.port>
             <project.artifactId>${project.artifactId}</project.artifactId>
             <project.version>${project.version}</project.version>
           </systemPropertyVariables>
