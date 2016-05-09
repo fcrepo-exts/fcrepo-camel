@@ -15,6 +15,8 @@
  */
 package org.fcrepo.camel;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.net.URI;
 
 import org.apache.camel.Consumer;
@@ -56,7 +58,9 @@ public class FcrepoEndpoint extends DefaultEndpoint {
         super(uri, component);
         this.configuration = configuration;
         this.transactionManager = component.getTransactionManager();
-        setBaseUrl(remaining);
+        if (isBlank(configuration.getBaseUrl())) {
+            setBaseUrl(remaining);
+        }
     }
 
     /**

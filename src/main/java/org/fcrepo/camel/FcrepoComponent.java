@@ -124,6 +124,14 @@ public class FcrepoComponent extends UriEndpointComponent {
     }
 
     /**
+     * set the baseUrl component-wide
+     * @param baseUrl the repository root
+     */
+    public void setBaseUrl(final String baseUrl) {
+        getConfiguration().setBaseUrl(baseUrl);
+    }
+
+    /**
      *  Create an Endpoint from a fcrepo uri along with an optional path value and attributes.
      *  @param uri the fcrepo uri identifying the repository hostname and port
      *  @param remaining the string identifying the repository path
