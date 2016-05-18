@@ -124,6 +124,7 @@ sometimes convenient to set up component-wide configurations. This can be done v
       <property name="authUsername" value="${fcrepo.authUsername}"/>
       <property name="authPassword" value="${fcrepo.authPassword}"/>
       <property name="authHost" value="${fcrepo.authHost}"/>
+      <property name="baseUrl" value="${fcrepo.baseUrl}"/>
     </bean>
 
 
