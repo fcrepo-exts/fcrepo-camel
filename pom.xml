@@ -13,7 +13,7 @@
   <artifactId>fcrepo-camel</artifactId>
   <packaging>bundle</packaging>
 
-  <version>4.4.2-SNAPSHOT</version>
+  <version>4.4.3-SNAPSHOT</version>
 
   <name>Fcrepo Camel Component</name>
   <description>Camel Component for interacting with a Fedora Repository</description>
