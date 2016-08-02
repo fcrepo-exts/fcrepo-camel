@@ -335,5 +335,4 @@ Maintainers
 Current maintainers:
 
 * [Aaron Coburn](https://github.com/acoburn)
-* [Daniel Lamb](https://github.com/daniel-dgi)
-
+* [Daniel Lamb](https://github.com/dannylamb)
