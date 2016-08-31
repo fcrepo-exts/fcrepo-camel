@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,6 +16,8 @@
  * limitations under the License.
  */
 package org.fcrepo.camel.integration;
+
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +32,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.RdfNamespaces;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -123,15 +126,15 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
         operationEndpoint.assertIsSatisfied();
 
         // Check deleted container
-        for (Exchange exchange : goneEndpoint.getExchanges()) {
-            Assert.assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
-            Assert.assertTrue(exchange.getIn().getBody(String.class).contains("Gone"));
-        }
+        goneEndpoint.getExchanges().forEach(exchange -> {
+            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
+            assertTrue(exchange.getIn().getBody(String.class).contains("Discovered tombstone"));
+        });
 
-        for (Exchange exchange : notFoundEndpoint.getExchanges()) {
-            Assert.assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
-            Assert.assertTrue(exchange.getIn().getBody(String.class).contains("Not Found"));
-        }
+        notFoundEndpoint.getExchanges().forEach(exchange -> {
+            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
+            assertTrue(exchange.getIn().getBody(String.class).contains("Not Found"));
+        });
     }
 
     @Override
