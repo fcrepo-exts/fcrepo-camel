@@ -136,12 +136,10 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
         // Check deleted container
         for (Exchange exchange : goneEndpoint.getExchanges()) {
             assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-            assertTrue(exchange.getIn().getBody(String.class).contains("Discovered tombstone"));
         }
 
         for (Exchange exchange : notFoundEndpoint.getExchanges()) {
             assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
-            assertTrue(exchange.getIn().getBody(String.class).contains("Not Found"));
         }
      }
 

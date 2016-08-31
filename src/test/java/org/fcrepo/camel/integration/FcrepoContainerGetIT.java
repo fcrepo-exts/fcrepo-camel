@@ -137,12 +137,10 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
         // Check deleted container
         goneEndpoint.getExchanges().forEach(exchange -> {
             assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-            assertTrue(exchange.getIn().getBody(String.class).contains("Discovered tombstone"));
         });
 
         notFoundEndpoint.getExchanges().forEach(exchange -> {
             assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
-            assertTrue(exchange.getIn().getBody(String.class).contains("Not Found"));
         });
     }
 
