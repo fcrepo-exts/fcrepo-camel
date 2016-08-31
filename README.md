@@ -7,6 +7,7 @@ The **fcrepo:** component provides access to an external
 for use with [Apache Camel](https://camel.apache.org).
 
 [![Build Status](https://travis-ci.org/fcrepo4-exts/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4-exts/fcrepo-camel)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.camel/fcrepo-camel/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.camel/fcrepo-camel/)
 
 URI format
 ----------
@@ -303,22 +304,20 @@ header values:
   * `org.fcrepo.jms.baseURL`
   * `org.fcrepo.jms.eventType`
   * `org.fcrepo.jms.identifier`
-  * `org.fcrepo.jms.properties`
+  * `org.fcrepo.jms.resourceType`
   * `org.fcrepo.jms.timestamp`
   * `org.fcrepo.jms.user`
   * `org.fcrepo.jms.userAgent`
 
-Both `eventType` and `properties` are comma-delimited lists of events or properties.
-The `eventType` values follow the JCR 2.0 specification and include:
+Both `eventType` and `resourceType` are comma-delimited lists of values.
+The `eventType` values follow the [Fedora Event Type ontology](http://fedora.info/definitions/v4/event#):
 
-  * `http://fedora.info/definitions/v4/repository#NODE_ADDED`
-  * `http://fedora.info/definitions/v4/repository#NODE_REMOVED`
-  * `http://fedora.info/definitions/v4/repository#PROPERTY_ADDED`
-  * `http://fedora.info/definitions/v4/repository#PROPERTY_CHANGED`
-  * `http://fedora.info/definitions/v4/repository#PROPERTY_REMOVED`
+  * `http://fedora.info/definitions/v4/event#ResourceCreation`
+  * `http://fedora.info/definitions/v4/event#ResourceDeletion`
+  * `http://fedora.info/definitions/v4/event#ResourceModification`
+  * `http://fedora.info/definitions/v4/event#ResourceRelocation`
 
-The `properties` field will list the RDF properties that changed with that
-event. `NODE_REMOVED` events contain no properties.
+The `resourceType` values will include any `rdf:type` values for the resource in question.
 
 Examples and more information
 -----------------------------
