@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -19,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.RdfNamespaces;
-import org.fcrepo.jms.headers.DefaultMessageFactory;
+import org.fcrepo.jms.DefaultMessageFactory;
 import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +39,6 @@ public class FcrepoConstantsIT {
         assertEquals(JmsHeaders.IDENTIFIER, DefaultMessageFactory.IDENTIFIER_HEADER_NAME);
         assertEquals(JmsHeaders.EVENT_TYPE, DefaultMessageFactory.EVENT_TYPE_HEADER_NAME);
         assertEquals(JmsHeaders.EVENT_ID, DefaultMessageFactory.EVENT_ID_HEADER_NAME);
-        assertEquals(JmsHeaders.PROPERTIES, DefaultMessageFactory.PROPERTIES_HEADER_NAME);
         assertEquals(JmsHeaders.TIMESTAMP, DefaultMessageFactory.TIMESTAMP_HEADER_NAME);
         assertEquals(JmsHeaders.USER, DefaultMessageFactory.USER_HEADER_NAME);
         assertEquals(JmsHeaders.USER_AGENT, DefaultMessageFactory.USER_AGENT_HEADER_NAME);
