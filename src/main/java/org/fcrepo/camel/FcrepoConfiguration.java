@@ -242,6 +242,7 @@ public class FcrepoConfiguration implements Cloneable {
      * 
      * @param transform define an LD-Path transform program for converting RDF to JSON
      */
+    @Deprecated
     public void setTransform(final String transform) {
         this.transform = transform;
     }

@@ -26,7 +26,7 @@ FcrepoEndpoint options
 | `accept` | `null` | Set the `Accept` header for content negotiation |
 | `fixity` | `false` | Whether GET requests should check the fixity of non-RDF content |
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
-| `transform` | `null` | If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
+| `transform` | `null` | **Deprecated** If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
 | `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
@@ -39,69 +39,70 @@ A simple example for sending messages to an external Solr service:
     XPathBuilder xpath = new XPathBuilder("/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#Indexable']");
     xpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
-    from("activemq:topic:fedora")
+    from("activemq:topic:fedora").routeId("triplestore-router")
+      .setHeader(FCREPO_IDENTIFIER).header("org.fcrepo.jms.identifier")
+      .setHeader(FCREPO_BASE_URL).header("org.fcrepo.jms.baseUrl")
       .choice()
-        .when(header("org.fcrepo.jms.eventType").isEqualTo("http://fedora.info/definitions/v4/repository#NODE_REMOVED"))
+        .when(simple("${header[org.fcrepo.jms.eventType]} == \"http://fedora.info/definitions/v4/event#ResourceDeletion\"))
           .to("direct:remove")
-        .otherwise()
-          .to("direct:update");
-
-    from("direct:update")
-      .to("fcrepo:localhost:8080/rest")
-      .choice()
-        .when(xpath)
-          .to("fcrepo:localhost:8080/rest?transform=mytransform")
-          .to("http4:solr-host:8080/solr/core/update")
+        .when(simple("${header[org.fcrepo.jms.resourceType]} contains \"http://fedora.info/definitions/v4/indexing#Indexable\""))
+          .to("direct:update")
         .otherwise()
           .to("direct:remove");
 
-    from("direct:remove")
-      .transform()
-        .simple("{\"delete\":{\"id\":\"${header[org.fcrepo.jms.identifier]}\"}}")
-      .setHeader(Exchange.CONTENT_TYPE, "application/json")
-      .setHeader(Exchange.HTTP_METHOD, "POST")
-      .to("http4:solr-host:8080/solr/core/update");
+    from("direct:update").routeId("triplestore-updater")
+      .to("fcrepo:localhost:8080/fcrepo/rest?accept=application/n-triples")
+      .process(new SparqlUpdateProcessor())
+      .to("http4:triplestore-host:8080/dataset/update");
+
+    from("direct:remove").routeId("triplestore-remover")
+      .process(new SparqlDeleteProcessor())
+      .to("http4:triplestore-host:8080/dataset/update");
 
 Or, using the Spring DSL:
 
-    <route id="solr-router">
-      <from uri="activemq:topic:fedora"/>
-      <choice>
-        <when>
-          <simple>${header[org.fcrepo.jms.eventType]} == 'http://fedora.info/definitions/v4/repository#NODE_REMOVED'</simple>
-          <to uri="direct:remove"/>
-        </when>
-        <otherwise>
-          <to uri="direct:update"/>
-        </otherwise>
-      </choice>
-    </route>
+    <bean id="updateProcessor" class="org.fcrepo.camel.processor.SparqlUpdateProcessor"/>
+    <bean id="deleteProcessor" class="org.fcrepo.camel.processor.SparqlDeleteProcessor"/>
 
-    <route id="solr-updater">
-      <from uri="direct:update"/>
-      <to uri="fcrepo:localhost:8080/rest"/>
-      <filter>
-        <xpath>/rdf:RDF/rdf:Description/rdf:type[@rdf:resource='http://fedora.info/definitions/v4/indexing#Indexable']</xpath>
-        <to uri="fcrepo:localhost:8080/rest?transform=mytransform"/>
-        <to uri="http4:solr-host:8080/solr/core/update"/>
-      </filter>
-    </route>
+    <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+      <route id="triplestore-router">
+        <from uri="activemq:topic:fedora"/>
+        <setHeader headerName="CamelFcrepoIdentifier">
+          <simple>${header[org.fcrepo.jms.identifier]}</simple>
+        </setHeader>
+        <setHeader headerName="CamelFcrepoBaseUrl">
+          <simple>${header[org.fcrepo.jms.baseUrl]}</simple>
+        </setHeader>
+        <choice>
+          <when>
+            <simple>${header[org.fcrepo.jms.eventType]} == 'http://fedora.info/definitions/v4/event#ResourceDeletion'</simple>
+            <to uri="direct:remove"/>
+          </when>
+          <when>
+            <simple>${header[org.fcrepo.jms.resourceType]} contains "http://fedora.info/definitions/v4/indexing#Indexable"</simple>
+            <to uri="direct:update"/>
+          </when>
+          <otherwise>
+            <to uri="direct:remove"/>
+          </otherwise>
+        </choice>
+      </route>
 
-    <route id="solr-remover">
-      <from uri="direct:remove"/>
-      <transform>
-        <simple>{"delete":{"id":"${header[org.fcrepo.jms.baseURL]}${header[org.fcrepo.jms.identifier]}"}}</simple>
-      </transform>
-      <setHeader headerName="Content-Type">
-        <constant>application/json</constant>
-      </setHeader>
-      <setHeader headerName="CamelHttpMethod">
-        <constant>POST</constant>
-      </setHeader>
-      <to uri="http4:solr-host:8080/solr/core/update"/>
-    </route>
+      <route id="triplestore-updater">
+        <from uri="direct:update"/>
+        <to uri="fcrepo:localhost:8080/rest?accept=application/n-triples"/>
+        <process ref="updateProcessor"/>
+        <to uri="http4:triplestore-host:8080/dataset/update"/>
+      </route>
 
-**Please Note**: as in this example, if you plan to handle `NODE_REMOVED` events, you should expect any requests
+      <route id="triplestore-remover">
+        <from uri="direct:remove"/>
+        <process ref="deleteProcessor"/>
+        <to uri="http4:triplestore-host:8080/dataset/update"/>
+      </route>
+    </camelContext>
+
+**Please Note**: as in this example, if you plan to handle `ResourceDeletion` events, you should expect any requests
 back to fedora (via `fcrepo:`) to respond with a `410 Gone` error, so it is recommended that you route your
 messages accordingly.
 
@@ -140,7 +141,7 @@ Message headers
 | `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
 | `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
 | `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
-| `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
+| `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | **Deprecated** The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH`   | `String` | Sets a URI for a named graph when used with the `processor.Sparql*` classes. This may be useful when storing data in an external triplestore. |
 
 The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `CamelFcrepoIdentifier` is not defined.
@@ -151,7 +152,7 @@ If these headers are used with the Spring DSL or with the Simple language, the h
 | ------- | ----- |
 | `FcrepoHeaders.FCREPO_BASE_URL` | `CamelFcrepoBaseUrl` |
 | `FcrepoHeaders.FCREPO_IDENTIFIER` | `CamelFcrepoIdentifier` |
-| `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` |
+| `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` (**Deprecated**) |
 | `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH` | `CamelFcrepoNamedGraph` |
 
