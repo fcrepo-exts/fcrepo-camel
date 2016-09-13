@@ -313,6 +313,7 @@ public class FcrepoProducer extends DefaultProducer {
         if (!isBlank(transformPath)) {
             url.append(transformPath);
         } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
+            LOGGER.warn("The tombstone option is deprecated and will be removed in the 4.5.0 release of fcrepo-camel");
             url.append("/fcr:tombstone");
         }
 
