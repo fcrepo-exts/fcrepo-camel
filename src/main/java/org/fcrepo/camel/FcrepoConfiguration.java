@@ -260,6 +260,7 @@ public class FcrepoConfiguration implements Cloneable {
      * 
      * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
      */
+    @Deprecated
     public void setTombstone(final Boolean tombstone) {
         this.tombstone = tombstone;
     }
