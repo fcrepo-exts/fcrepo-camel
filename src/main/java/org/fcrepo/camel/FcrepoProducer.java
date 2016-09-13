@@ -277,6 +277,7 @@ public class FcrepoProducer extends DefaultProducer {
         final String fcrTransform = "/fcr:transform";
 
         if (!isBlank(endpoint.getTransform()) || !isBlank(transformProgram)) {
+            LOGGER.warn("The transform option for fcrepo-camel has been deprecated and will be removed in 4.5.0");
             if (method == HttpMethods.POST) {
                 return fcrTransform;
             } else if (method == HttpMethods.GET) {
