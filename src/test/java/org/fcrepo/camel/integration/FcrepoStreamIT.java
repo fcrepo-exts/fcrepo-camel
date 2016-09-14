@@ -62,9 +62,6 @@ public class FcrepoStreamIT extends CamelTestSupport {
     @EndpointInject(uri = "mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @EndpointInject(uri = "mock:verifyNotFound")
-    protected MockEndpoint notFoundEndpoint;
-
     @Produce(uri = "direct:filter")
     protected ProducerTemplate template;
 
@@ -76,15 +73,12 @@ public class FcrepoStreamIT extends CamelTestSupport {
 
         childEndpoint.expectedMessageCount(children);
 
-        deletedEndpoint.expectedMessageCount(2);
-        deletedEndpoint.expectedBodiesReceived(null, null);
+        deletedEndpoint.expectedMessageCount(1);
+        deletedEndpoint.allMessages().body().equals(null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         goneEndpoint.expectedMessageCount(1);
         goneEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 410);
-
-        notFoundEndpoint.expectedMessageCount(1);
-        notFoundEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 404);
 
         final Map<String, Object> headers = new HashMap<>();
         headers.put(Exchange.HTTP_METHOD, "PUT");
@@ -109,7 +103,6 @@ public class FcrepoStreamIT extends CamelTestSupport {
         childEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
         deletedEndpoint.assertIsSatisfied();
-        notFoundEndpoint.assertIsSatisfied();
 
         for (Exchange exchange : childEndpoint.getExchanges()) {
             Assert.assertTrue(exchange.getIn().getBody(String.class).contains("/stream/"));
@@ -153,13 +146,7 @@ public class FcrepoStreamIT extends CamelTestSupport {
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
                     .to(fcrepo_uri + "?throwExceptionOnFailure=false")
-                    .to("mock:verifyGone")
-                    .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))
-                    .to(fcrepo_uri + "?tombstone=true")
-                    .to("mock:deleted")
-                    .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
-                    .to("mock:verifyNotFound");
+                    .to("mock:verifyGone");
             }
         };
     }

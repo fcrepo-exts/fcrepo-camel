@@ -26,8 +26,6 @@ public final class FcrepoHeaders {
 
     public static final String FCREPO_IDENTIFIER = "CamelFcrepoIdentifier";
 
-    public static final String FCREPO_TRANSFORM = "CamelFcrepoTransform";
-
     public static final String FCREPO_PREFER = "CamelFcrepoPrefer";
 
     public static final String FCREPO_NAMED_GRAPH = "CamelFcrepoNamedGraph";

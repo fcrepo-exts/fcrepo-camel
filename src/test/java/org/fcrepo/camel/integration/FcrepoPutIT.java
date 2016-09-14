@@ -17,6 +17,8 @@
  */
 package org.fcrepo.camel.integration;
 
+import static java.util.UUID.randomUUID;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,8 +60,9 @@ public class FcrepoPutIT extends CamelTestSupport {
 
     @Test
     public void testPut() throws InterruptedException {
-        final String path1 = "/test/a/b/c/d";
-        final String path2 = "/test/a/b/c/e";
+
+        final String path1 = "/" + randomUUID();
+        final String path2 = "/" + randomUUID();
 
         // Assertions
         resultEndpoint.expectedMessageCount(2);
@@ -69,7 +72,7 @@ public class FcrepoPutIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(2);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        deletedEndpoint.expectedMessageCount(4);
+        deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         // Setup
@@ -131,8 +134,6 @@ public class FcrepoPutIT extends CamelTestSupport {
 
                 from("direct:teardown")
                     .to(fcrepo_uri)
-                    .to("mock:deleted")
-                    .to(fcrepo_uri + "?tombstone=true")
                     .to("mock:deleted");
             }
         };

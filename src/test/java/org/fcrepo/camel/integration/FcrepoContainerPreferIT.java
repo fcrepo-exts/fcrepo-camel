@@ -62,9 +62,6 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
     @EndpointInject(uri = "mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @EndpointInject(uri = "mock:verifyNotFound")
-    protected MockEndpoint notFoundEndpoint;
-
     @Produce(uri = "direct:filter")
     protected ProducerTemplate template;
 
@@ -82,15 +79,12 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        deletedEndpoint.expectedMessageCount(4);
-        deletedEndpoint.expectedBodiesReceived(null, null, null, null);
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedBodiesReceived(null, null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         goneEndpoint.expectedMessageCount(2);
         goneEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 410);
-
-        notFoundEndpoint.expectedMessageCount(2);
-        notFoundEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 404);
 
         final Map<String, Object> headers = new HashMap<>();
         headers.put(Exchange.HTTP_METHOD, "POST");
@@ -150,16 +144,11 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
         filteredEndpoint.assertIsSatisfied();
         containerEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
-        notFoundEndpoint.assertIsSatisfied();
         deletedEndpoint.assertIsSatisfied();
 
         // Check deleted container
         goneEndpoint.getExchanges().forEach(exchange -> {
             assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
-
-        notFoundEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
         });
     }
 
@@ -237,13 +226,7 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
                     .to(fcrepo_uri + "?throwExceptionOnFailure=false")
-                    .to("mock:verifyGone")
-                    .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))
-                    .to(fcrepo_uri + "?tombstone=true")
-                    .to("mock:deleted")
-                    .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
-                    .to("mock:verifyNotFound");
+                    .to("mock:verifyGone");
             }
         };
     }

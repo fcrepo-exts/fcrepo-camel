@@ -107,29 +107,12 @@ public class FcrepoEndpointTest {
     @Test
     public void testConfiguration() {
         final FcrepoConfiguration config = new FcrepoConfiguration();
-        config.setTombstone(true);
+        config.setFixity(true);
 
         final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
-        assertEquals(false, testEndpoint.getTombstone());
+        assertEquals(false, testEndpoint.getFixity());
         testEndpoint.setConfiguration(config);
-        assertEquals(true, testEndpoint.getTombstone());
-    }
-
-    @Test
-    public void testTombstone() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
-        assertEquals(false, testEndpoint.getTombstone());
-        testEndpoint.setTombstone(true);
-        assertEquals(true, testEndpoint.getTombstone());
-    }
-
-    @Test
-    public void testTransform() {
-        final FcrepoEndpoint testEndpoint = new FcrepoEndpoint(FCREPO_URI, FCREPO_PATH, mockContext, testConfig);
-        final String transform = "default";
-        assertEquals(null, testEndpoint.getTransform());
-        testEndpoint.setTransform(transform);
-        assertEquals(transform, testEndpoint.getTransform());
+        assertEquals(true, testEndpoint.getFixity());
     }
 
     @Test
