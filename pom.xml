@@ -13,7 +13,7 @@
   <artifactId>fcrepo-camel</artifactId>
   <packaging>bundle</packaging>
 
-  <version>4.4.4</version>
+  <version>4.5.0-SNAPSHOT</version>
 
   <name>Fcrepo Camel Component</name>
   <description>Camel Component for interacting with a Fedora Repository</description>
@@ -73,7 +73,7 @@
     <connection>scm:git:git://github.com/fcrepo4-exts/${project_name}.git</connection>
     <developerConnection>scm:git:git@github.com:fcrepo4-exts/${project_name}.git</developerConnection>
     <url>https://github.com/fcrepo4-exts/fcrepo-camel</url>
-    <tag>fcrepo-camel-4.4.4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
