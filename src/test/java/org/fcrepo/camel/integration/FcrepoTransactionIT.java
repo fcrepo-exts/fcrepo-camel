@@ -39,9 +39,6 @@ import org.fcrepo.camel.RdfNamespaces;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.junit.Test;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -50,8 +47,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @author Aaron Coburn
  * @since November 7, 2014
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/spring-test/test-container.xml"})
 public class FcrepoTransactionIT extends CamelTestSupport {
 
     private TransactionTemplate txTemplate;
@@ -237,7 +232,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:transactedput")
 
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/one")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
@@ -247,11 +242,11 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:transactedput")
 
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/one")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/two")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/two")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
@@ -272,7 +267,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:transactedput")
 
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/one")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
@@ -282,11 +277,11 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:transactedput")
 
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/one")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/two")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/two")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
@@ -296,16 +291,16 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:transactedput")
 
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/one")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/two")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/two")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
-                    .setHeader(Exchange.HTTP_PATH).simple("/rest${headers.TestIdentifierBase}/three")
+                    .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/three")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
                     .to(http4_uri + "?throwExceptionOnFailure=false")
                     .to("mock:notfound")

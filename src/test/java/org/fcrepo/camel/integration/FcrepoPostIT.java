@@ -32,17 +32,12 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Test adding a new resource with POST
  * @author Aaron Coburn
  * @since November 7, 2014
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/spring-test/test-container.xml"})
 public class FcrepoPostIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:created")
