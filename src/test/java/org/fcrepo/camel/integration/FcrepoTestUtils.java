@@ -43,9 +43,9 @@ public final class FcrepoTestUtils {
      */
     public static String getFcrepoBaseUrl() {
         if (FCREPO_PORT == 80) {
-            return "http://localhost/rest";
+            return "http://localhost/fcrepo/rest";
         }
-        return "http://localhost:" + FCREPO_PORT + "/rest";
+        return "http://localhost:" + FCREPO_PORT + "/fcrepo/rest";
     }
 
     /**
@@ -55,9 +55,9 @@ public final class FcrepoTestUtils {
      */
     public static String getFcrepoEndpointUri() {
         if (FCREPO_PORT == 80) {
-            return "fcrepo://localhost/rest";
+            return "fcrepo://localhost/fcrepo/rest";
         }
-        return "fcrepo://localhost:" + FCREPO_PORT + "/rest";
+        return "fcrepo://localhost:" + FCREPO_PORT + "/fcrepo/rest";
     }
 
     /**
@@ -67,9 +67,9 @@ public final class FcrepoTestUtils {
      */
     public static String getFcrepoEndpointUriWithScheme() {
         if (FCREPO_PORT == 80) {
-            return "fcrepo:http://localhost/rest";
+            return "fcrepo:http://localhost/fcrepo/rest";
         }
-        return "fcrepo:http://localhost:" + FCREPO_PORT + "/rest";
+        return "fcrepo:http://localhost:" + FCREPO_PORT + "/fcrepo/rest";
     }
 
     /**
@@ -88,8 +88,8 @@ public final class FcrepoTestUtils {
      * @return string containing NS document
      */
     public static String getN3Document() {
-        return "<http://localhost/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/author> \"Author\" .\n" +
-                "<http://localhost/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/title> \"This & That\" .";
+        return "<http://localhost/fcrepo/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/author> \"Author\" .\n" +
+                "<http://localhost/fcrepo/rest/path/a/b/c> <http://purl.org/dc/elements/1.1/title> \"This & That\" .";
     }
 
     /**

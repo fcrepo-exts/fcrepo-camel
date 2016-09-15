@@ -24,13 +24,10 @@ import org.fcrepo.camel.RdfNamespaces;
 import org.fcrepo.jms.DefaultMessageFactory;
 import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author acoburn
  */
-@RunWith(MockitoJUnitRunner.class)
 public class FcrepoConstantsIT {
 
     @Test
