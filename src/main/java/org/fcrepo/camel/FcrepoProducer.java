@@ -201,20 +201,17 @@ public class FcrepoProducer extends DefaultProducer {
 
     /**
      * Given an exchange, extract the value for use with an Accept header. The order of preference is:
-     * 1) whether a transform is being requested 2) an accept value is set on the endpoint 3) a value set on
-     * the Exchange.ACCEPT_CONTENT_TYPE header 4) a value set on an "Accept" header 5) the endpoint
-     * DEFAULT_CONTENT_TYPE (i.e. application/rdf+xml)
+     * 1) whether an accept value is set on the endpoint 2) a value set on
+     * the Exchange.ACCEPT_CONTENT_TYPE header 3) a value set on an "Accept" header
+     * 4) the endpoint DEFAULT_CONTENT_TYPE (i.e. application/rdf+xml)
      *
      * @param exchange the incoming message exchange
      */
     private String getAccept(final Exchange exchange) {
         final Message in = exchange.getIn();
-        final String fcrepoTransform = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
         final String acceptHeader = getAcceptHeader(exchange);
 
-        if (!isBlank(endpoint.getTransform()) || !isBlank(fcrepoTransform)) {
-            return "application/json";
-        } else if (!isBlank(endpoint.getAccept())) {
+        if (!isBlank(endpoint.getAccept())) {
             return endpoint.getAccept();
         } else if (!isBlank(acceptHeader)) {
             return acceptHeader;
@@ -262,36 +259,6 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
-     *  Extract a transformation path from the exchange if the appropriate headers
-     *  are set. This will format the URL to use the transform program defined
-     *  in the CamelFcrepoTransform header or the transform uri option (in that
-     *  order of precidence).
-     *
-     *  @param exchange the camel message exchange
-     *  @return String
-     */
-    private String getTransformPath(final Exchange exchange) {
-        final Message in = exchange.getIn();
-        final HttpMethods method = getMethod(exchange);
-        final String transformProgram = in.getHeader(FcrepoHeaders.FCREPO_TRANSFORM, String.class);
-        final String fcrTransform = "/fcr:transform";
-
-        if (!isBlank(endpoint.getTransform()) || !isBlank(transformProgram)) {
-            LOGGER.warn("The transform option for fcrepo-camel has been deprecated and will be removed in 4.5.0");
-            if (method == HttpMethods.POST) {
-                return fcrTransform;
-            } else if (method == HttpMethods.GET) {
-                if (!isBlank(transformProgram)) {
-                    return fcrTransform + "/" + transformProgram;
-                } else {
-                    return fcrTransform + "/" + endpoint.getTransform();
-                }
-            }
-        }
-        return "";
-    }
-
-    /**
      * Given an exchange, extract the fully qualified URL for a fedora resource. By default, this will use the entire
      * path set on the endpoint. If either of the following headers are defined, they will be appended to that path in
      * this order of preference: 1) FCREPO_IDENTIFIER 2) org.fcrepo.jms.identifier
@@ -300,7 +267,6 @@ public class FcrepoProducer extends DefaultProducer {
      */
     private String getUrl(final Exchange exchange, final String transaction) {
         final StringBuilder url = new StringBuilder();
-        final String transformPath = getTransformPath(exchange);
         final HttpMethods method = getMethod(exchange);
 
         url.append(endpoint.getBaseUrlWithScheme());
@@ -309,13 +275,6 @@ public class FcrepoProducer extends DefaultProducer {
             url.append(transaction);
         }
         url.append(getPathFromHeaders(exchange));
-
-        if (!isBlank(transformPath)) {
-            url.append(transformPath);
-        } else if (method == HttpMethods.DELETE && endpoint.getTombstone()) {
-            LOGGER.warn("The tombstone option is deprecated and will be removed in the 4.5.0 release of fcrepo-camel");
-            url.append("/fcr:tombstone");
-        }
 
         return url.toString();
     }

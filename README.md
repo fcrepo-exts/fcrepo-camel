@@ -26,7 +26,6 @@ FcrepoEndpoint options
 | `accept` | `null` | Set the `Accept` header for content negotiation |
 | `fixity` | `false` | Whether GET requests should check the fixity of non-RDF content |
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
-| `transform` | `null` | **Deprecated** If set, this defines the transform used for the given object. This should be used in the context of GET or POST. For GET requests, the value should be the name of the transform (e.g. `default`). For POST requests, the value can simply be `true`. Using this causes the `Accept` header to be set as `application/json`. |
 | `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
@@ -141,7 +140,6 @@ Message headers
 | `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
 | `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
 | `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
-| `FcrepoHeaders.FCREPO_TRANSFORM`     | `String` | **Deprecated** The named `fcr:transform` method to use. This value overrides any value set explicitly on the endpoint. |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH`   | `String` | Sets a URI for a named graph when used with the `processor.Sparql*` classes. This may be useful when storing data in an external triplestore. |
 
 The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `CamelFcrepoIdentifier` is not defined.
@@ -152,7 +150,6 @@ If these headers are used with the Spring DSL or with the Simple language, the h
 | ------- | ----- |
 | `FcrepoHeaders.FCREPO_BASE_URL` | `CamelFcrepoBaseUrl` |
 | `FcrepoHeaders.FCREPO_IDENTIFIER` | `CamelFcrepoIdentifier` |
-| `FcrepoHeaders.FCREPO_TRANSFORM` | `CamelFcrepoTransform` (**Deprecated**) |
 | `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH` | `CamelFcrepoNamedGraph` |
 

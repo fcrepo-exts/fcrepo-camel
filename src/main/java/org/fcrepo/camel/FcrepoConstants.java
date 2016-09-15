@@ -30,10 +30,6 @@ public final class FcrepoConstants {
 
     public static final String ROLLBACK = TRANSACTION + "/fcr:rollback";
 
-    public static final String TOMBSTONE = "/fcr:tombstone";
-
-    public static final String TRANSFORM = "/fcr:transform";
-
     // prevent instantiation
     private FcrepoConstants() {
     }

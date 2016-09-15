@@ -69,7 +69,7 @@ public class FcrepoPathIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(1);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedMessageCount(1);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         // Setup
@@ -126,8 +126,6 @@ public class FcrepoPathIT extends CamelTestSupport {
 
                 from("direct:teardown")
                     .to(fcrepo_uri)
-                    .to("mock:deleted")
-                    .to(fcrepo_uri + "?tombstone=true")
                     .to("mock:deleted");
             }
         };

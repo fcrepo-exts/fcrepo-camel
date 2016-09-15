@@ -40,9 +40,6 @@ public class FcrepoConfiguration implements Cloneable {
     private String accept = null;
 
     @UriParam
-    private String transform = null;
-
-    @UriParam
     private String authUsername = null;
 
     @UriParam
@@ -50,9 +47,6 @@ public class FcrepoConfiguration implements Cloneable {
 
     @UriParam
     private String authHost = null;
-
-    @UriParam
-    private Boolean tombstone = false;
 
     @UriParam
     private Boolean fixity = false;
@@ -235,44 +229,6 @@ public class FcrepoConfiguration implements Cloneable {
      */
     public Boolean getThrowExceptionOnFailure() {
         return throwExceptionOnFailure;
-    }
-
-    /**
-     * transform setter
-     * 
-     * @param transform define an LD-Path transform program for converting RDF to JSON
-     */
-    @Deprecated
-    public void setTransform(final String transform) {
-        this.transform = transform;
-    }
-
-    /**
-     * transform getter
-     *
-     * @return the name of an LD-Path transform program used to convert RDF to JSON
-     */
-    public String getTransform() {
-        return transform;
-    }
-
-    /**
-     * tombstone setter
-     * 
-     * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
-     */
-    @Deprecated
-    public void setTombstone(final Boolean tombstone) {
-        this.tombstone = tombstone;
-    }
-
-    /**
-     * tombstone getter
-     *
-     * @return whether to access the /fcr:tombstone endpoint for a resource
-     */
-    public Boolean getTombstone() {
-        return tombstone;
     }
 
     /**

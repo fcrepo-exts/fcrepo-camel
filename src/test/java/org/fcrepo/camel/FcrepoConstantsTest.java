@@ -48,8 +48,6 @@ public class FcrepoConstantsTest {
         assertEquals(FcrepoConstants.TRANSACTION, "/fcr:tx");
         assertEquals(FcrepoConstants.ROLLBACK, "/fcr:tx/fcr:rollback");
         assertEquals(FcrepoConstants.COMMIT, "/fcr:tx/fcr:commit");
-        assertEquals(FcrepoConstants.TOMBSTONE, "/fcr:tombstone");
-        assertEquals(FcrepoConstants.TRANSFORM, "/fcr:transform");
         assertEquals(FcrepoConstants.FIXITY, "/fcr:fixity");
     }
 
@@ -57,7 +55,6 @@ public class FcrepoConstantsTest {
     public void testFcrepoHeaders() {
         assertEquals(FcrepoHeaders.FCREPO_BASE_URL, "CamelFcrepoBaseUrl");
         assertEquals(FcrepoHeaders.FCREPO_IDENTIFIER, "CamelFcrepoIdentifier");
-        assertEquals(FcrepoHeaders.FCREPO_TRANSFORM, "CamelFcrepoTransform");
         assertEquals(FcrepoHeaders.FCREPO_PREFER, "CamelFcrepoPrefer");
         assertEquals(FcrepoHeaders.FCREPO_NAMED_GRAPH, "CamelFcrepoNamedGraph");
     }

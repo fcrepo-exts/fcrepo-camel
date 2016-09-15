@@ -65,9 +65,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
     @EndpointInject(uri = "mock:fixity")
     protected MockEndpoint fixityEndpoint;
 
-    @EndpointInject(uri = "mock:verifyNotFound")
-    protected MockEndpoint notFoundEndpoint;
-
     @Produce(uri = "direct:filter")
     protected ProducerTemplate template;
 
@@ -86,8 +83,8 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        deletedEndpoint.expectedMessageCount(4);
-        deletedEndpoint.expectedBodiesReceived(null, null, null, null);
+        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedBodiesReceived(null, null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         goneEndpoint.expectedMessageCount(2);
@@ -95,9 +92,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
 
         fixityEndpoint.expectedMessageCount(3);
         fixityEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
-
-        notFoundEndpoint.expectedMessageCount(2);
-        notFoundEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 404);
 
         final String binary = "/file";
         final Map<String, Object> headers = new HashMap<>();
@@ -133,7 +127,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         filteredEndpoint.assertIsSatisfied();
         binaryEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
-        notFoundEndpoint.assertIsSatisfied();
         deletedEndpoint.assertIsSatisfied();
         fixityEndpoint.assertIsSatisfied();
 
@@ -145,10 +138,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         // Check deleted container
         goneEndpoint.getExchanges().forEach(exchange -> {
             assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
-
-        notFoundEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("text/html"));
         });
     }
 
@@ -198,13 +187,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
                     .to(fcrepo_uri + "?throwExceptionOnFailure=false")
-                    .to("mock:verifyGone")
-                    .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))
-                    .to(fcrepo_uri + "?tombstone=true")
-                    .to("mock:deleted")
-                    .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
-                    .to("mock:verifyNotFound");
+                    .to("mock:verifyGone");
             }
         };
     }

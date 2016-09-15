@@ -113,7 +113,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
     @Test
     public void testTransaction() throws InterruptedException {
         // Assertions
-        deletedEndpoint.expectedMessageCount(8);
+        deletedEndpoint.expectedMessageCount(4);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         transactedEndpoint.expectedMessageCount(1);
@@ -164,7 +164,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
     @Test
     public void testTransactionWithRollback() throws InterruptedException {
         // Assertions
-        deletedEndpoint.expectedMessageCount(2);
+        deletedEndpoint.expectedMessageCount(1);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         transactedEndpoint.expectedMessageCount(0);
@@ -327,8 +327,6 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                 from("direct:teardown")
                     .setHeader(Exchange.HTTP_METHOD).constant("DELETE")
                     .to(fcrepo_uri)
-                    .to("mock:deleted")
-                    .to(fcrepo_uri + "?tombstone=true")
                     .to("mock:deleted");
             }
         };

@@ -343,26 +343,6 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     }
 
     /**
-     * transform setter
-     * 
-     * @param transform define an LD-Path transform program for converting RDF to JSON
-     */
-    @ManagedAttribute(description = "The LDPath transform program to use")
-    public void setTransform(final String transform) {
-        getConfiguration().setTransform(transform);
-    }
-
-    /**
-     * transform getter
-     *
-     * @return the LD-Path transform program used to convert RDF to JSON
-     */
-    @ManagedAttribute(description = "The LDPath transform program to use")
-    public String getTransform() {
-        return getConfiguration().getTransform();
-    }
-
-    /**
      * fixity setter
      *
      * @param fixity whether to access the /fcr:fixity endpoint for a resource
@@ -380,27 +360,6 @@ public class FcrepoEndpoint extends DefaultEndpoint {
     @ManagedAttribute(description = "Whether to access the /fcr:fixity endpoint for a resource")
     public Boolean getFixity() {
         return getConfiguration().getFixity();
-    }
-
-
-    /**
-     * tombstone setter
-     * 
-     * @param tombstone whether to access the /fcr:tombstone endpoint for a resource
-     */
-    @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
-    public void setTombstone(final Boolean tombstone) {
-        getConfiguration().setTombstone(tombstone);
-    }
-
-    /**
-     * tombstone getter
-     *
-     * @return whether to access the /fcr:tombstone endpoint for a resource
-     */
-    @ManagedAttribute(description = "Whether to use the /fcr:tombstone endpoint on objects")
-    public Boolean getTombstone() {
-        return getConfiguration().getTombstone();
     }
 
     /**
