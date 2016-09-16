@@ -17,8 +17,9 @@
  */
 package org.fcrepo.camel;
 
-import com.google.common.collect.ImmutableMap;
+import static java.util.Collections.unmodifiableMap;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,13 +37,19 @@ public final class RdfNamespaces {
 
     public static final String PREMIS = "http://www.loc.gov/premis/rdf/v1#";
 
-    public static final Map<String, String> PREFER_PROPERTIES = ImmutableMap.<String, String>builder()
-        .put("PreferContainment", LDP + "PreferContainment")
-        .put("PreferMembership", LDP + "PreferMembership")
-        .put("PreferMinimalContainer", LDP + "PreferMinimalContainer")
-        .put("ServerManaged", REPOSITORY + "ServerManaged")
-        .put("EmbedResources", REPOSITORY + "EmbedResources")
-        .put("InboundReferences", REPOSITORY + "InboundReferences").build();
+    public static final Map<String, String> PREFER_PROPERTIES;
+
+    static {
+        final Map<String, String> prefer = new HashMap<>();
+        prefer.put("PreferContainment", LDP + "PreferContainment");
+        prefer.put("PreferMembership", LDP + "PreferMembership");
+        prefer.put("PreferMinimalContainer", LDP + "PreferMinimalContainer");
+        prefer.put("ServerManaged", REPOSITORY + "ServerManaged");
+        prefer.put("EmbedResources", REPOSITORY + "EmbedResources");
+        prefer.put("InboundReferences", REPOSITORY + "InboundReferences");
+
+        PREFER_PROPERTIES = unmodifiableMap(prefer);
+    }
 
     private RdfNamespaces() {
         // Prevent instantiation

@@ -92,18 +92,14 @@ public class KarafIT {
             editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
             features(maven().groupId("org.apache.karaf.features").artifactId("standard")
                         .versionAsInProject().classifier("features").type("xml"), "scr"),
-            features(maven().groupId("org.apache.camel.karaf").artifactId("apache-camel")
-                        .type("xml").classifier("features").versionAsInProject(), "camel-blueprint", "camel-spring"),
+            features(maven().groupId("org.apache.camel.karaf").artifactId("apache-camel").type("xml")
+                    .classifier("features").versionAsInProject(), "camel-blueprint", "camel-spring", "camel-jackson"),
             mavenBundle().groupId("commons-codec").artifactId("commons-codec").version(commonsCodecVersion),
             mavenBundle().groupId("org.apache.commons").artifactId("commons-csv").version(commonsCsvVersion),
             mavenBundle().groupId("org.apache.commons").artifactId("commons-lang3").versionAsInProject(),
-            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").version(httpclientVersion),
-            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").version(httpcoreVersion),
+            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").versionAsInProject(),
+            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").versionAsInProject(),
             mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").versionAsInProject(),
-            mavenBundle().groupId("com.google.guava").artifactId("guava").versionAsInProject(),
-            mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").versionAsInProject(),
-            mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").versionAsInProject(),
-            mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-databind").versionAsInProject(),
             mavenBundle().groupId("com.github.jsonld-java").artifactId("jsonld-java").versionAsInProject(),
             mavenBundle().groupId("org.apache.thrift").artifactId("libthrift").version(thriftVersion),
             mavenBundle().groupId("org.fcrepo.client").artifactId("fcrepo-java-client").versionAsInProject(),

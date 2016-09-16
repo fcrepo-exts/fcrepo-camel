@@ -6,6 +6,7 @@
     <feature>transaction</feature>
     <feature version="${camel.version.range}">camel</feature>
     <feature version="${camel.version.range}">camel-spring</feature>
+    <feature version="${camel.version.range}">camel-jackson</feature>
 
     <bundle dependency="true">mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
     <bundle dependency="true">mvn:org.apache.commons/commons-csv/${commons.csv.version}</bundle>
@@ -14,11 +15,7 @@
     <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
     <bundle dependency="true">mvn:org.apache.jena/jena-osgi/${jena.version}</bundle>
     <bundle dependency="true">mvn:org.apache.thrift/libthrift/${thrift.version}</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson2.version}</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson2.version}</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson2.version}</bundle>
     <bundle dependency="true">mvn:com.github.jsonld-java/jsonld-java/${jsonld.version}</bundle>
-    <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     <bundle dependency="true">mvn:org.fcrepo.client/fcrepo-java-client/${fcrepo-java-client.version}</bundle>
 
     <bundle>mvn:org.fcrepo.camel/fcrepo-camel/${project.version}</bundle>
