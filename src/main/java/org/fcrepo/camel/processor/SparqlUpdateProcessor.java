@@ -36,6 +36,7 @@ import java.io.IOException;
 import com.hp.hpl.jena.rdf.model.Model;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.NoSuchHeaderException;
 import org.apache.camel.Processor;
 
 /**
@@ -51,14 +52,14 @@ public class SparqlUpdateProcessor implements Processor {
      *
      * @param exchange the current camel message exchange
      */
-    public void process(final Exchange exchange) throws IOException {
+    public void process(final Exchange exchange) throws IOException, NoSuchHeaderException {
 
         final Message in = exchange.getIn();
 
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
         final String namedGraph = in.getHeader(FCREPO_NAMED_GRAPH, "", String.class);
         final Model model = createDefaultModel();
-        final String subject = getSubjectUri(in).orElseThrow(() -> new IOException("Could not extract Subject URI"));
+        final String subject = getSubjectUri(exchange);
 
         read(model, in.getBody(InputStream.class),
                 contentTypeToLang(parse(in.getHeader(CONTENT_TYPE, String.class)).getMimeType()));

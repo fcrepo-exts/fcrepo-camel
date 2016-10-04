@@ -25,6 +25,7 @@ import static org.fcrepo.camel.processor.ProcessorUtils.getSubjectUri;
 import java.io.IOException;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.NoSuchHeaderException;
 import org.apache.camel.Processor;
 
 /**
@@ -44,9 +45,8 @@ public class SparqlDescribeProcessor implements Processor {
      *
      *  @param exchange the current camel message exchange
      */
-    public void process(final Exchange exchange) throws IOException {
-        final String subject = getSubjectUri(exchange.getIn()).orElseThrow(() ->
-                new IOException("Could not extract subject URI"));
+    public void process(final Exchange exchange) throws IOException, NoSuchHeaderException {
+        final String subject = getSubjectUri(exchange);
 
         exchange.getIn().setBody("query=" + encode("DESCRIBE <" + subject + ">", "UTF-8"));
         exchange.getIn().setHeader(HTTP_METHOD, "POST");

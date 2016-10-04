@@ -17,15 +17,13 @@
  */
 package org.fcrepo.camel.processor;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static com.hp.hpl.jena.util.URIref.encode;
+import static org.apache.camel.util.ExchangeHelper.getMandatoryHeader;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 
-import java.util.Optional;
-
-import org.apache.camel.Message;
+import org.apache.camel.Exchange;
+import org.apache.camel.NoSuchHeaderException;
 
 /**
  * Utility functions for fcrepo processor classes
@@ -43,23 +41,21 @@ public final class ProcessorUtils {
 
     private static String trimTrailingSlash(final String path) {
         if (path.endsWith("/")) {
-            return trimTrailingSlash(path.substring(0, path.length() - 1));
+            return path.substring(0, path.length() - 1);
         }
         return path;
     }
 
     /**
-     * Extract the subject URI from the incoming message headers.
-     * @param in the incoming Message
+     * Extract the subject URI from the incoming exchange.
+     * @param exchange the incoming Exchange
      * @return the subject URI
+     * @throws NoSuchHeaderException when the CamelFcrepoBaseUrl header is not present
      */
-    public static Optional<String> getSubjectUri(final Message in) {
-        final String base = in.getHeader(FCREPO_BASE_URL, String.class);
-        final String path = in.getHeader(FCREPO_IDENTIFIER, "", String.class);
-        if (base == null) {
-            return empty();
-        }
-        return of(trimTrailingSlash(base) + path);
+    public static String getSubjectUri(final Exchange exchange) throws NoSuchHeaderException {
+        final String base = getMandatoryHeader(exchange, FCREPO_BASE_URL, String.class);
+        final String path = exchange.getIn().getHeader(FCREPO_IDENTIFIER, "", String.class);
+        return trimTrailingSlash(base) + path;
     }
 
     /**

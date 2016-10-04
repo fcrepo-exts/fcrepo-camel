@@ -17,21 +17,25 @@
  */
 package org.fcrepo.camel;
 
+import static java.net.URLEncoder.encode;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
-import static java.net.URLEncoder.encode;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
+import org.apache.camel.NoSuchHeaderException;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.processor.SparqlDescribeProcessor;
 import org.junit.Test;
@@ -51,11 +55,11 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
 
     @Test
     public void missingHeaders() throws IOException, InterruptedException {
-        final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_IDENTIFIER, "/foo");
-        template.sendBodyAndHeaders(null, headers);
-        resultEndpoint.expectedMessageCount(0);
-        resultEndpoint.assertIsSatisfied();
+        final Exchange in = new DefaultExchange(context());
+        in.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        final Exchange out = template.send(in);
+        assertTrue(out.isFailed());
+        assertTrue(out.getException() instanceof NoSuchHeaderException);
     }
 
     @Test

@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.NoSuchHeaderException;
 import org.apache.camel.Processor;
 
 /**
@@ -43,11 +44,11 @@ public class SparqlDeleteProcessor implements Processor {
      *
      * @param exchange the current camel message exchange
      */
-    public void process(final Exchange exchange) throws IOException {
+    public void process(final Exchange exchange) throws IOException, NoSuchHeaderException {
 
         final Message in = exchange.getIn();
         final String namedGraph = in.getHeader(FCREPO_NAMED_GRAPH, "", String.class);
-        final String subject = getSubjectUri(in).orElseThrow(() -> new IOException("Could not extract Subject URI"));
+        final String subject = getSubjectUri(exchange);
 
         in.setBody("update=" + encode(deleteWhere(subject, namedGraph), "UTF-8"));
         in.setHeader(HTTP_METHOD, "POST");
