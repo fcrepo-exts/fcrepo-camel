@@ -119,7 +119,7 @@
 
     <dependency>
       <groupId>org.apache.jena</groupId>
-      <artifactId>jena-core</artifactId>
+      <artifactId>jena-osgi</artifactId>
       <version>${jena.version}</version>
     </dependency>
 
@@ -183,13 +183,6 @@
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-junit4</artifactId>
       <version>${pax-exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.jena</groupId>
-      <artifactId>jena-arq</artifactId>
-      <version>${jena.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -321,7 +314,6 @@
             <httpclient.version>${httpclient.version}</httpclient.version>
             <httpcore.version>${httpcore.version}</httpcore.version>
             <thrift.version>${thrift.version}</thrift.version>
-            <jena.version>${jena.version}</jena.version>
             <karaf.ssh.port>${karaf.ssh.port}</karaf.ssh.port>
             <karaf.rmiRegistry.port>${karaf.rmiRegistry.port}</karaf.rmiRegistry.port>
             <karaf.rmiServer.port>${karaf.rmiServer.port}</karaf.rmiServer.port>

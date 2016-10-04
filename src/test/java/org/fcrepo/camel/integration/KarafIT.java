@@ -74,7 +74,6 @@ public class KarafIT {
         final String httpclientVersion = cm.getProperty("httpclient.version");
         final String httpcoreVersion = cm.getProperty("httpcore.version");
         final String thriftVersion = cm.getProperty("thrift.version");
-        final String jenaVersion = cm.getProperty("jena.version");
         final String rmiRegistryPort = cm.getProperty("karaf.rmiRegistry.port");
         final String rmiServerPort = cm.getProperty("karaf.rmiServer.port");
         final String sshPort = cm.getProperty("karaf.ssh.port");
@@ -100,7 +99,7 @@ public class KarafIT {
             mavenBundle().groupId("org.apache.commons").artifactId("commons-lang3").versionAsInProject(),
             mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").version(httpclientVersion),
             mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").version(httpcoreVersion),
-            mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").version(jenaVersion),
+            mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").versionAsInProject(),
             mavenBundle().groupId("com.google.guava").artifactId("guava").versionAsInProject(),
             mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").versionAsInProject(),
             mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").versionAsInProject(),

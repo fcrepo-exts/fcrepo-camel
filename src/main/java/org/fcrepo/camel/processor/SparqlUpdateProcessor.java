@@ -17,9 +17,17 @@
  */
 package org.fcrepo.camel.processor;
 
-import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
-import static org.fcrepo.camel.processor.ProcessorUtils.langFromMimeType;
 import static java.net.URLEncoder.encode;
+import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
+import static org.apache.http.entity.ContentType.parse;
+import static org.apache.jena.riot.RDFDataMgr.read;
+import static org.apache.jena.riot.RDFLanguages.contentTypeToLang;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_NAMED_GRAPH;
+import static org.fcrepo.camel.processor.ProcessorUtils.deleteWhere;
+import static org.fcrepo.camel.processor.ProcessorUtils.getSubjectUri;
+import static org.fcrepo.camel.processor.ProcessorUtils.insertData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -29,7 +37,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
-import org.fcrepo.camel.FcrepoHeaders;
 
 /**
  * Represents a processor for creating the sparql-update message to
@@ -49,38 +56,19 @@ public class SparqlUpdateProcessor implements Processor {
         final Message in = exchange.getIn();
 
         final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
-        final String subject = ProcessorUtils.getSubjectUri(in);
-        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
-        final Model model = createDefaultModel().read(in.getBody(InputStream.class), subject,
-                langFromMimeType(in.getHeader(Exchange.CONTENT_TYPE, String.class)));
+        final String namedGraph = in.getHeader(FCREPO_NAMED_GRAPH, "", String.class);
+        final Model model = createDefaultModel();
+        final String subject = getSubjectUri(in).orElseThrow(() -> new IOException("Could not extract Subject URI"));
+
+        read(model, in.getBody(InputStream.class),
+                contentTypeToLang(parse(in.getHeader(CONTENT_TYPE, String.class)).getMimeType()));
 
         model.write(serializedGraph, "N-TRIPLE");
 
-        /*
-         * Before inserting updated triples, the Sparql update command
-         * below deletes all triples with the defined subject uri
-         * (coming from the FCREPO_IDENTIFIER and FCREPO_BASE_URL headers).
-         * It also deletes triples that have a subject corresponding to
-         * that Fcrepo URI plus the "/fcr:export?format=jcr/xml" string
-         * appended to it. This makes it possible to more completely
-         * remove any triples for a given resource that were added
-         * earlier. If fcrepo ever stops producing triples that are
-         * appended with /fcr:export?format..., then that extra line
-         * can be removed. It would also be possible to recursively delete
-         * triples (by removing any triple whose subject is also an object
-         * of the starting (or context) URI, but that approach tends to
-         * delete too many triples from the triplestore. This command does
-         * not delete blank nodes.
-         */
-        final StringBuilder query = new StringBuilder();
-        query.append(ProcessorUtils.deleteWhere(subject, namedGraph));
-        query.append(";\n");
-        query.append(ProcessorUtils.deleteWhere(subject + "/fcr:export?format=jcr/xml", namedGraph));
-        query.append(";\n");
-        query.append(ProcessorUtils.insertData(serializedGraph.toString("UTF-8"), namedGraph));
+        in.setBody("update=" + encode(deleteWhere(subject, namedGraph) + ";\n" +
+                insertData(serializedGraph.toString("UTF-8"), namedGraph), "UTF-8"));
 
-        in.setBody("update=" + encode(query.toString(), "UTF-8"));
-        in.setHeader(Exchange.HTTP_METHOD, "POST");
-        in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
+        in.setHeader(HTTP_METHOD, "POST");
+        in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
     }
 }

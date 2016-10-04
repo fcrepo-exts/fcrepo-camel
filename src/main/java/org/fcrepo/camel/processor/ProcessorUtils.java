@@ -17,13 +17,15 @@
  */
 package org.fcrepo.camel.processor;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static com.hp.hpl.jena.util.URIref.encode;
-import java.io.IOException;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+
+import java.util.Optional;
 
 import org.apache.camel.Message;
-import org.apache.commons.lang3.StringUtils;
-import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.JmsHeaders;
 
 /**
  * Utility functions for fcrepo processor classes
@@ -40,55 +42,24 @@ public final class ProcessorUtils {
     }
 
     private static String trimTrailingSlash(final String path) {
-        String trimmed = path;
-        while (trimmed.endsWith("/")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        if (path.endsWith("/")) {
+            return trimTrailingSlash(path.substring(0, path.length() - 1));
         }
-        return trimmed;
-    }
-
-    /**
-     * Extract a language string suitable for Jena from a MimeType value
-     * @param contentType a MIMEType string
-     * @return a Jena-compatible language string
-     */
-    public static String langFromMimeType(final String contentType) {
-        if (contentType.equals("application/n-triples")) {
-            return "N-TRIPLE";
-        } else if (contentType.equals("text/turtle")) {
-            return "TURTLE";
-        } else if (contentType.equals("application/rdf+xml")) {
-            return "RDF/XML";
-        } else if (contentType.equals("text/rdf+n3") || contentType.equals("text/n3")) {
-            return "N3";
-        } else {
-            return null;
-        }
+        return path;
     }
 
     /**
      * Extract the subject URI from the incoming message headers.
      * @param in the incoming Message
      * @return the subject URI
-     * @throws IOException when no baseURL header is present
      */
-    public static String getSubjectUri(final Message in) throws IOException {
-        final StringBuilder base = new StringBuilder("");
-
-        if (in.getHeader(FcrepoHeaders.FCREPO_BASE_URL) != null) {
-            base.append(trimTrailingSlash(in.getHeader(FcrepoHeaders.FCREPO_BASE_URL, String.class)));
-        } else if (in.getHeader(JmsHeaders.BASE_URL) != null) {
-            base.append(trimTrailingSlash(in.getHeader(JmsHeaders.BASE_URL, String.class)));
-        } else {
-            throw new IOException("No baseURL header available!");
+    public static Optional<String> getSubjectUri(final Message in) {
+        final String base = in.getHeader(FCREPO_BASE_URL, String.class);
+        final String path = in.getHeader(FCREPO_IDENTIFIER, "", String.class);
+        if (base == null) {
+            return empty();
         }
-
-        if (in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER) != null) {
-           base.append(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class));
-        } else if (in.getHeader(JmsHeaders.IDENTIFIER) != null) {
-           base.append(in.getHeader(JmsHeaders.IDENTIFIER, String.class));
-        }
-        return base.toString();
+        return of(trimTrailingSlash(base) + path);
     }
 
     /**
@@ -101,7 +72,7 @@ public final class ProcessorUtils {
     public static String deleteWhere(final String subject, final String namedGraph) {
         final StringBuilder stmt = new StringBuilder("DELETE WHERE { ");
 
-        if (!StringUtils.isBlank(namedGraph)) {
+        if (!namedGraph.isEmpty()) {
             stmt.append("GRAPH ");
             stmt.append("<" + encode(namedGraph) + ">");
             stmt.append(" { ");
@@ -110,7 +81,7 @@ public final class ProcessorUtils {
         stmt.append("<" + encode(subject) + ">");
         stmt.append(" ?p ?o ");
 
-        if (!StringUtils.isBlank(namedGraph)) {
+        if (!namedGraph.isEmpty()) {
             stmt.append("} ");
         }
 
@@ -128,7 +99,7 @@ public final class ProcessorUtils {
     public static String insertData(final String serializedGraph, final String namedGraph) {
         final StringBuilder query = new StringBuilder("INSERT DATA { ");
 
-        if (!StringUtils.isBlank(namedGraph)) {
+        if (!namedGraph.isEmpty()) {
             query.append("GRAPH <");
             query.append(encode(namedGraph));
             query.append("> { ");
@@ -136,7 +107,7 @@ public final class ProcessorUtils {
 
         query.append(serializedGraph);
 
-        if (!StringUtils.isBlank(namedGraph)) {
+        if (!namedGraph.isEmpty()) {
             query.append("} ");
         }
 

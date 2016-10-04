@@ -87,8 +87,7 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
 
         // Assertions
         resultEndpoint.expectedBodiesReceived("update=" +
-                encode("DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
-                "DELETE WHERE { <" + base + path + "/fcr:export?format=jcr/xml> ?p ?o }", "UTF-8"));
+                encode("DELETE WHERE { <" + base + path + "> ?p ?o }", "UTF-8"));
         resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE,
                 "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
@@ -100,27 +99,12 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
         template.sendBodyAndHeaders(incomingDoc, headers);
 
         headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
-        headers.put(JmsHeaders.IDENTIFIER, path);
-        template.sendBodyAndHeaders(incomingDoc, headers);
-
-        headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
-        template.sendBodyAndHeaders(incomingDoc, headers);
-
-        headers.clear();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
-        headers.put(JmsHeaders.IDENTIFIER, path);
-        template.sendBodyAndHeaders(incomingDoc, headers);
-
-        headers.clear();
         headers.put(FcrepoHeaders.FCREPO_BASE_URL, base + path);
         template.sendBodyAndHeaders(incomingDoc, headers);
 
 
         // Confirm that assertions passed
-        resultEndpoint.expectedMessageCount(5);
+        resultEndpoint.expectedMessageCount(2);
         resultEndpoint.assertIsSatisfied();
     }
 

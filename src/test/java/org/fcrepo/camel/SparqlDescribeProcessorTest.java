@@ -19,7 +19,8 @@ package org.fcrepo.camel;
 
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static java.net.URLEncoder.encode;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
     @Test
     public void missingHeaders() throws IOException, InterruptedException {
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        headers.put(FCREPO_IDENTIFIER, "/foo");
         template.sendBodyAndHeaders(null, headers);
         resultEndpoint.expectedMessageCount(0);
         resultEndpoint.assertIsSatisfied();
@@ -66,35 +67,19 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         resultEndpoint.expectedBodiesReceived("query=" + encode("DESCRIBE <" + base + path + ">", "UTF-8"));
         resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
-        resultEndpoint.expectedHeaderReceived(ACCEPT_CONTENT_TYPE, "application/rdf+xml");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        headers.put(FCREPO_BASE_URL, base);
+        headers.put(FCREPO_IDENTIFIER, path);
         template.sendBodyAndHeaders(null, headers);
 
         headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
-        headers.put(JmsHeaders.IDENTIFIER, path);
-        template.sendBodyAndHeaders(null, headers);
-
-        headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
-        template.sendBodyAndHeaders(null, headers);
-
-        headers.clear();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
-        headers.put(JmsHeaders.IDENTIFIER, path);
-        template.sendBodyAndHeaders(null, headers);
-
-        headers.clear();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base + path);
+        headers.put(FCREPO_BASE_URL, base + path);
         template.sendBodyAndHeaders(null, headers);
 
         // Confirm that assertions passed
-        resultEndpoint.expectedMessageCount(5);
+        resultEndpoint.expectedMessageCount(2);
         resultEndpoint.assertIsSatisfied();
     }
 

@@ -18,11 +18,13 @@
 package org.fcrepo.camel.processor;
 
 import static java.net.URLEncoder.encode;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.fcrepo.camel.processor.ProcessorUtils.getSubjectUri;
 
 import java.io.IOException;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
 import org.apache.camel.Processor;
 
 /**
@@ -30,9 +32,6 @@ import org.apache.camel.Processor;
  * that is ready to be POSTed to a Sparql endpoint.
  *
  * The processor expects the following headers:
- *      org.fcrepo.jms.identifier
- *      org.fcrepo.jms.baseURL
- * each of which can be overridden with the following:
  *      FCREPO_IDENTIFIER
  *      FCREPO_BASE_URL
  *
@@ -46,13 +45,11 @@ public class SparqlDescribeProcessor implements Processor {
      *  @param exchange the current camel message exchange
      */
     public void process(final Exchange exchange) throws IOException {
-
-        final Message in = exchange.getIn();
-        final String subject = ProcessorUtils.getSubjectUri(in);
+        final String subject = getSubjectUri(exchange.getIn()).orElseThrow(() ->
+                new IOException("Could not extract subject URI"));
 
         exchange.getIn().setBody("query=" + encode("DESCRIBE <" + subject + ">", "UTF-8"));
-        exchange.getIn().setHeader(Exchange.HTTP_METHOD, "POST");
-        exchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, "application/rdf+xml");
-        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
+        exchange.getIn().setHeader(HTTP_METHOD, "POST");
+        exchange.getIn().setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
     }
 }
