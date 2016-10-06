@@ -23,12 +23,10 @@ import static com.hp.hpl.jena.rdf.model.ResourceFactory.createStatement;
 import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.util.ExchangeHelper.getMandatoryHeader;
 import static org.apache.http.entity.ContentType.parse;
 import static org.apache.jena.riot.RDFDataMgr.read;
 import static org.apache.jena.riot.RDFLanguages.contentTypeToLang;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.processor.ProcessorUtils.getSubjectUri;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -65,18 +63,16 @@ public class LdnProcessor implements Processor {
      */
     public void process(final Exchange exchange) throws IOException, NoSuchHeaderException {
         final Message in = exchange.getIn();
-
-        // After https://github.com/fcrepo4-exts/fcrepo-camel/pull/125 is merged, this block can be simplified
-        final String base = getMandatoryHeader(exchange, FCREPO_BASE_URL, String.class);
-        final String path = in.getHeader(FCREPO_IDENTIFIER, "", String.class);
-        final Resource resource = createResource(base + path);
-
         final Model model = createDefaultModel();
+        final Model newModel = createDefaultModel();
+        final Resource resource = createResource(getSubjectUri(exchange));
+        final Resource event = createResource("");
+        final AtomicInteger counter = new AtomicInteger();
+        final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
+
         read(model, in.getBody(InputStream.class),
                 contentTypeToLang(parse(in.getHeader(CONTENT_TYPE, String.class)).getMimeType()));
 
-        final Model newModel = createDefaultModel();
-        final Resource event = createResource("");
         newModel.add(createStatement(event, used, resource));
         model.listObjectsOfProperty(resource, wasGeneratedBy).forEachRemaining(obj -> {
             if (obj.isResource()) {
@@ -85,7 +81,6 @@ public class LdnProcessor implements Processor {
                 });
             }
         });
-        final AtomicInteger counter = new AtomicInteger();
         model.listObjectsOfProperty(resource, wasAttributedTo).forEachRemaining(obj -> {
             final Resource agent = createResource("#agent" + Integer.toString(counter.getAndIncrement()));
             if (obj.isResource()) {
@@ -96,7 +91,6 @@ public class LdnProcessor implements Processor {
             newModel.add(createStatement(event, wasAssociatedWith, agent));
         });
 
-        final ByteArrayOutputStream serializedGraph = new ByteArrayOutputStream();
         newModel.write(serializedGraph, "JSON-LD");
 
         in.setBody(serializedGraph.toString("UTF-8"));
