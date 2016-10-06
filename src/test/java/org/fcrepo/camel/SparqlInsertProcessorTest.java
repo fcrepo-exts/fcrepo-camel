@@ -18,9 +18,11 @@
 package org.fcrepo.camel;
 
 import static org.apache.commons.lang3.StringUtils.normalizeSpace;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
 import static java.net.URLEncoder.encode;
 
 import java.io.IOException;
@@ -70,31 +72,13 @@ public class SparqlInsertProcessorTest extends CamelTestSupport {
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
-        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
-        template.sendBodyAndHeaders(document, headers);
-
-        headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
-        headers.put(JmsHeaders.IDENTIFIER, path);
-        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
-        template.sendBodyAndHeaders(document, headers);
-
-        headers.clear();
-        headers.put(JmsHeaders.BASE_URL, base);
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, path);
-        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
-        template.sendBodyAndHeaders(getTurtleDocument(), headers);
-
-        headers.clear();
-        headers.put(FcrepoHeaders.FCREPO_BASE_URL, base);
-        headers.put(JmsHeaders.IDENTIFIER, path);
-        headers.put(Exchange.CONTENT_TYPE, "application/n-triples");
+        headers.put(FCREPO_BASE_URL, base);
+        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
 
         // Confirm that assertions passed
-        resultEndpoint.expectedMessageCount(4);
+        resultEndpoint.expectedMessageCount(1);
         resultEndpoint.assertIsSatisfied();
     }
 

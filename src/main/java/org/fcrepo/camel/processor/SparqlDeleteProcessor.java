@@ -18,13 +18,18 @@
 package org.fcrepo.camel.processor;
 
 import static java.net.URLEncoder.encode;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_NAMED_GRAPH;
+import static org.fcrepo.camel.processor.ProcessorUtils.deleteWhere;
+import static org.fcrepo.camel.processor.ProcessorUtils.getSubjectUri;
 
 import java.io.IOException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.NoSuchHeaderException;
 import org.apache.camel.Processor;
-import org.fcrepo.camel.FcrepoHeaders;
 
 /**
  * Represends a message processor that deletes objects from an
@@ -39,37 +44,15 @@ public class SparqlDeleteProcessor implements Processor {
      *
      * @param exchange the current camel message exchange
      */
-    public void process(final Exchange exchange) throws IOException {
+    public void process(final Exchange exchange) throws IOException, NoSuchHeaderException {
 
         final Message in = exchange.getIn();
-        final String namedGraph = in.getHeader(FcrepoHeaders.FCREPO_NAMED_GRAPH, String.class);
-        final String subject = ProcessorUtils.getSubjectUri(in);
+        final String namedGraph = in.getHeader(FCREPO_NAMED_GRAPH, "", String.class);
+        final String subject = getSubjectUri(exchange);
 
-        /*
-         * N.B. The Sparql update command below deletes all triples with
-         * the defined subject uri (coming from the FCREPO_IDENTIFIER
-         * and FCREPO_BASE_URL headers). It also deletes triples that
-         * have a subject corresponding to that Fcrepo URI plus the
-         * "/fcr:export?format=jcr/xml" string appended to it. This
-         * makes it possible to more completely remove any triples
-         * for a given resource that were added earlier. If fcrepo
-         * ever stops producing triples that are appended with
-         * /fcr:export?format..., then that extra line can be removed.
-         * It would also be possible to recursively delete triples
-         * (by removing any triple whose subject is also an object of
-         * the starting (or context) URI, but that approach tends to delete
-         * too many triples from the triplestore. This command does
-         * not remove blank nodes.
-         */
-        final StringBuilder query = new StringBuilder();
-
-        query.append(ProcessorUtils.deleteWhere(subject, namedGraph));
-        query.append(";\n");
-        query.append(ProcessorUtils.deleteWhere(subject + "/fcr:export?format=jcr/xml", namedGraph));
-
-        in.setBody("update=" + encode(query.toString(), "UTF-8"));
-        in.setHeader(Exchange.HTTP_METHOD, "POST");
-        in.setHeader(Exchange.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
+        in.setBody("update=" + encode(deleteWhere(subject, namedGraph), "UTF-8"));
+        in.setHeader(HTTP_METHOD, "POST");
+        in.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
    }
 
 }
