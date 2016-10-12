@@ -27,10 +27,6 @@
             <managementContext createConnector="false"/>
         </managementContext>
 
-        <persistenceAdapter>
-            <kahaDB directory="${fcrepo.activemq.directory:ActiveMQ/kahadb}"/>
-        </persistenceAdapter>
-
         <systemUsage>
             <systemUsage>
                 <memoryUsage>
