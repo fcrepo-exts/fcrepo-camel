@@ -18,8 +18,8 @@
 package org.fcrepo.camel.processor;
 
 import static java.net.URLEncoder.encode;
-import static com.hp.hpl.jena.rdf.model.ModelFactory.createDefaultModel;
 import static org.apache.http.entity.ContentType.parse;
+import static org.apache.jena.rdf.model.ModelFactory.createDefaultModel;
 import static org.apache.jena.riot.RDFDataMgr.read;
 import static org.apache.jena.riot.RDFLanguages.contentTypeToLang;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
@@ -33,7 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.NoSuchHeaderException;

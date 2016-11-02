@@ -71,6 +71,7 @@ public class KarafIT {
         final String fcrepoCamelBundle = "file:" + getBaseDir() + "/target/" + artifactName + ".jar";
         final String commonsCodecVersion = cm.getProperty("commons.codec.version");
         final String commonsCsvVersion = cm.getProperty("commons.csv.version");
+        final String dexxVersion = cm.getProperty("dexx.version");
         final String httpclientVersion = cm.getProperty("httpclient.version");
         final String httpcoreVersion = cm.getProperty("httpcore.version");
         final String thriftVersion = cm.getProperty("thrift.version");
@@ -103,6 +104,7 @@ public class KarafIT {
             mavenBundle().groupId("com.github.jsonld-java").artifactId("jsonld-java").versionAsInProject(),
             mavenBundle().groupId("org.apache.thrift").artifactId("libthrift").version(thriftVersion),
             mavenBundle().groupId("org.fcrepo.client").artifactId("fcrepo-java-client").versionAsInProject(),
+            mavenBundle().groupId("com.github.andrewoma.dexx").artifactId("collection").version(dexxVersion),
             bundle(fcrepoCamelBundle).start()
        };
     }

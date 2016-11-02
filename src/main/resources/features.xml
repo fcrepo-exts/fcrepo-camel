@@ -17,6 +17,7 @@
     <bundle dependency="true">mvn:org.apache.thrift/libthrift/${thrift.version}</bundle>
     <bundle dependency="true">mvn:com.github.jsonld-java/jsonld-java/${jsonld.version}</bundle>
     <bundle dependency="true">mvn:org.fcrepo.client/fcrepo-java-client/${fcrepo-java-client.version}</bundle>
+    <bundle dependency="true">mvn:com.github.andrewoma.dexx/collection/${dexx-collection.version}</bundle>
 
     <bundle>mvn:org.fcrepo.camel/fcrepo-camel/${project.version}</bundle>
   </feature>
