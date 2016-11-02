@@ -17,6 +17,10 @@
  */
 package org.fcrepo.camel;
 
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -239,42 +243,25 @@ public class FcrepoProducer extends DefaultProducer {
     }
 
     /**
-     * The resource path can be set either by the Camel header (CamelFcrepoIdentifier)
-     * or by fedora's jms headers (org.fcrepo.jms.identifier). This method extracts
-     * a path from the appropriate header (the camel header overrides the jms header).
-     *
-     * @param exchange The camel exchange
-     * @return String
-     */
-    private String getPathFromHeaders(final Exchange exchange) {
-        final Message in = exchange.getIn();
-
-        if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class))) {
-            return in.getHeader(FcrepoHeaders.FCREPO_IDENTIFIER, String.class);
-        } else if (!isBlank(in.getHeader(JmsHeaders.IDENTIFIER, String.class))) {
-            return in.getHeader(JmsHeaders.IDENTIFIER, String.class);
-        } else {
-            return "";
-        }
-    }
-
-    /**
      * Given an exchange, extract the fully qualified URL for a fedora resource. By default, this will use the entire
      * path set on the endpoint. If either of the following headers are defined, they will be appended to that path in
-     * this order of preference: 1) FCREPO_IDENTIFIER 2) org.fcrepo.jms.identifier
+     * this order of preference: 1) FCREPO_URI 2) FCREPO_BASE_URL + FCREPO_IDENTIFIER
      *
      * @param exchange the incoming message exchange
      */
     private String getUrl(final Exchange exchange, final String transaction) {
-        final StringBuilder url = new StringBuilder();
-        final HttpMethods method = getMethod(exchange);
+        final String uri = exchange.getIn().getHeader(FCREPO_URI, "", String.class);
+        if (!uri.isEmpty()) {
+            return uri;
+        }
 
-        url.append(endpoint.getBaseUrlWithScheme());
+        final String baseUrl = exchange.getIn().getHeader(FCREPO_BASE_URL, "", String.class);
+        final StringBuilder url = new StringBuilder(baseUrl.isEmpty() ? endpoint.getBaseUrlWithScheme() : baseUrl);
         if (transaction != null) {
             url.append("/");
             url.append(transaction);
         }
-        url.append(getPathFromHeaders(exchange));
+        url.append(exchange.getIn().getHeader(FCREPO_IDENTIFIER, "", String.class));
 
         return url.toString();
     }
@@ -288,8 +275,8 @@ public class FcrepoProducer extends DefaultProducer {
         final Message in = exchange.getIn();
 
         if (getMethod(exchange) == HttpMethods.GET) {
-            if (!isBlank(in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class))) {
-                return in.getHeader(FcrepoHeaders.FCREPO_PREFER, String.class);
+            if (!isBlank(in.getHeader(FCREPO_PREFER, String.class))) {
+                return in.getHeader(FCREPO_PREFER, String.class);
             } else {
                 return buildPreferHeader(endpoint.getPreferInclude(), endpoint.getPreferOmit());
             }

@@ -138,11 +138,10 @@ Message headers
 | `Exchange.CONTENT_TYPE` | `String` | The ContentType of the resource. This sets the `Content-Type` header, but this value can be overridden directly on the endpoint. |
 | `Exchange.ACCEPT_CONTENT_TYPE` | `String` | This sets the `Accept` header, but this value can be overridden directly on the endpoint. |
 | `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
+| `FcrepoHeaders.FCREPO_URI`    | `String` | The full resource URI. Note: if this is defined, it takes precedence over any values set with `FCREPO_IDENTIFIER` and `FCREPO_BASE_URL`. |
 | `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
 | `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH`   | `String` | Sets a URI for a named graph when used with the `processor.Sparql*` classes. This may be useful when storing data in an external triplestore. |
-
-The `fcrepo` component will also accept message headers produced directly by fedora, particularly the `org.fcrepo.jms.identifier` header. It will use that header only when `CamelFcrepoIdentifier` is not defined.
 
 If these headers are used with the Spring DSL or with the Simple language, the header values can be used directly with the following values:
 
@@ -177,10 +176,10 @@ Resource path
 -------------
 
 The path for `fcrepo` resources can be set in several different ways. If the
-`CamelFcrepoIdentifier` header is set, that value will be appended to the endpoint
-URI. If the `CamelFcrepoIdentifier` is not set, the path will be populated by the
-`org.fcrepo.jms.identifier` header and appended to the endpoint URI. If neither
-header is set, only the endpoint URI will be used.
+`CamelFcrepoUri` header is set, that will be used as the full path of the
+Fedora resource. If that header is not set, the value of the `CamelFcrepoIdentifier`
+header will be appended to either the endpoint URI or the value of the
+`CamelFcrepoBaseUrl` header (the `CamelFcrepoBaseUrl` header takes precedence, if defined).
 
 It is generally a good idea to set the endpoint URI to fedora's REST API
 endpoint and then use the appropriate header to set the path of the intended
@@ -193,13 +192,13 @@ For example, each of these routes will request the resource at
       .setHeader("CamelFcrepoIdentifier", "/a/b/c/abcdef")
       .to("fcrepo:localhost:8080/rest");
 
-    // org.fcrepo.jms.identifier and CamelFcrepoIdentifier headers are undefined
+    // CamelFcrepoUri and CamelFcrepoIdentifier headers are undefined
     from("direct:start")
       .to("fcrepo:localhost:8080/rest/a/b/c/abcdef");
 
-    // org.fcrepo.jms.identifier is set as '/a/b/c/abcdef'
     // and CamelFcrepoIdentifier is not defined
     from("direct:start")
+      .setHeader("CamelFcrepoUri", "http://localhost:8080/rest/a/b/c/abcdef")
       .to("fcrepo:localhost:8080/rest")
 
 

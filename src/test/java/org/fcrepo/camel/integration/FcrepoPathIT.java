@@ -29,7 +29,6 @@ import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
@@ -57,7 +56,7 @@ public class FcrepoPathIT extends CamelTestSupport {
         final String path = "/test/a/b/c/d";
 
         // Assertions
-        resultEndpoint.expectedMessageCount(3);
+        resultEndpoint.expectedMessageCount(2);
         resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
@@ -75,7 +74,6 @@ public class FcrepoPathIT extends CamelTestSupport {
         template.sendBodyAndHeaders("direct:setup", FcrepoTestUtils.getTurtleDocument(), setupHeaders);
 
         // Test
-        template.sendBodyAndHeader(null, JmsHeaders.IDENTIFIER, path);
         template.sendBodyAndHeader(null, FcrepoHeaders.FCREPO_IDENTIFIER, path);
         template.sendBody("direct:checkPath", null);
 

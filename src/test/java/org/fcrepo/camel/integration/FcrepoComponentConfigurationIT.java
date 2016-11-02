@@ -36,7 +36,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoComponent;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,11 +76,11 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(2);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        containerEndpoint.expectedMessageCount(2);
+        containerEndpoint.expectedMessageCount(1);
         containerEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         containerEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        filteredEndpoint.expectedMessageCount(2);
+        filteredEndpoint.expectedMessageCount(1);
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
@@ -112,9 +111,6 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
-
-        template.sendBodyAndHeader("direct:get", null, JmsHeaders.IDENTIFIER, identifier);
-        template.sendBodyAndHeader("direct:get", null, JmsHeaders.IDENTIFIER, identifier + binary);
 
         template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
         template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);

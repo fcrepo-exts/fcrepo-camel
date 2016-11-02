@@ -17,6 +17,15 @@
  */
 package org.fcrepo.camel.integration;
 
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.fcrepo.camel.RdfNamespaces.RDF;
+import static org.fcrepo.camel.RdfNamespaces.REPOSITORY;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUriWithScheme;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -24,16 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.JmsHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -65,26 +70,26 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
     public void testGetContainer() throws InterruptedException {
         // Assertions
         createdEndpoint.expectedMessageCount(2);
-        createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
+        createdEndpoint.expectedHeaderReceived(HTTP_RESPONSE_CODE, 201);
 
         containerEndpoint.expectedMessageCount(2);
-        containerEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
-        containerEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+        containerEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/rdf+xml");
+        containerEndpoint.expectedHeaderReceived(HTTP_RESPONSE_CODE, 200);
 
         filteredEndpoint.expectedMessageCount(2);
-        filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
-        filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
+        filteredEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/rdf+xml");
+        filteredEndpoint.expectedHeaderReceived(HTTP_RESPONSE_CODE, 200);
 
         deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedBodiesReceived(null, null);
-        deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
+        deletedEndpoint.expectedHeaderReceived(HTTP_RESPONSE_CODE, 204);
 
         goneEndpoint.expectedMessageCount(2);
-        goneEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 410);
+        goneEndpoint.expectedHeaderReceived(HTTP_RESPONSE_CODE, 410);
 
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(Exchange.HTTP_METHOD, "POST");
-        headers.put(Exchange.CONTENT_TYPE, "text/turtle");
+        headers.put(HTTP_METHOD, "POST");
+        headers.put(CONTENT_TYPE, "text/turtle");
 
         final String fullPath = template.requestBodyAndHeaders(
                 "direct:create",
@@ -92,24 +97,23 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
                 headers, String.class);
 
         // Strip off the baseUrl to get the resource path
-        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
+        final String identifier = fullPath.replaceAll(getFcrepoBaseUrl(), "");
         final String binary = "/file";
 
         headers.clear();
-        headers.put(Exchange.HTTP_METHOD, "PUT");
-        headers.put(Exchange.CONTENT_TYPE, "text/plain");
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
+        headers.put(HTTP_METHOD, "PUT");
+        headers.put(CONTENT_TYPE, "text/plain");
+        headers.put(FCREPO_IDENTIFIER, identifier + binary);
 
         template.sendBodyAndHeaders("direct:create", FcrepoTestUtils.getTextDocument(), headers);
 
-        template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
-        template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
+        template.sendBodyAndHeader("direct:get", null, FCREPO_IDENTIFIER, identifier);
+        template.sendBodyAndHeader("direct:get", null, FCREPO_IDENTIFIER, identifier + binary);
+        template.sendBodyAndHeader("direct:get", null, FCREPO_URI, getFcrepoBaseUrl() + identifier);
+        template.sendBodyAndHeader("direct:get", null, FCREPO_URI, getFcrepoBaseUrl() + identifier + binary);
 
-        template.sendBodyAndHeader("direct:get", null, JmsHeaders.IDENTIFIER, identifier);
-        template.sendBodyAndHeader("direct:get", null, JmsHeaders.IDENTIFIER, identifier + binary);
-
-        template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
-        template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        template.sendBodyAndHeader("direct:delete", null, FCREPO_IDENTIFIER, identifier + binary);
+        template.sendBodyAndHeader("direct:delete", null, FCREPO_IDENTIFIER, identifier);
 
         // Confirm that assertions passed
         createdEndpoint.assertIsSatisfied();
@@ -119,12 +123,12 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
         deletedEndpoint.assertIsSatisfied();
 
         // skip first message, as we've already extracted the body
-        assertEquals(FcrepoTestUtils.getFcrepoBaseUrl() + identifier + binary,
+        assertEquals(getFcrepoBaseUrl() + identifier + binary,
                 createdEndpoint.getExchanges().get(1).getIn().getBody(String.class));
 
         // Check deleted container
         goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
+            assertTrue(exchange.getIn().getHeader(CONTENT_TYPE, String.class).contains("application/rdf+xml"));
         });
     }
 
@@ -134,9 +138,9 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
             @Override
             public void configure() {
 
-                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUriWithScheme();
+                final String fcrepo_uri = getFcrepoEndpointUriWithScheme();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF);
 
                 from("direct:create")
                     .to(fcrepo_uri)
@@ -147,16 +151,16 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Container']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Container']", ns)
                     .to("mock:filter")
                     .to(fcrepo_uri)
                     .to("mock:container");
 
                 from("direct:delete")
-                    .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))
+                    .setHeader(HTTP_METHOD, constant("DELETE"))
                     .to(fcrepo_uri)
                     .to("mock:deleted")
-                    .setHeader(Exchange.HTTP_METHOD, constant("GET"))
+                    .setHeader(HTTP_METHOD, constant("GET"))
                     .to(fcrepo_uri + "?throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }

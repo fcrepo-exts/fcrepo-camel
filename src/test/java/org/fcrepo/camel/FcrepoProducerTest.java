@@ -18,6 +18,13 @@
 package org.fcrepo.camel;
 
 import static java.net.URI.create;
+import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.DISABLE_HTTP_STREAM_CACHE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
@@ -88,7 +95,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(getResponse);
@@ -96,8 +103,8 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -109,7 +116,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader("Accept", TestUtils.N_TRIPLES);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
@@ -118,7 +125,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -131,8 +138,8 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_PREFER, prefer);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_PREFER, prefer);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
@@ -140,7 +147,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -156,7 +163,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
 
         when(mockClient.head(eq(create(baseUrl + path)))).thenReturn(headResponse);
         when(mockClient.get(eq(create(baseUrl + path + FcrepoConstants.FIXITY)),
@@ -165,7 +172,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.fixityTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -181,7 +188,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
@@ -189,7 +196,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -204,7 +211,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
@@ -212,7 +219,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -228,7 +235,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
@@ -236,7 +243,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -251,7 +258,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), any(String.class), eq(prefer))).thenReturn(getResponse);
@@ -259,7 +266,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -273,7 +280,7 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), eq(TestUtils.N_TRIPLES), any(String.class))).thenReturn(getResponse);
@@ -281,7 +288,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
     }
 
     @Test
@@ -299,7 +306,7 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
     }
 
     @Test
@@ -313,16 +320,16 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(JmsHeaders.IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TestUtils.TEXT_PLAIN);
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.GET);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, TestUtils.TEXT_PLAIN);
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.GET);
 
         when(mockClient.get(any(URI.class), eq(TestUtils.TEXT_PLAIN), any(String.class))).thenReturn(getResponse);
 
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), content);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.TEXT_PLAIN);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.TEXT_PLAIN);
     }
 
     @Test
@@ -334,16 +341,16 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.HEAD);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.HEAD);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
 
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(), null);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.N_TRIPLES);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -354,16 +361,16 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.DELETE);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.DELETE);
 
         when(mockClient.delete(any(URI.class))).thenReturn(deleteResponse);
 
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(), null);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), null);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE), null);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -376,16 +383,16 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.POST);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.POST);
 
         when(mockClient.post(any(URI.class), any(InputStream.class), any(String.class))).thenReturn(postResponse);
 
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), responseText);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TestUtils.TEXT_PLAIN);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE), TestUtils.TEXT_PLAIN);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -399,8 +406,8 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.POST);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.POST);
         testExchange.getIn().setBody(new ByteArrayInputStream(TestUtils.sparqlUpdate.getBytes()));
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
@@ -423,8 +430,8 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.PATCH);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.PATCH);
         testExchange.getIn().setBody(new ByteArrayInputStream(TestUtils.sparqlUpdate.getBytes()));
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
@@ -445,8 +452,8 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, HttpMethods.PUT);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.PUT);
         testExchange.getIn().setBody(null);
 
         when(mockClient.put(any(URI.class), any(InputStream.class), any(String.class))).thenReturn(patchResponse);
@@ -454,8 +461,8 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.baseUrl);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE), TestUtils.TEXT_PLAIN);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE), TestUtils.TEXT_PLAIN);
     }
 
     @Test
@@ -487,7 +494,7 @@ public class FcrepoProducerTest {
         testEndpoint.setBaseUrl("http://localhost:8080/rest");
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(eq(create(TestUtils.baseUrl)), eq(TestUtils.RDF_XML),
@@ -496,8 +503,8 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -512,7 +519,7 @@ public class FcrepoProducerTest {
         testEndpoint.setBaseUrl("localhost:443/rest");
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/secure");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(eq(create(TestUtils.baseUrlSecure)), eq(TestUtils.RDF_XML),
@@ -521,8 +528,8 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -537,7 +544,7 @@ public class FcrepoProducerTest {
         testEndpoint.setBaseUrl("https://localhost/rest");
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/secure");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/secure");
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(eq(create(TestUtils.baseUrlSecureWithoutPort)), eq(TestUtils.RDF_XML),
@@ -546,8 +553,8 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -576,7 +583,7 @@ public class FcrepoProducerTest {
 
         uow.beginTransactedBy((Object)tx);
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
         testExchange.setUnitOfWork(uow);
 
         when(otherMockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
@@ -592,17 +599,17 @@ public class FcrepoProducerTest {
 
         testProducer.process(testExchange);
 
-        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
-        assertEquals(TestUtils.RDF_XML, testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class));
+        assertEquals(status, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.RDF_XML, testExchange.getIn().getHeader(CONTENT_TYPE, String.class));
         assertEquals(TestUtils.rdfXml, testExchange.getIn().getBody(String.class));
 
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, "GET");
-        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TestUtils.N_TRIPLES);
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path2);
+        testExchange.getIn().setHeader(HTTP_METHOD, "GET");
+        testExchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, TestUtils.N_TRIPLES);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path2);
         testExchange.setUnitOfWork(uow);
         testProducer.process(testExchange);
-        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
-        assertEquals(TestUtils.N_TRIPLES, testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class));
+        assertEquals(status, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.N_TRIPLES, testExchange.getIn().getHeader(CONTENT_TYPE, String.class));
         assertEquals(TestUtils.rdfTriples, testExchange.getIn().getBody(String.class));
 
     }
@@ -633,7 +640,7 @@ public class FcrepoProducerTest {
 
         uow.beginTransactedBy((Object)tx);
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
         testExchange.setUnitOfWork(uow);
 
         when(otherMockClient.post(eq(beginUri), any(InputStream.class), anyString())).thenReturn(
@@ -649,13 +656,13 @@ public class FcrepoProducerTest {
 
         testProducer.process(testExchange);
 
-        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
-        assertEquals(TestUtils.RDF_XML, testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class));
+        assertEquals(status, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.RDF_XML, testExchange.getIn().getHeader(CONTENT_TYPE, String.class));
         assertEquals(TestUtils.rdfXml, testExchange.getIn().getBody(String.class));
 
-        testExchange.getIn().setHeader(Exchange.HTTP_METHOD, "GET");
-        testExchange.getIn().setHeader(Exchange.ACCEPT_CONTENT_TYPE, TestUtils.N_TRIPLES);
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, path2);
+        testExchange.getIn().setHeader(HTTP_METHOD, "GET");
+        testExchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, TestUtils.N_TRIPLES);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path2);
         testExchange.setUnitOfWork(uow);
         testProducer.process(testExchange);
     }
@@ -670,8 +677,8 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.setProperty(Exchange.DISABLE_HTTP_STREAM_CACHE, true);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.setProperty(DISABLE_HTTP_STREAM_CACHE, true);
 
         when(mockClient.head(any(URI.class))).thenReturn(headResponse);
         when(mockClient.get(any(URI.class), eq(TestUtils.RDF_XML), any(String.class))).thenReturn(getResponse);
@@ -679,8 +686,8 @@ public class FcrepoProducerTest {
         testProducer.process(testExchange);
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 
     @Test
@@ -694,8 +701,8 @@ public class FcrepoProducerTest {
 
         init();
 
-        testExchange.getIn().setHeader(FcrepoHeaders.FCREPO_IDENTIFIER, "/foo");
-        testExchange.setProperty(Exchange.DISABLE_HTTP_STREAM_CACHE, false);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.setProperty(DISABLE_HTTP_STREAM_CACHE, false);
 
         testExchange.getContext().getStreamCachingStrategy().setSpoolThreshold(1024);
         testExchange.getContext().getStreamCachingStrategy().setBufferSize(256);
@@ -710,7 +717,7 @@ public class FcrepoProducerTest {
         assertNotNull(testExchange.getIn().getBody(InputStreamCache.class));
         assertEquals(rdfConcat.length(), testExchange.getIn().getBody(InputStreamCache.class).length());
         assertEquals(rdfConcat.length(), testExchange.getIn().getBody(InputStreamCache.class).length());
-        assertEquals(testExchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class), TestUtils.RDF_XML);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
+        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
     }
 }
