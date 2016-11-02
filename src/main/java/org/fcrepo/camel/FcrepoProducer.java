@@ -17,16 +17,22 @@
  */
 package org.fcrepo.camel;
 
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.fcrepo.client.FcrepoClient.client;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
+import java.util.function.Function;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -37,6 +43,7 @@ import org.apache.camel.util.IOHelper;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
+import org.fcrepo.client.GetBuilder;
 import org.fcrepo.client.HttpMethods;
 import org.slf4j.Logger;
 import org.springframework.transaction.TransactionStatus;
@@ -59,9 +66,22 @@ public class FcrepoProducer extends DefaultProducer {
 
     private FcrepoEndpoint endpoint;
 
-    private FcrepoClient client;
+    private FcrepoClient fcrepoClient;
 
     private TransactionTemplate transactionTemplate;
+
+    /**
+     *  Add the appropriate namespace to the prefer header in case the
+     *  short form was supplied.
+     */
+    private static Function<String, String> addPreferNamespace = property -> {
+        final String prefer = RdfNamespaces.PREFER_PROPERTIES.get(property);
+        if (!isBlank(prefer)) {
+            return prefer;
+        }
+        return property;
+    };
+
 
     /**
      * Create a FcrepoProducer object
@@ -72,12 +92,14 @@ public class FcrepoProducer extends DefaultProducer {
         super(endpoint);
         this.endpoint = endpoint;
         this.transactionTemplate = endpoint.createTransactionTemplate();
-        this.client = new FcrepoClient(
-                endpoint.getAuthUsername(),
-                endpoint.getAuthPassword(),
-                endpoint.getAuthHost(),
-                endpoint.getThrowExceptionOnFailure());
-
+        final FcrepoClient.FcrepoClientBuilder builder = client()
+                .credentials(endpoint.getAuthUsername(), endpoint.getAuthPassword())
+                .authScope(endpoint.getAuthHost());
+        if (endpoint.getThrowExceptionOnFailure()) {
+            this.fcrepoClient = builder.throwExceptionOnFailure().build();
+        } else {
+            this.fcrepoClient = builder.build();
+        }
     }
 
     /**
@@ -112,7 +134,6 @@ public class FcrepoProducer extends DefaultProducer {
         final String contentType = getContentType(exchange);
         final String accept = getAccept(exchange);
         final String url = getUrl(exchange, transaction);
-        final String prefer = getPrefer(exchange);
 
         LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
 
@@ -120,33 +141,46 @@ public class FcrepoProducer extends DefaultProducer {
 
         switch (method) {
         case PATCH:
-            response = client.patch(getMetadataUri(url), in.getBody(InputStream.class));
+            response = fcrepoClient.patch(getMetadataUri(url)).body(in.getBody(InputStream.class)).perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case PUT:
-            response = client.put(URI.create(url), in.getBody(InputStream.class), contentType);
+            response = fcrepoClient.put(URI.create(url)).body(in.getBody(InputStream.class), contentType).perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case POST:
-            response = client.post(URI.create(url), in.getBody(InputStream.class), contentType);
+            response = fcrepoClient.post(URI.create(url)).body(in.getBody(InputStream.class), contentType).perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case DELETE:
-            response = client.delete(URI.create(url));
+            response = fcrepoClient.delete(URI.create(url)).perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case HEAD:
-            response = client.head(URI.create(url));
+            response = fcrepoClient.head(URI.create(url)).perform();
             exchange.getIn().setBody(null);
             break;
         case GET:
         default:
-            if (endpoint.getFixity()) {
-                response = client.get(URI.create(url + FcrepoConstants.FIXITY), accept, prefer);
-            } else if (endpoint.getMetadata()) {
-                response = client.get(getMetadataUri(url), accept, prefer);
+            final GetBuilder get = fcrepoClient.get(getUri(endpoint, url)).accept(accept);
+            final String preferHeader = in.getHeader(FCREPO_PREFER, "", String.class);
+            if (!preferHeader.isEmpty()) {
+                final FcrepoPrefer prefer = new FcrepoPrefer(preferHeader);
+                if (prefer.isMinimal()) {
+                    response = get.preferMinimal().perform();
+                } else if (prefer.isRepresentation()) {
+                    response = get.preferRepresentation(prefer.getInclude(), prefer.getOmit()).perform();
+                } else {
+                    response = get.perform();
+                }
             } else {
-                response = client.get(URI.create(url), accept, prefer);
+                final List<URI> include = getPreferInclude(endpoint);
+                final List<URI> omit = getPreferOmit(endpoint);
+                if (include.isEmpty() && omit.isEmpty()) {
+                    response = get.perform();
+                } else {
+                    response = get.preferRepresentation(include, omit).perform();
+                }
             }
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
@@ -155,13 +189,37 @@ public class FcrepoProducer extends DefaultProducer {
         exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
     }
 
+    private URI getUri(final FcrepoEndpoint endpoint, final String url) throws FcrepoOperationFailedException {
+        if (endpoint.getFixity()) {
+            return URI.create(url + FcrepoConstants.FIXITY);
+        } else if (endpoint.getMetadata()) {
+            return getMetadataUri(url);
+        }
+        return URI.create(url);
+    }
+
+    private List<URI> getPreferOmit(final FcrepoEndpoint endpoint) {
+        if (!isBlank(endpoint.getPreferOmit())) {
+            return stream(endpoint.getPreferOmit().split("\\s+")).map(addPreferNamespace).map(URI::create)
+                .collect(toList());
+        }
+        return emptyList();
+    }
+
+    private List<URI> getPreferInclude(final FcrepoEndpoint endpoint) {
+        if (!isBlank(endpoint.getPreferInclude())) {
+            return stream(endpoint.getPreferInclude().split("\\s+")).map(addPreferNamespace).map(URI::create)
+                .collect(toList());
+        }
+        return emptyList();
+    }
 
     /**
      * Retrieve the resource location from a HEAD request.
      */
     private URI getMetadataUri(final String url)
             throws FcrepoOperationFailedException {
-        final FcrepoResponse headResponse = client.head(URI.create(url));
+        final FcrepoResponse headResponse = fcrepoClient.head(URI.create(url)).perform();
         if (headResponse.getLocation() != null) {
             return headResponse.getLocation();
         } else {
@@ -264,58 +322,6 @@ public class FcrepoProducer extends DefaultProducer {
         url.append(exchange.getIn().getHeader(FCREPO_IDENTIFIER, "", String.class));
 
         return url.toString();
-    }
-
-    /**
-     *  Given an exchange, extract the Prefer headers, if any.
-     *
-     *  @param exchange the incoming message exchange
-     */
-    private String getPrefer(final Exchange exchange) {
-        final Message in = exchange.getIn();
-
-        if (getMethod(exchange) == HttpMethods.GET) {
-            if (!isBlank(in.getHeader(FCREPO_PREFER, String.class))) {
-                return in.getHeader(FCREPO_PREFER, String.class);
-            } else {
-                return buildPreferHeader(endpoint.getPreferInclude(), endpoint.getPreferOmit());
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     *  Build the prefer header from include and/or omit endpoint values
-     */
-    private String buildPreferHeader(final String include, final String omit) {
-        if (isBlank(include) && isBlank(omit)) {
-            return null;
-        } else {
-            final StringBuilder prefer = new StringBuilder("return=representation;");
-
-            if (!isBlank(include)) {
-                prefer.append(" include=\"" + addPreferNamespace(include) + "\";");
-            }
-            if (!isBlank(omit)) {
-                prefer.append(" omit=\"" + addPreferNamespace(omit) + "\";");
-            }
-            LOGGER.info("Prefer: {}", prefer.toString());
-            return prefer.toString();
-        }
-    }
-
-    /**
-     *  Add the appropriate namespace to the prefer header in case the
-     *  short form was supplied.
-     */
-    private String addPreferNamespace(final String property) {
-        final String prefer = RdfNamespaces.PREFER_PROPERTIES.get(property);
-        if (!isBlank(prefer)) {
-            return prefer;
-        } else {
-            return property;
-        }
     }
 
     private static Object extractResponseBodyAsStream(final InputStream is, final Exchange exchange) {
