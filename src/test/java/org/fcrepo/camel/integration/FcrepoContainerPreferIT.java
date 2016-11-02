@@ -31,7 +31,6 @@ import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.JmsHeaders;
 import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
@@ -107,7 +106,7 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
         template.sendBodyAndHeader("direct:includeContainment", null, FcrepoHeaders.FCREPO_IDENTIFIER,
                 identifier);
 
-        template.sendBodyAndHeader("direct:omitServerManaged", null, JmsHeaders.IDENTIFIER,
+        template.sendBodyAndHeader("direct:omitServerManaged", null, FcrepoHeaders.FCREPO_IDENTIFIER,
                 identifier);
         template.sendBodyAndHeader("direct:omitContainmentShort", null, FcrepoHeaders.FCREPO_IDENTIFIER,
                 identifier);

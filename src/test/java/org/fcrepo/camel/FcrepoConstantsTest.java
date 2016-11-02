@@ -30,19 +30,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class FcrepoConstantsTest {
 
     @Test
-    public void testJmsHeaders() {
-        assertEquals(JmsHeaders.BASE_URL, "org.fcrepo.jms.baseURL");
-        assertEquals(JmsHeaders.IDENTIFIER, "org.fcrepo.jms.identifier");
-        assertEquals(JmsHeaders.EVENT_TYPE, "org.fcrepo.jms.eventType");
-        assertEquals(JmsHeaders.EVENT_ID, "org.fcrepo.jms.eventID");
-        assertEquals(JmsHeaders.PROPERTIES, "org.fcrepo.jms.properties");
-        assertEquals(JmsHeaders.TIMESTAMP, "org.fcrepo.jms.timestamp");
-        assertEquals(JmsHeaders.USER, "org.fcrepo.jms.user");
-        assertEquals(JmsHeaders.USER_AGENT, "org.fcrepo.jms.userAgent");
-        assertEquals(JmsHeaders.PREFIX, "org.fcrepo.jms.");
-    }
-
-    @Test
     public void testConstants() {
         assertEquals(FcrepoProducer.DEFAULT_CONTENT_TYPE, "application/rdf+xml");
         assertEquals(FcrepoConstants.TRANSACTION, "/fcr:tx");
@@ -57,6 +44,7 @@ public class FcrepoConstantsTest {
         assertEquals(FcrepoHeaders.FCREPO_IDENTIFIER, "CamelFcrepoIdentifier");
         assertEquals(FcrepoHeaders.FCREPO_PREFER, "CamelFcrepoPrefer");
         assertEquals(FcrepoHeaders.FCREPO_NAMED_GRAPH, "CamelFcrepoNamedGraph");
+        assertEquals(FcrepoHeaders.FCREPO_URI, "CamelFcrepoUri");
     }
 
     @Test

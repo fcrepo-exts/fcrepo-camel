@@ -60,12 +60,13 @@ public class FcrepoEventIT extends CamelTestSupport {
     public void testGetMessage() throws Exception {
         resetMocks();
 
-        isPartOfEndpoint.expectedMessageCount(4);
-        idEndpoint.expectedMessageCount(4);
-        typeEndpoint.expectedMessageCount(4);
-        wasGeneratedByEndpoint.expectedMessageCount(2);
-        wasAttributedToEndpoint.expectedMessageCount(4);
+        isPartOfEndpoint.expectedMessageCount(5);
+        idEndpoint.expectedMessageCount(5);
+        typeEndpoint.expectedMessageCount(5);
+        wasGeneratedByEndpoint.expectedMessageCount(3);
+        wasAttributedToEndpoint.expectedMessageCount(5);
 
+        template.sendBody("direct:setup", null);
         template.sendBodyAndHeader("direct:create", getTurtleDocument(), CONTENT_TYPE, "text/turtle");
         template.sendBodyAndHeader("direct:create", getTurtleDocument(), CONTENT_TYPE, "text/turtle");
 
@@ -88,6 +89,8 @@ public class FcrepoEventIT extends CamelTestSupport {
             public void configure() {
                 from("activemq:queue:fedora")
                     .unmarshal().json(Jackson)
+                    .filter()
+                    .simple("${body[id]} starts with 'http://localhost:" + webPort + "/fcrepo/rest/event'")
                     .multicast()
                     .to("direct:type", "direct:id", "direct:isPartOf", "direct:wasGeneratedBy",
                             "direct:wasAttributedTo");
@@ -119,9 +122,13 @@ public class FcrepoEventIT extends CamelTestSupport {
                         "'http://fedora.info/definitions/v4/event#ResourceCreation' in ${body[wasGeneratedBy][type]}")
                     .to("mock:wasGeneratedBy");
 
+                from("direct:setup")
+                    .setHeader(HTTP_METHOD).constant("PUT")
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/event");
+
                 from("direct:create")
                     .setHeader(HTTP_METHOD).constant("POST")
-                    .to("fcrepo:localhost:" + webPort + "/fcrepo/rest");
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/event");
             }
         };
     }
