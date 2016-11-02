@@ -17,8 +17,8 @@
  */
 package org.fcrepo.camel.processor;
 
-import static com.hp.hpl.jena.util.URIref.encode;
 import static org.apache.camel.util.ExchangeHelper.getMandatoryHeader;
+import static org.apache.jena.util.URIref.encode;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 

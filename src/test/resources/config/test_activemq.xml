@@ -9,7 +9,7 @@
 
     <context:property-placeholder/>
 
-    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost">
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" persistent="false">
         <destinationPolicy>
             <policyMap>
                 <policyEntries>
