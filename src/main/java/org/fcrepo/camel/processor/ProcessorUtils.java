@@ -21,6 +21,7 @@ import static org.apache.camel.util.ExchangeHelper.getMandatoryHeader;
 import static org.apache.jena.util.URIref.encode;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.NoSuchHeaderException;
@@ -53,9 +54,13 @@ public final class ProcessorUtils {
      * @throws NoSuchHeaderException when the CamelFcrepoBaseUrl header is not present
      */
     public static String getSubjectUri(final Exchange exchange) throws NoSuchHeaderException {
-        final String base = getMandatoryHeader(exchange, FCREPO_BASE_URL, String.class);
-        final String path = exchange.getIn().getHeader(FCREPO_IDENTIFIER, "", String.class);
-        return trimTrailingSlash(base) + path;
+        final String uri = exchange.getIn().getHeader(FCREPO_URI, "", String.class);
+        if (uri.isEmpty()) {
+            final String base = getMandatoryHeader(exchange, FCREPO_BASE_URL, String.class);
+            final String path = exchange.getIn().getHeader(FCREPO_IDENTIFIER, "", String.class);
+            return trimTrailingSlash(base) + path;
+        }
+        return uri;
     }
 
     /**

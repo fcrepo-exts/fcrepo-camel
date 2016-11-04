@@ -22,11 +22,10 @@ import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
@@ -64,23 +63,16 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
 
     @Test
     public void testDescribe() throws IOException, InterruptedException {
-        final String base = "http://localhost/rest";
-        final String path = "/path/a/b/c/d";
+        final String uri = "http://localhost/rest/path/a/b/c/d";
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("query=" + encode("DESCRIBE <" + base + path + ">", "UTF-8"));
+        resultEndpoint.expectedBodiesReceived("query=" + encode("DESCRIBE <" + uri + ">", "UTF-8"));
         resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
         // Test
-        final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(FCREPO_IDENTIFIER, path);
-        template.sendBodyAndHeaders(null, headers);
-
-        headers.clear();
-        headers.put(FCREPO_BASE_URL, base + path);
-        template.sendBodyAndHeaders(null, headers);
+        template.sendBodyAndHeader(null, FCREPO_URI, uri);
+        template.sendBodyAndHeader(null, FCREPO_BASE_URL, uri);
 
         // Confirm that assertions passed
         resultEndpoint.expectedMessageCount(2);

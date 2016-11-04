@@ -17,10 +17,17 @@
  */
 package org.fcrepo.camel.integration;
 
+import static java.util.UUID.randomUUID;
 import static org.apache.activemq.camel.component.ActiveMQComponent.activeMQComponent;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.model.dataformat.JsonLibrary.Jackson;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_AGENT;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_DATE_TIME;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_ID;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_RESOURCE_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
 
 import org.apache.camel.EndpointInject;
@@ -29,6 +36,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.fcrepo.camel.processor.EventProcessor;
 import org.junit.Test;
 
 /**
@@ -56,15 +64,55 @@ public class FcrepoEventIT extends CamelTestSupport {
     @Produce(uri = "direct:create")
     protected ProducerTemplate template;
 
+    private final String container = randomUUID().toString();
+
     @Test
     public void testGetMessage() throws Exception {
+        final String webPort = System.getProperty("fcrepo.dynamic.test.port", "8080");
+        final String baseContainer = "http://localhost:" + webPort + "/fcrepo/rest/" + container;
+        final String fcrepoResource = "http://fedora.info/definitions/v4/repository#Resource";
+
         resetMocks();
 
         isPartOfEndpoint.expectedMessageCount(5);
+        isPartOfEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
+        isPartOfEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
+        isPartOfEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
+        isPartOfEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        isPartOfEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
+        isPartOfEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
+
         idEndpoint.expectedMessageCount(5);
+        idEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
+        idEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
+        idEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
+        idEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        idEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
+        idEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
+
         typeEndpoint.expectedMessageCount(5);
+        typeEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
+        typeEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
+        typeEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
+        typeEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        typeEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
+        typeEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
+
         wasGeneratedByEndpoint.expectedMessageCount(3);
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
+
         wasAttributedToEndpoint.expectedMessageCount(5);
+        wasAttributedToEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
+        wasAttributedToEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
+        wasAttributedToEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
+        wasAttributedToEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        wasAttributedToEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
+        wasAttributedToEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
         template.sendBody("direct:setup", null);
         template.sendBodyAndHeader("direct:create", getTurtleDocument(), CONTENT_TYPE, "text/turtle");
@@ -89,8 +137,9 @@ public class FcrepoEventIT extends CamelTestSupport {
             public void configure() {
                 from("activemq:queue:fedora")
                     .unmarshal().json(Jackson)
+                    .process(new EventProcessor())
                     .filter()
-                    .simple("${body[id]} starts with 'http://localhost:" + webPort + "/fcrepo/rest/event'")
+                    .simple("${body[id]} starts with 'http://localhost:" + webPort + "/fcrepo/rest/" + container + "'")
                     .multicast()
                     .to("direct:type", "direct:id", "direct:isPartOf", "direct:wasGeneratedBy",
                             "direct:wasAttributedTo");
@@ -124,11 +173,11 @@ public class FcrepoEventIT extends CamelTestSupport {
 
                 from("direct:setup")
                     .setHeader(HTTP_METHOD).constant("PUT")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/event");
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container);
 
                 from("direct:create")
                     .setHeader(HTTP_METHOD).constant("POST")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/event");
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container);
             }
         };
     }

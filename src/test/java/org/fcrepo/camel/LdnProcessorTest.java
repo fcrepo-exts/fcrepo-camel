@@ -19,8 +19,7 @@ package org.fcrepo.camel;
 
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.apache.camel.model.dataformat.JsonLibrary.Jackson;
 import static org.apache.camel.util.ObjectHelper.loadResourceAsStream;
 
@@ -54,14 +53,12 @@ public class LdnProcessorTest extends CamelTestSupport {
 
     @Test
     public void testLdnProcessor() throws IOException, InterruptedException {
-        final String base = "http://localhost:8080/fcrepo/rest";
-        final String path = "/path/to/resource";
+        final String uri = "http://localhost:8080/fcrepo/rest/path/to/resource";
         final InputStream document = loadResourceAsStream("event.json");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(FCREPO_URI, uri);
         headers.put(CONTENT_TYPE, "application/ld+json");
         template.sendBodyAndHeaders(document, headers);
 

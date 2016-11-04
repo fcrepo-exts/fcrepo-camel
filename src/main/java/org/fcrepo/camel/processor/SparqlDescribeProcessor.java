@@ -33,8 +33,10 @@ import org.apache.camel.Processor;
  * that is ready to be POSTed to a Sparql endpoint.
  *
  * The processor expects the following headers:
- *      FCREPO_IDENTIFIER
+ *      FCREPO_URI
+ *      * or *
  *      FCREPO_BASE_URL
+ *      FCREPO_IDENTIFIER
  *
  * @author Aaron Coburn
  * @since November 6, 2014

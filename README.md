@@ -39,12 +39,11 @@ A simple example for sending messages to an external Solr service:
     xpath.namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
     from("activemq:topic:fedora").routeId("triplestore-router")
-      .setHeader(FCREPO_IDENTIFIER).header("org.fcrepo.jms.identifier")
-      .setHeader(FCREPO_BASE_URL).header("org.fcrepo.jms.baseUrl")
+      .process(new EventProcessor())
       .choice()
-        .when(simple("${header[org.fcrepo.jms.eventType]} == \"http://fedora.info/definitions/v4/event#ResourceDeletion\"))
+        .when(header(FCREPO_EVENT_TYPE).contains("http://fedora.info/definitions/v4/event#ResourceDeletion"))
           .to("direct:remove")
-        .when(simple("${header[org.fcrepo.jms.resourceType]} contains \"http://fedora.info/definitions/v4/indexing#Indexable\""))
+        .when(header(FCREPO_RESOURCE_TYPE).contains("http://fedora.info/definitions/v4/indexing#Indexable"))
           .to("direct:update")
         .otherwise()
           .to("direct:remove");
@@ -62,23 +61,19 @@ Or, using the Spring DSL:
 
     <bean id="updateProcessor" class="org.fcrepo.camel.processor.SparqlUpdateProcessor"/>
     <bean id="deleteProcessor" class="org.fcrepo.camel.processor.SparqlDeleteProcessor"/>
+    <bean id="eventProcessor" class="org.fcrepo.camel.processor.EventProcessor"/>
 
     <camelContext xmlns="http://camel.apache.org/schema/blueprint">
       <route id="triplestore-router">
         <from uri="activemq:topic:fedora"/>
-        <setHeader headerName="CamelFcrepoIdentifier">
-          <simple>${header[org.fcrepo.jms.identifier]}</simple>
-        </setHeader>
-        <setHeader headerName="CamelFcrepoBaseUrl">
-          <simple>${header[org.fcrepo.jms.baseUrl]}</simple>
-        </setHeader>
+        <process ref="eventProcessor"/>
         <choice>
           <when>
-            <simple>${header[org.fcrepo.jms.eventType]} == 'http://fedora.info/definitions/v4/event#ResourceDeletion'</simple>
+            <simple>${header[CamelFcrepoEventType].contains("http://fedora.info/definitions/v4/event#ResourceDeletion")}</simple>
             <to uri="direct:remove"/>
           </when>
           <when>
-            <simple>${header[org.fcrepo.jms.resourceType]} contains "http://fedora.info/definitions/v4/indexing#Indexable"</simple>
+            <simple>${header[CamelFcrepoResourceType].contains("http://fedora.info/definitions/v4/indexing#Indexable")}</simple>
             <to uri="direct:update"/>
           </when>
           <otherwise>
@@ -137,20 +132,31 @@ Message headers
 | `Exchange.HTTP_METHOD` | `String` | The HTTP method to use |
 | `Exchange.CONTENT_TYPE` | `String` | The ContentType of the resource. This sets the `Content-Type` header, but this value can be overridden directly on the endpoint. |
 | `Exchange.ACCEPT_CONTENT_TYPE` | `String` | This sets the `Accept` header, but this value can be overridden directly on the endpoint. |
-| `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
-| `FcrepoHeaders.FCREPO_URI`    | `String` | The full resource URI. Note: if this is defined, it takes precedence over any values set with `FCREPO_IDENTIFIER` and `FCREPO_BASE_URL`. |
-| `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. |
-| `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. |
+| `FcrepoHeaders.FCREPO_AGENT` | `List` | A collection of agents that generated this event. |
+| `FcrepoHeaders.FCREPO_BASE_URL`      | `String` | The base url used for accessing Fedora. **Note:** users are encouraged to use the `FCREPO_URI` header instead. |
+| `FcrepoHeaders.FCREPO_DATE_TIME` | `String` | A datetime string formatted in ISO 8601 corresponding to the instant of the event. |
+| `FcrepoHeaders.FCREPO_EVENT_ID` | `String` | A unique identifier for this event. |
+| `FcrepoHeaders.FCREPO_EVENT_TYPE` | `List` | A set of URIs corresponding to the event type. |
+| `FcrepoHeaders.FCREPO_IDENTIFIER`    | `String` | The resource path, appended to the endpoint uri. **Note:** users are encouraged to use the `FCREPO_URI` header instead. |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH`   | `String` | Sets a URI for a named graph when used with the `processor.Sparql*` classes. This may be useful when storing data in an external triplestore. |
+| `FcrepoHeaders.FCREPO_PREFER`  | `String` | This sets the `Prefer` header on a repository request. The full header value should be declared here, and it will override any value set directly on an endpoint. |
+| `FcrepoHeaders.FCREPO_RESOURCE_TYPE` | `List` | A set of URIs corresponding to the resource type. |
+| `FcrepoHeaders.FCREPO_URI`    | `String` | The full resource URI. Note: if this is defined, it takes precedence over any values set with `FCREPO_IDENTIFIER` and `FCREPO_BASE_URL`. |
 
 If these headers are used with the Spring DSL or with the Simple language, the header values can be used directly with the following values:
 
 | Name    | Value |
 | ------- | ----- |
+| `FcrepoHeaders.FCREPO_AGENT` | `CamelFcrepoAgent` |
 | `FcrepoHeaders.FCREPO_BASE_URL` | `CamelFcrepoBaseUrl` |
+| `FcrepoHeaders.FCREPO_DATE_TIME` | `CamelFcrepoDateTime` |
+| `FcrepoHeaders.FCREPO_EVENT_ID` | `CamelFcrepoEventId` |
+| `FcrepoHeaders.FCREPO_EVENT_TYPE` | `CamelFcrepoEventType` |
 | `FcrepoHeaders.FCREPO_IDENTIFIER` | `CamelFcrepoIdentifier` |
-| `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
 | `FcrepoHeaders.FCREPO_NAMED_GRAPH` | `CamelFcrepoNamedGraph` |
+| `FcrepoHeaders.FCREPO_PREFER` | `CamelFcrepoPrefer` |
+| `FcrepoHeaders.FCREPO_RESOURCE_TYPE` | `CamelFcrepoResourceType` |
+| `FcrepoHeaders.FCREPO_URI` | `CamelFcrepoUri` |
 
 These headers can be removed as a group like this in the Java DSL: `removeHeaders("CamelFcrepo*")`
 
@@ -315,6 +321,21 @@ The `eventType` values follow the [Fedora Event Type ontology](http://fedora.inf
   * `http://fedora.info/definitions/v4/event#ResourceRelocation`
 
 The `resourceType` values will include any `rdf:type` values for the resource in question.
+
+The message body will be formatted as JSON-LD, and users are encouraged to rely on the data found there rather than in the JMS-specific headers.
+
+Typically, an application will unmarshal the payload from a message broker like so:
+
+    from("activemq:queue:fedora")
+        .unmarshal().json(Jackson)
+
+Additionally, the `EventProcessor` will populate Message headers with the data in this message. The recommended pattern to use is:
+
+    from("activemq:queue:fedora")
+        .unmarshal().json(Jackson)
+        .process(new EventProcessor())
+
+If you don't need further access to the message body, it is possible to omit the `unmarshal().json(Jackson)` step.
 
 Examples and more information
 -----------------------------
