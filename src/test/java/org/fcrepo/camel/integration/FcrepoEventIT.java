@@ -147,11 +147,15 @@ public class FcrepoEventIT extends CamelTestSupport {
                 from("direct:type")
                     .filter()
                     .simple("'http://fedora.info/definitions/v4/repository#Resource' in ${body[type]}")
+                    .filter(header(FCREPO_RESOURCE_TYPE)
+                            .contains("http://fedora.info/definitions/v4/repository#Resource"))
                     .to("mock:type");
 
                 from("direct:id")
                     .filter()
                     .simple("${body[id]} starts with 'http://localhost:" + webPort + "/fcrepo/rest'")
+                    .filter(header(FCREPO_URI).startsWith("http://localhost:" + webPort + "/fcrepo/rest"))
+                    .filter(header(FCREPO_EVENT_ID).startsWith("urn:uuid:"))
                     .to("mock:id");
 
                 from("direct:isPartOf")
@@ -163,12 +167,15 @@ public class FcrepoEventIT extends CamelTestSupport {
                     .split(simple("${body[wasAttributedTo]}"))
                     .filter()
                     .simple("'bypassAdmin' == ${body[name]}")
+                    .filter(header(FCREPO_AGENT).contains("bypassAdmin"))
                     .to("mock:wasAttributedTo");
 
                 from("direct:wasGeneratedBy")
                     .filter()
                     .simple(
                         "'http://fedora.info/definitions/v4/event#ResourceCreation' in ${body[wasGeneratedBy][type]}")
+                    .filter(header(FCREPO_EVENT_TYPE)
+                            .contains("http://fedora.info/definitions/v4/event#ResourceCreation"))
                     .to("mock:wasGeneratedBy");
 
                 from("direct:setup")
