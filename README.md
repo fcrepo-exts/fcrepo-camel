@@ -319,7 +319,7 @@ The `resourceType` values will include any `rdf:type` values for the resource in
 Examples and more information
 -----------------------------
 
-There are several example projects in the `examples` directory of this distribution.
+For projects that use `fcrepo-camel`, please refer to the [`fcrepo-camel-toolbox`](https://github.com/fcrepo4-exts/fcrepo-camel-toolbox) project.
 
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
