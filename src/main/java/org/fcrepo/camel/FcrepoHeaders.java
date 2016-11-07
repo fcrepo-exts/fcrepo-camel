@@ -32,6 +32,16 @@ public final class FcrepoHeaders {
 
     public static final String FCREPO_URI = "CamelFcrepoUri";
 
+    public static final String FCREPO_EVENT_TYPE = "CamelFcrepoEventType";
+
+    public static final String FCREPO_RESOURCE_TYPE = "CamelFcrepoResourceType";
+
+    public static final String FCREPO_DATE_TIME = "CamelFcrepoDateTime";
+
+    public static final String FCREPO_AGENT = "CamelFcrepoAgent";
+
+    public static final String FCREPO_EVENT_ID = "CamelFcrepoEventId";
+
     private FcrepoHeaders() {
         // prevent instantiation
     }

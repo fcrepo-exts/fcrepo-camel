@@ -20,11 +20,10 @@ package org.fcrepo.camel;
 import static java.net.URLEncoder.encode;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
@@ -62,23 +61,23 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
 
     @Test
     public void testDelete() throws IOException, InterruptedException {
-        final String base = "http://localhost/rest";
-        final String path = "/path/book3";
+        final String base = "http://localhost/rest/";
+        final String uri = "path/book3";
         final String incomingDoc =
             "<rdf:RDF" +
             "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
             "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"" +
             "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
-            "    xmlns=\"" + base + path + "\">" +
+            "    xmlns=\"" + uri + "\">" +
             "  <rdf:Description rdf:about=\"" + base + "\">" +
             "    <dc:title>Silas Marner</dc:title>" +
             "  </rdf:Description>" +
-            "  <rdf:Description rdf:about=\"" + base + path + "\">" +
+            "  <rdf:Description rdf:about=\"" + uri + "\">" +
             "    <dc:title>Middlemarch</dc:title>" +
-            "    <dc:relation rdf:resource=\"" + base + path + "/appendix\"/>" +
-            "    <dc:relation rdf:resource=\"" + base + path + "#appendix2\"/>" +
+            "    <dc:relation rdf:resource=\"" + uri + "/appendix\"/>" +
+            "    <dc:relation rdf:resource=\"" + uri + "#appendix2\"/>" +
             "    <dc:relation rdf:resource=\"http://some-other-uri/appendix3\"/>" +
-            "    <dc:relation rdf:resource=\"" + base + path + "\"/>" +
+            "    <dc:relation rdf:resource=\"" + uri + "\"/>" +
             "    <dc:creator rdf:parseType=\"Resource\">" +
             "      <vcard:FN>George Elliot</vcard:FN>" +
             "      <vcard:N rdf:parseType=\"Resource\">" +
@@ -91,21 +90,14 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
 
         // Assertions
         resultEndpoint.expectedBodiesReceived("update=" +
-                encode("DELETE WHERE { <" + base + path + "> ?p ?o }", "UTF-8"));
+                encode("DELETE WHERE { <" + uri + "> ?p ?o }", "UTF-8"));
         resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE,
                 "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test
-        final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base);
-        headers.put(FCREPO_IDENTIFIER, path);
-        template.sendBodyAndHeaders(incomingDoc, headers);
-
-        headers.clear();
-        headers.put(FCREPO_BASE_URL, base + path);
-        template.sendBodyAndHeaders(incomingDoc, headers);
-
+        template.sendBodyAndHeader(incomingDoc, FCREPO_URI, uri);
+        template.sendBodyAndHeader(incomingDoc, FCREPO_BASE_URL, uri);
 
         // Confirm that assertions passed
         resultEndpoint.expectedMessageCount(2);

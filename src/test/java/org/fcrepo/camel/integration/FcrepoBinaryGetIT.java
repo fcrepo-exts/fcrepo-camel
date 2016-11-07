@@ -17,6 +17,7 @@
  */
 package org.fcrepo.camel.integration;
 
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +32,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
@@ -93,28 +93,25 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         headers.put(Exchange.HTTP_METHOD, "POST");
         headers.put(Exchange.CONTENT_TYPE, "text/turtle");
 
-        final String fullPath = template.requestBodyAndHeaders(
+        final String uri = template.requestBodyAndHeaders(
                 "direct:create",
                 FcrepoTestUtils.getTurtleDocument(),
                 headers, String.class);
 
-        // Strip off the baseUrl to get the resource path
-        final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
-
         headers.clear();
         headers.put(Exchange.HTTP_METHOD, "PUT");
         headers.put(Exchange.CONTENT_TYPE, "text/plain");
-        headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
+        headers.put(FCREPO_URI, uri + binary);
 
         template.sendBodyAndHeaders("direct:create", FcrepoTestUtils.getTextDocument(), headers);
 
-        template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
-        template.sendBodyAndHeader("direct:get", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
+        template.sendBodyAndHeader("direct:get", null, FCREPO_URI, uri);
+        template.sendBodyAndHeader("direct:get", null, FCREPO_URI, uri + binary);
 
-        template.sendBodyAndHeader("direct:getFixity", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
+        template.sendBodyAndHeader("direct:getFixity", null, FCREPO_URI, uri + binary);
 
-        template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + binary);
-        template.sendBodyAndHeader("direct:delete", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
+        template.sendBodyAndHeader("direct:delete", null, FCREPO_URI, uri + binary);
+        template.sendBodyAndHeader("direct:delete", null, FCREPO_URI, uri);
 
 
         // Confirm that assertions passed
@@ -127,7 +124,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
 
         // Additional assertions
         // skip first message, as we've already extracted the body
-        assertEquals(FcrepoTestUtils.getFcrepoBaseUrl() + identifier + binary,
+        assertEquals(uri + binary,
                 createdEndpoint.getExchanges().get(1).getIn().getBody(String.class));
 
         // Check deleted container

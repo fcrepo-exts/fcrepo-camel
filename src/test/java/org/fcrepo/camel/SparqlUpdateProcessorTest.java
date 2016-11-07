@@ -20,9 +20,8 @@ package org.fcrepo.camel;
 import static org.apache.commons.lang3.StringUtils.normalizeSpace;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_NAMED_GRAPH;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getN3Document;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
@@ -58,14 +57,13 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
 
     @Test
     public void testNamedGraph() throws IOException, InterruptedException {
-        final String base = "http://localhost/rest";
-        final String path = "/path/a/b/c";
+        final String uri = "http://localhost/rest/path/a/b/c";
         final String graph = "foo";
         final String document = getN3Document();
         // Reverse the lines as the RDF may be serialized in opposite order
 
         final String responsePrefix =
-              "DELETE WHERE { GRAPH <" + graph + "> { <" + base + path + "> ?p ?o } };\n" +
+              "DELETE WHERE { GRAPH <" + graph + "> { <" + uri + "> ?p ?o } };\n" +
               "INSERT DATA { GRAPH <" + graph + "> { ";
         final String responseSuffix = "\n} }";
 
@@ -76,14 +74,13 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
             resultEndpoint.expectedBodyReceived().body().contains(encode(s, "UTF-8"));
         }
         resultEndpoint.expectedBodyReceived().body().contains(
-                encode("<" + base + path + "> dc:title \"some title\" .", "UTF-8"));
+                encode("<" + uri + "> dc:title \"some title\" .", "UTF-8"));
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base + "/");
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(FCREPO_URI, uri);
         headers.put(FCREPO_NAMED_GRAPH, graph);
         headers.put(CONTENT_TYPE, "application/n-triples");
         template.sendBodyAndHeaders(document, headers);
@@ -95,13 +92,12 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
 
     @Test
     public void testUpdate() throws IOException, InterruptedException {
-        final String base = "http://localhost/rest";
-        final String path = "/path/a/b/c";
+        final String uri = "http://localhost/rest/path/a/b/c";
         final String document = getTurtleDocument();
         // Reverse the lines as the RDF may be serialized in opposite order
 
         final String responsePrefix =
-                  "DELETE WHERE { <" + base + path + "> ?p ?o };\n" +
+                  "DELETE WHERE { <" + uri + "> ?p ?o };\n" +
                   "INSERT DATA { ";
         final String responseSuffix = "\n}";
 
@@ -112,14 +108,13 @@ public class SparqlUpdateProcessorTest extends CamelTestSupport {
             resultEndpoint.expectedBodyReceived().body().contains(encode(s, "UTF-8"));
         }
         resultEndpoint.expectedBodyReceived().body().contains(
-                encode("<" + base + path + "> dc:title \"some title\" .", "UTF-8"));
+                encode("<" + uri + "> dc:title \"some title\" .", "UTF-8"));
         resultEndpoint.expectedHeaderReceived("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
         // Test
         final Map<String, Object> headers = new HashMap<>();
-        headers.put(FCREPO_BASE_URL, base + "/");
-        headers.put(FCREPO_IDENTIFIER, path);
+        headers.put(FCREPO_URI, uri);
         headers.put(CONTENT_TYPE, "text/turtle");
         template.sendBodyAndHeaders(document, headers);
 
