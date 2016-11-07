@@ -20,11 +20,14 @@ package org.fcrepo.camel;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
 
 /**
  * A class representing the value of an HTTP Prefer header
@@ -33,7 +36,9 @@ import java.util.Map;
  */
 public class FcrepoPrefer {
 
-    private static final String LINK_DELIM = ";\\s*";
+    private static final Logger LOGGER = getLogger(FcrepoPrefer.class);
+
+    private static final String LINK_DELIM = "\\s*;\\s*";
 
     private static final String OMIT = "omit";
 
@@ -95,7 +100,7 @@ public class FcrepoPrefer {
         if (prefer != null) {
             final Map<String, String> data = new HashMap<>();
 
-            for (final String section : prefer.split(";\\s*")) {
+            for (final String section : prefer.split(LINK_DELIM)) {
                 final String[] parts = section.split("=");
                 if (parts.length == 2) {
                     final String value;
@@ -108,8 +113,10 @@ public class FcrepoPrefer {
                 }
             }
             this.returnType = data.get("return");
-            this.include = getUris(data.get("include"));
-            this.omit = getUris(data.get("omit"));
+            this.include = getUris(data.get(INCLUDE));
+            this.omit = getUris(data.get(OMIT));
+        } else {
+            LOGGER.warn("Could not parse a null Prefer value");
         }
     }
 
