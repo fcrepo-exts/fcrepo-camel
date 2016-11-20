@@ -25,6 +25,8 @@ import static org.apache.jena.rdf.model.ResourceFactory.createResource;
 import static org.apache.jena.rdf.model.ResourceFactory.createStatement;
 import static org.apache.jena.rdf.model.ModelFactory.createDefaultModel;
 import static org.apache.jena.riot.RDFDataMgr.read;
+import static org.apache.jena.riot.RDFDataMgr.write;
+import static org.apache.jena.riot.RDFFormat.JSONLD;
 import static org.apache.jena.riot.RDFLanguages.contentTypeToLang;
 import static org.fcrepo.camel.processor.ProcessorUtils.getSubjectUri;
 
@@ -91,8 +93,7 @@ public class LdnProcessor implements Processor {
             newModel.add(createStatement(event, wasAssociatedWith, agent));
         });
 
-        newModel.write(serializedGraph, "JSON-LD");
-
+        write(serializedGraph, newModel, JSONLD);
         in.setBody(serializedGraph.toString("UTF-8"));
         in.setHeader(HTTP_METHOD, "POST");
         in.setHeader(CONTENT_TYPE, "application/ld+json");
