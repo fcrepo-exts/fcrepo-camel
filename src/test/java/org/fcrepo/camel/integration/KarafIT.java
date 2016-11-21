@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
@@ -36,17 +35,15 @@ import static org.ops4j.pax.exam.util.PathUtils.getBaseDir;
 
 import java.io.File;
 
-import javax.inject.Inject;
-
-import org.apache.karaf.features.FeaturesService;
+import org.apache.camel.test.karaf.AbstractFeatureTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.ConfigurationManager;
+import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 
 /**
@@ -54,15 +51,9 @@ import org.slf4j.Logger;
  * @since February 8, 2016
  */
 @RunWith(PaxExam.class)
-public class KarafIT {
+public class KarafIT extends AbstractFeatureTest {
 
     private static Logger LOG = getLogger(KarafIT.class);
-
-    @Inject
-    protected FeaturesService featuresService;
-
-    @Inject
-    protected BundleContext bundleContext;
 
     @Configuration
     public Option[] config() {
@@ -88,14 +79,14 @@ public class KarafIT {
             logLevel(LogLevel.WARN),
             keepRuntimeFolder(),
             configureConsole().ignoreLocalConsole(),
-            systemProperty("fcrepo-camel-bundle").value(fcrepoCamelBundle),
+            CoreOptions.systemProperty("fcrepo-camel-bundle").value(fcrepoCamelBundle),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
             editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
             features(maven().groupId("org.apache.karaf.features").artifactId("standard")
                         .versionAsInProject().classifier("features").type("xml"), "scr"),
-            features(maven().groupId("org.apache.camel.karaf").artifactId("apache-camel").type("xml")
-                    .classifier("features").versionAsInProject(), "camel-blueprint", "camel-spring", "camel-jackson"),
+            features(getCamelKarafFeatureUrl(), "camel-blueprint", "camel-spring", "camel-jackson"),
+            mavenBundle().groupId("org.apache.camel").artifactId("camel-test-karaf").versionAsInProject(),
             mavenBundle().groupId("commons-codec").artifactId("commons-codec").version(commonsCodecVersion),
             mavenBundle().groupId("org.apache.commons").artifactId("commons-csv").version(commonsCsvVersion),
             mavenBundle().groupId("org.apache.commons").artifactId("commons-lang3").versionAsInProject(),
