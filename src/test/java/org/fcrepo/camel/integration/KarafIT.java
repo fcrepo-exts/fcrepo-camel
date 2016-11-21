@@ -74,6 +74,7 @@ public class KarafIT {
         final String dexxVersion = cm.getProperty("dexx.version");
         final String httpclientVersion = cm.getProperty("httpclient.version");
         final String httpcoreVersion = cm.getProperty("httpcore.version");
+        final String jsonldVersion = cm.getProperty("jsonld.version");
         final String thriftVersion = cm.getProperty("thrift.version");
         final String rmiRegistryPort = cm.getProperty("karaf.rmiRegistry.port");
         final String rmiServerPort = cm.getProperty("karaf.rmiServer.port");
@@ -101,7 +102,7 @@ public class KarafIT {
             mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").versionAsInProject(),
             mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").versionAsInProject(),
             mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").versionAsInProject(),
-            mavenBundle().groupId("com.github.jsonld-java").artifactId("jsonld-java").versionAsInProject(),
+            mavenBundle().groupId("com.github.jsonld-java").artifactId("jsonld-java").version(jsonldVersion),
             mavenBundle().groupId("org.apache.thrift").artifactId("libthrift").version(thriftVersion),
             mavenBundle().groupId("org.fcrepo.client").artifactId("fcrepo-java-client").versionAsInProject(),
             mavenBundle().groupId("com.github.andrewoma.dexx").artifactId("collection").version(dexxVersion),
