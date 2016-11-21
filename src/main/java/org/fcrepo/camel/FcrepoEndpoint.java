@@ -132,18 +132,16 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      * @return String
      */
     public String getBaseUrlWithScheme() {
-        final StringBuilder url = new StringBuilder();
         final String baseUrl = getBaseUrl();
 
         if (!baseUrl.startsWith("http:") && !baseUrl.startsWith("https:")) {
             if (URI.create("http://" + baseUrl).getPort() == DEFAULT_HTTPS_PORT) {
-                url.append("https://");
+                return "https://" + baseUrl;
             } else {
-                url.append("http://");
+                return "http://" + baseUrl;
             }
         }
-        url.append(baseUrl);
-        return url.toString();
+        return baseUrl;
     }
 
     /**

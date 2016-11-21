@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>4.6.0</version>
+    <version>4.7.0</version>
   </parent>
 
   <groupId>org.fcrepo.camel</groupId>
@@ -49,7 +49,7 @@
     <pax-exam.version>4.8.0</pax-exam.version>
     <slf4j.version>1.7.20</slf4j.version>
     <spring.version>4.2.5.RELEASE</spring.version>
-    <fcrepo.version>4.6.0</fcrepo.version>
+    <fcrepo.version>4.7.0</fcrepo.version>
     <fcrepo-java-client.version>0.2.1</fcrepo-java-client.version>
 
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
@@ -433,7 +433,7 @@
               </systemProperty>
               <systemProperty>
                 <name>fcrepo.modeshape.configuration</name>
-                <value>classpath:/config/minimal-default/repository.json</value>
+                <value>classpath:/config/file-simple/repository.json</value>
               </systemProperty>
               <systemProperty>
                 <name>fcrepo.activemq.configuration</name>

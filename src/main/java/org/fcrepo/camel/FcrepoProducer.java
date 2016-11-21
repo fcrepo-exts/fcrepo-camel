@@ -17,14 +17,23 @@
  */
 package org.fcrepo.camel;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.Exchange.DISABLE_HTTP_STREAM_CACHE;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.fcrepo.camel.FcrepoConstants.FIXITY;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.fcrepo.camel.RdfNamespaces.PREFER_PROPERTIES;
+import static org.fcrepo.client.HttpMethods.GET;
 import static org.fcrepo.client.FcrepoClient.client;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -75,7 +84,7 @@ public class FcrepoProducer extends DefaultProducer {
      *  short form was supplied.
      */
     private static Function<String, String> addPreferNamespace = property -> {
-        final String prefer = RdfNamespaces.PREFER_PROPERTIES.get(property);
+        final String prefer = PREFER_PROPERTIES.get(property);
         if (!isBlank(prefer)) {
             return prefer;
         }
@@ -185,13 +194,13 @@ public class FcrepoProducer extends DefaultProducer {
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
         }
 
-        exchange.getIn().setHeader(Exchange.CONTENT_TYPE, response.getContentType());
-        exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getStatusCode());
+        exchange.getIn().setHeader(CONTENT_TYPE, response.getContentType());
+        exchange.getIn().setHeader(HTTP_RESPONSE_CODE, response.getStatusCode());
     }
 
     private URI getUri(final FcrepoEndpoint endpoint, final String url) throws FcrepoOperationFailedException {
         if (endpoint.getFixity()) {
-            return URI.create(url + FcrepoConstants.FIXITY);
+            return URI.create(url + FIXITY);
         } else if (endpoint.getMetadata()) {
             return getMetadataUri(url);
         }
@@ -236,9 +245,9 @@ public class FcrepoProducer extends DefaultProducer {
      * @param exchange the incoming message exchange
      */
     private HttpMethods getMethod(final Exchange exchange) {
-        final HttpMethods method = exchange.getIn().getHeader(Exchange.HTTP_METHOD, HttpMethods.class);
+        final HttpMethods method = exchange.getIn().getHeader(HTTP_METHOD, HttpMethods.class);
         if (method == null) {
-            return HttpMethods.GET;
+            return GET;
         } else {
             return method;
         }
@@ -270,9 +279,7 @@ public class FcrepoProducer extends DefaultProducer {
      * @param exchange the incoming message exchange
      */
     private String getAccept(final Exchange exchange) {
-        final Message in = exchange.getIn();
         final String acceptHeader = getAcceptHeader(exchange);
-
         if (!isBlank(endpoint.getAccept())) {
             return endpoint.getAccept();
         } else if (!isBlank(acceptHeader)) {
@@ -291,8 +298,8 @@ public class FcrepoProducer extends DefaultProducer {
      */
     private String getAcceptHeader(final Exchange exchange) {
         final Message in = exchange.getIn();
-        if (!isBlank(in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class))) {
-            return in.getHeader(Exchange.ACCEPT_CONTENT_TYPE, String.class);
+        if (!isBlank(in.getHeader(ACCEPT_CONTENT_TYPE, String.class))) {
+            return in.getHeader(ACCEPT_CONTENT_TYPE, String.class);
         } else if (!isBlank(in.getHeader("Accept", String.class))) {
             return in.getHeader("Accept", String.class);
         } else {
@@ -332,7 +339,7 @@ public class FcrepoProducer extends DefaultProducer {
         }
 
         // convert the input stream to StreamCache if the stream cache is not disabled
-        if (exchange.getProperty(Exchange.DISABLE_HTTP_STREAM_CACHE, Boolean.FALSE, Boolean.class)) {
+        if (exchange.getProperty(DISABLE_HTTP_STREAM_CACHE, FALSE, Boolean.class)) {
             return is;
         } else {
             try (final CachedOutputStream cos = new CachedOutputStream(exchange)) {

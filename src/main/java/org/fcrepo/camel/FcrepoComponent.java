@@ -142,8 +142,7 @@ public class FcrepoComponent extends UriEndpointComponent {
      */
     @Override
     protected Endpoint createEndpoint(final String uri, final String remaining, final Map<String, Object> parameters) {
-
-        FcrepoConfiguration newConfig;
+        final FcrepoConfiguration newConfig;
         if (configuration == null) {
             newConfig = new FcrepoConfiguration();
         } else {
