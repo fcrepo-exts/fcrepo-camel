@@ -29,8 +29,8 @@ import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -39,6 +39,8 @@ import org.junit.Test;
  * @since November 7, 2014
  */
 public class FcrepoPostIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -96,7 +98,7 @@ public class FcrepoPostIT extends CamelTestSupport {
             public void configure() {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 final XPathBuilder titleXpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
                 titleXpath.namespaces(ns);
@@ -111,7 +113,7 @@ public class FcrepoPostIT extends CamelTestSupport {
                     .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Resource']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Resource']", ns)
                     .split(titleXpath)
                     .to("mock:result");
 

@@ -20,8 +20,6 @@ package org.fcrepo.camel.integration;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
-import static org.fcrepo.camel.RdfNamespaces.RDF;
-import static org.fcrepo.camel.RdfNamespaces.REPOSITORY;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
@@ -39,6 +37,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.junit.Test;
 
 /**
@@ -47,6 +46,10 @@ import org.junit.Test;
  * @since Dec 26, 2014
  */
 public class FcrepoContainerGetIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
+
+    private static final String LDP = "http://www.w3.org/ns/ldp#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -140,7 +143,7 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
 
                 final String fcrepo_uri = getFcrepoEndpointUriWithScheme();
 
-                final Namespaces ns = new Namespaces("rdf", RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 from("direct:create")
                     .to(fcrepo_uri)

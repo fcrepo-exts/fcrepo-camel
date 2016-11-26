@@ -30,8 +30,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -40,6 +40,8 @@ import org.junit.Test;
  * @since Dec 26, 2014
  */
 public class FcrepoContainerPatchIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -127,7 +129,7 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
                 ns.add("dc", "http://purl.org/dc/elements/1.1/");
 
                 from("direct:create")
@@ -144,7 +146,7 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
                     .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Container']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Container']", ns)
                     .to("mock:filter")
                     .split().xpath(
                         "/rdf:RDF/rdf:Description/dc:title/text()", ns)

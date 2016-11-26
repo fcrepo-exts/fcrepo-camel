@@ -46,14 +46,4 @@ public class FcrepoConstantsTest {
         assertEquals(FcrepoHeaders.FCREPO_NAMED_GRAPH, "CamelFcrepoNamedGraph");
         assertEquals(FcrepoHeaders.FCREPO_URI, "CamelFcrepoUri");
     }
-
-    @Test
-    public void testRdfLexicon() {
-        assertEquals(RdfNamespaces.REPOSITORY, "http://fedora.info/definitions/v4/repository#");
-        assertEquals(RdfNamespaces.INDEXING, "http://fedora.info/definitions/v4/indexing#");
-        assertEquals(RdfNamespaces.PREMIS, "http://www.loc.gov/premis/rdf/v1#");
-        assertEquals(RdfNamespaces.RDF, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        assertEquals(RdfNamespaces.LDP, "http://www.w3.org/ns/ldp#");
-    }
-
 }

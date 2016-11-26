@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.jena.vocabulary.RDF;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -32,7 +33,6 @@ import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -112,8 +112,8 @@ public class FcrepoStreamIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUriWithScheme();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
-                ns.add("ldp", RdfNamespaces.LDP);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
+                ns.add("ldp", "http://www.w3.org/ns/ldp#");
 
                 final XPathBuilder ldpChildren = new XPathBuilder("/rdf:RDF/rdf:Description/ldp:contains");
                 ldpChildren.namespaces(ns);

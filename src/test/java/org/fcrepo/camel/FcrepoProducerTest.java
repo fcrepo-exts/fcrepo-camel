@@ -28,6 +28,7 @@ import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
+import static org.fcrepo.camel.FcrepoProducer.PREFER_PROPERTIES;
 import static org.fcrepo.camel.TestUtils.N_TRIPLES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -71,6 +72,10 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class FcrepoProducerTest {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
+
+    private static final String LDP = "http://www.w3.org/ns/ldp#";
 
     private FcrepoEndpoint testEndpoint;
 
@@ -531,16 +536,16 @@ public class FcrepoProducerTest {
     public void testPreferProperties() throws Exception {
         testProducer = new FcrepoProducer(testEndpoint);
 
-        assertEquals(6, RdfNamespaces.PREFER_PROPERTIES.size());
+        assertEquals(6, PREFER_PROPERTIES.size());
         final String[] fcrepoPrefer = new String[] { "ServerManaged", "EmbedResources", "InboundReferences" };
         for (final String s : fcrepoPrefer) {
-            assertEquals(RdfNamespaces.REPOSITORY + s, RdfNamespaces.PREFER_PROPERTIES.get(s));
+            assertEquals(REPOSITORY + s, PREFER_PROPERTIES.get(s));
         }
 
         final String[] ldpPrefer = new String[] { "PreferContainment", "PreferMembership",
             "PreferMinimalContainer" };
         for (final String s : ldpPrefer) {
-            assertEquals(RdfNamespaces.LDP + s, RdfNamespaces.PREFER_PROPERTIES.get(s));
+            assertEquals(LDP + s, PREFER_PROPERTIES.get(s));
         }
     }
 

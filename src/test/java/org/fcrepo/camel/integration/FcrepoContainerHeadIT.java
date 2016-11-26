@@ -31,8 +31,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -130,7 +130,7 @@ public class FcrepoContainerHeadIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 from("direct:create")
                     .to(fcrepo_uri)
@@ -140,7 +140,7 @@ public class FcrepoContainerHeadIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Container']", ns)
+                        "[@rdf:resource='http://fedora.info/definitions/v4/repository#Container']", ns)
                     .to("mock:filter")
                     .setHeader(Exchange.HTTP_METHOD, constant("HEAD"))
                     .to(fcrepo_uri)

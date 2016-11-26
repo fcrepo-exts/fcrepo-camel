@@ -31,8 +31,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -41,6 +41,8 @@ import org.junit.Test;
  * @since November 7, 2014
  */
 public class FcrepoBinaryHeadIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -135,7 +137,7 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 from("direct:create")
                     .to(fcrepo_uri)
@@ -145,7 +147,7 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Binary']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Binary']", ns)
                     .to("mock:filter")
                     .setHeader(Exchange.HTTP_METHOD, constant("HEAD"))
                     .to(fcrepo_uri + "?metadata=false")
