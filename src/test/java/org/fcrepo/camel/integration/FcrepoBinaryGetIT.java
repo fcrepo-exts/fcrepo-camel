@@ -32,7 +32,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.fcrepo.camel.RdfNamespaces;
+import org.apache.jena.vocabulary.RDF;
 import org.junit.Test;
 
 /**
@@ -41,6 +41,10 @@ import org.junit.Test;
  * @since November 7, 2014
  */
 public class FcrepoBinaryGetIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
+
+    private static final String PREMIS = "http://www.loc.gov/premis/rdf/v1#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -141,9 +145,9 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
-                ns.add("premis", RdfNamespaces.PREMIS);
-                ns.add("fedora", RdfNamespaces.REPOSITORY);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
+                ns.add("premis", PREMIS);
+                ns.add("fedora", REPOSITORY);
 
                 from("direct:create")
                     .to(fcrepo_uri)
@@ -153,7 +157,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Binary']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Binary']", ns)
                     .to("mock:filter")
                     .to(fcrepo_uri + "?metadata=false")
                     .to("mock:binary");
@@ -162,7 +166,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to(fcrepo_uri + "?fixity=true")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.PREMIS + "Fixity']", ns)
+                        "[@rdf:resource='" + PREMIS + "Fixity']", ns)
                     .to("mock:fixity")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/premis:hasMessageDigest" +

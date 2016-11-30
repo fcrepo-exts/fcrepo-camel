@@ -20,6 +20,7 @@ package org.fcrepo.camel;
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;
 import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
@@ -32,7 +33,6 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-import static org.fcrepo.camel.RdfNamespaces.PREFER_PROPERTIES;
 import static org.fcrepo.client.HttpMethods.GET;
 import static org.fcrepo.client.FcrepoClient.client;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -40,7 +40,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.camel.Exchange;
@@ -73,11 +75,29 @@ public class FcrepoProducer extends DefaultProducer {
 
     private static final Logger LOGGER = getLogger(FcrepoProducer.class);
 
+    private static final String LDP = "http://www.w3.org/ns/ldp#";
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
+
     private FcrepoEndpoint endpoint;
 
     private FcrepoClient fcrepoClient;
 
     private TransactionTemplate transactionTemplate;
+
+    public static final Map<String, String> PREFER_PROPERTIES;
+
+    static {
+        final Map<String, String> prefer = new HashMap<>();
+        prefer.put("PreferContainment", LDP + "PreferContainment");
+        prefer.put("PreferMembership", LDP + "PreferMembership");
+        prefer.put("PreferMinimalContainer", LDP + "PreferMinimalContainer");
+        prefer.put("ServerManaged", REPOSITORY + "ServerManaged");
+        prefer.put("EmbedResources", REPOSITORY + "EmbedResources");
+        prefer.put("InboundReferences", REPOSITORY + "InboundReferences");
+
+        PREFER_PROPERTIES = unmodifiableMap(prefer);
+    }
 
     /**
      *  Add the appropriate namespace to the prefer header in case the

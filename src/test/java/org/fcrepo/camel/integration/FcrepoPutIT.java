@@ -30,8 +30,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -40,6 +40,8 @@ import org.junit.Test;
  * @since November 7, 2014
  */
 public class FcrepoPutIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -110,7 +112,7 @@ public class FcrepoPutIT extends CamelTestSupport {
             public void configure() {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 from("direct:setup")
                     .to(fcrepo_uri)
@@ -124,7 +126,7 @@ public class FcrepoPutIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Resource']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Resource']", ns)
                     .to("mock:result");
 
                 from("direct:teardown")

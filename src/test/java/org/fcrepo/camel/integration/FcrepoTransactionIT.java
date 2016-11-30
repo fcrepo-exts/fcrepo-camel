@@ -33,9 +33,9 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.spring.spi.SpringTransactionPolicy;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.FcrepoTransactionManager;
-import org.fcrepo.camel.RdfNamespaces;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.junit.Test;
 import org.junit.Before;
@@ -48,6 +48,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since November 7, 2014
  */
 public class FcrepoTransactionIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
     private TransactionTemplate txTemplate;
 
@@ -211,7 +213,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
                 final String http4_uri = fcrepo_uri.replaceAll("fcrepo:", "http4:");
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 final XPathBuilder titleXpath = new XPathBuilder("/rdf:RDF/rdf:Description/dc:title/text()");
                 titleXpath.namespaces(ns);
@@ -311,7 +313,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + RdfNamespaces.REPOSITORY + "Resource']", ns)
+                        "[@rdf:resource='" + REPOSITORY + "Resource']", ns)
                     .to("mock:verified");
 
                 from("direct:verifyMissing")

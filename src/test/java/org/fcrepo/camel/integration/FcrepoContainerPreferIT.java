@@ -30,8 +30,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.fcrepo.camel.RdfNamespaces;
 import org.junit.Test;
 
 /**
@@ -40,6 +40,10 @@ import org.junit.Test;
  * @since Dec 26, 2014
  */
 public class FcrepoContainerPreferIT extends CamelTestSupport {
+
+    private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
+
+    private static final String LDP = "http://www.w3.org/ns/ldp#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -154,9 +158,9 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
 
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
 
-                final Namespaces ns = new Namespaces("rdf", RdfNamespaces.RDF);
-                ns.add("fedora", RdfNamespaces.REPOSITORY);
-                ns.add("ldp", RdfNamespaces.LDP);
+                final Namespaces ns = new Namespaces("rdf", RDF.uri);
+                ns.add("fedora", REPOSITORY);
+                ns.add("ldp", LDP);
 
                 from("direct:create")
                     .to(fcrepo_uri)
