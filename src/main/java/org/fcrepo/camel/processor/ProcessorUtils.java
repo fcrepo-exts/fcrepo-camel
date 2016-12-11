@@ -17,14 +17,23 @@
  */
 package org.fcrepo.camel.processor;
 
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.apache.camel.util.ExchangeHelper.getMandatoryHeader;
 import static org.apache.jena.util.URIref.encode;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
+import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.List;
+
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.NoSuchHeaderException;
+
+import org.slf4j.Logger;
 
 /**
  * Utility functions for fcrepo processor classes
@@ -33,6 +42,8 @@ import org.apache.camel.NoSuchHeaderException;
  */
 
 public final class ProcessorUtils {
+
+    private static final Logger LOGGER  = getLogger(ProcessorUtils.class);
 
     /**
      * This is a utility class; the constructor is off-limits.
@@ -114,6 +125,25 @@ public final class ProcessorUtils {
 
         query.append("}");
         return query.toString();
+    }
+
+    /**
+     * Tokenize a property placeholder value
+     *
+     * @param context the camel context
+     * @param property the property name
+     * @param token the token used for splitting the value
+     * @return a list of values
+     */
+    public static List<String> tokenizePropertyPlaceholder(final CamelContext context, final String property,
+            final String token) {
+        try {
+            return stream(context.resolvePropertyPlaceholders(property).split(token)).map(String::trim)
+                .filter(val -> !val.isEmpty()).collect(toList());
+        } catch (final Exception ex) {
+            LOGGER.debug("No property value found for {}", property);
+            return emptyList();
+        }
     }
 }
 
