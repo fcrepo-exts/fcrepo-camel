@@ -131,7 +131,7 @@ public final class ProcessorUtils {
      * Tokenize a property placeholder value
      *
      * @param context the camel context
-     * @param property the property name
+     * @param property the name of the property placeholder
      * @param token the token used for splitting the value
      * @return a list of values
      */
