@@ -509,7 +509,7 @@
       <name>Aaron Coburn</name>
       <email>acoburn@amherst.edu</email>
       <organization>Amherst College</organization>
-      <organizationUrl>http://amherst.edu</organizationUrl>
+      <organizationUrl>http://www.amherst.edu</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -520,8 +520,8 @@
       <id>dlamb</id>
       <name>Danny Lamb</name>
       <email>dlamb@islandora.ca</email>
-      <organization>Islandora</organization>
-      <organizationUrl></organizationUrl>
+      <organization>Islandora Foundation</organization>
+      <organizationUrl>http://islandora.ca</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -533,7 +533,7 @@
       <name>Bethany Seeger</name>
       <email>bseeger@amherst.edu</email>
       <organization>Amherst College</organization>
-      <organizationUrl>http://amherst.edu</organizationUrl>
+      <organizationUrl>http://www.amherst.edu</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
