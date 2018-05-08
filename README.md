@@ -351,6 +351,5 @@ Maintainers
 
 Current maintainers:
 
-* [Aaron Coburn](https://github.com/acoburn)
 * [Daniel Lamb](https://github.com/dannylamb)
 * [Bethany Seeger](https://github.com/bseeger)
