@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.camel;
 
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_AGENT;
@@ -54,17 +55,19 @@ public class EventProcessorTest extends CamelTestSupport {
     public void testEventProcessor() throws IOException, InterruptedException {
 
         final List<String> agents = new ArrayList<>();
-        agents.add("fedo raAdmin");
+        agents.add("info:fedora/local-user#bypassAdmin");
         agents.add("CLAW client/1.0");
 
         final List<String> eventTypes = new ArrayList<>();
-        eventTypes.add("http://www.w3.org/ns/prov#Activity");
-        eventTypes.add("http://fedora.info/definitions/v4/event#ResourceCreation");
+        eventTypes.add("https://www.w3.org/ns/activitystreams#Create");
 
         final List<String> resourceTypes = new ArrayList<>();
-        resourceTypes.add("http://www.w3.org/ns/prov#Entity");
+        resourceTypes.add("http://www.w3.org/ns/ldp#Container");
         resourceTypes.add("http://fedora.info/definitions/v4/repository#Resource");
         resourceTypes.add("http://fedora.info/definitions/v4/repository#Container");
+        resourceTypes.add("http://www.w3.org/ns/ldp#RDFSource");
+        resourceTypes.add("http://www.w3.org/ns/ldp#BasicContainer");
+        resourceTypes.add("http://www.w3.org/ns/prov#Entity");
         resourceTypes.add("http://example.org/CustomType");
 
         template.sendBody("direct:start", loadResourceAsStream("event.json"));
