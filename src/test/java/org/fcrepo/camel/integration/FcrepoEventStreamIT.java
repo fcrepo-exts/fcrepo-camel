@@ -28,6 +28,7 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_RESOURCE_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.AUTH_QUERY_PARAMS;
 
 import java.io.InputStream;
 
@@ -105,11 +106,11 @@ public class FcrepoEventStreamIT extends CamelTestSupport {
 
                 from("direct:setup")
                     .setHeader(HTTP_METHOD).constant("PUT")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container);
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
 
                 from("direct:create")
                     .setHeader(HTTP_METHOD).constant("POST")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container);
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
             }
         };
     }

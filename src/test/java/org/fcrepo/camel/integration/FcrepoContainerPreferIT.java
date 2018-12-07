@@ -179,7 +179,7 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                     .to("mock:filter");
 
                 from("direct:includeServerManaged")
-                    .to(fcrepo_uri + "?preferInclude=ServerManaged")
+                    .to(fcrepo_uri + "&preferInclude=ServerManaged")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/fedora:created", ns)
                     .to("mock:filter")
@@ -187,13 +187,13 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                     .to("mock:container");
 
                 from("direct:includeContainmentOmitManaged")
-                    .to(fcrepo_uri + "?preferOmit=ServerManaged&preferInclude=PreferContainment")
+                    .to(fcrepo_uri + "&preferOmit=ServerManaged&preferInclude=PreferContainment")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/ldp:contains", ns)
                     .to("mock:filter");
 
                 from("direct:omitServerManaged")
-                    .to(fcrepo_uri + "?preferOmit=ServerManaged")
+                    .to(fcrepo_uri + "&preferOmit=ServerManaged")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/fedora:created", ns)
                     .to("mock:filter")
@@ -201,19 +201,19 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                     .to("mock:container");
 
                 from("direct:includeContainment")
-                    .to(fcrepo_uri + "?preferInclude=PreferContainment")
+                    .to(fcrepo_uri + "&preferInclude=PreferContainment")
                     .filter().xpath(
                             "/rdf:RDF/rdf:Description/ldp:contains", ns)
                     .to("mock:filter");
 
                 from("direct:omitContainmentShort")
-                    .to(fcrepo_uri + "?preferOmit=PreferContainment")
+                    .to(fcrepo_uri + "&preferOmit=PreferContainment")
                     .filter().xpath(
                             "/rdf:RDF/rdf:Description/ldp:contains", ns)
                     .to("mock:filter");
 
                 from("direct:omitContainmentFull")
-                    .to(fcrepo_uri + "?preferOmit=PreferContainment")
+                    .to(fcrepo_uri + "&preferOmit=PreferContainment")
                     .filter().xpath(
                             "/rdf:RDF/rdf:Description/ldp:contains", ns)
                     .to("mock:filter");
@@ -223,7 +223,7 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "*throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };

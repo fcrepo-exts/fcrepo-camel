@@ -72,7 +72,7 @@ public class FcrepoContentTypeEndpointIT extends CamelTestSupport {
                 final String fcrepo_uri = getFcrepoEndpointUri();
 
                 from("direct:start")
-                        .to(fcrepo_uri + "?accept=text/turtle")
+                        .to(fcrepo_uri + "&accept=text/turtle")
                         .to("mock:result");
             }
         };

@@ -150,7 +150,7 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
                         "[@rdf:resource='" + REPOSITORY + "Binary']", ns)
                     .to("mock:filter")
                     .setHeader(Exchange.HTTP_METHOD, constant("HEAD"))
-                    .to(fcrepo_uri + "?metadata=false")
+                    .to(fcrepo_uri + "&metadata=false")
                     .to("mock:binary");
 
                  from("direct:delete")
@@ -158,7 +158,7 @@ public class FcrepoBinaryHeadIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .to("mock:verify");
             }
         };

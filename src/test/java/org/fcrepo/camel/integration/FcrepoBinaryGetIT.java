@@ -159,11 +159,11 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='" + REPOSITORY + "Binary']", ns)
                     .to("mock:filter")
-                    .to(fcrepo_uri + "?metadata=false")
+                    .to(fcrepo_uri + "&metadata=false")
                     .to("mock:binary");
 
                 from("direct:getFixity")
-                    .to(fcrepo_uri + "?fixity=true")
+                    .to(fcrepo_uri + "&fixity=true")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='" + PREMIS + "Fixity']", ns)
@@ -182,7 +182,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };

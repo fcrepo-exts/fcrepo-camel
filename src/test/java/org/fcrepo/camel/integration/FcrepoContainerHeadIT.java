@@ -151,7 +151,7 @@ public class FcrepoContainerHeadIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };
