@@ -139,6 +139,8 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
 
         final FcrepoComponent fcrepo = (FcrepoComponent)context.getComponent("fcrepo");
         fcrepo.setBaseUrl(getFcrepoBaseUrl());
+        fcrepo.setAuthUsername("fedoraAdmin");
+        fcrepo.setAuthPassword("fedoraAdmin");
 
         return new RouteBuilder() {
             @Override
