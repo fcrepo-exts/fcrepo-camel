@@ -68,7 +68,7 @@ public class FcrepoEventStreamIT extends CamelTestSupport {
         resultsEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         resultsEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         resultsEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        resultsEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        resultsEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
         resultsEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         resultsEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
