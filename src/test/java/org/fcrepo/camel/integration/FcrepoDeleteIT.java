@@ -103,11 +103,6 @@ public class FcrepoDeleteIT extends CamelTestSupport {
         containerEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
         deletedEndpoint.assertIsSatisfied();
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
      }
 
     @Test
@@ -163,11 +158,6 @@ public class FcrepoDeleteIT extends CamelTestSupport {
         containerEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
         deletedEndpoint.assertIsSatisfied();
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
      }
 
     @Override

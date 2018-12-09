@@ -114,11 +114,6 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
         titleEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
         operationEndpoint.assertIsSatisfied();
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
     }
 
     @Override

@@ -128,11 +128,6 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
         // skip first message, as we've already extracted the body
         assertEquals(getFcrepoBaseUrl() + identifier + binary,
                 createdEndpoint.getExchanges().get(1).getIn().getBody(String.class));
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
     }
 
     @Override
