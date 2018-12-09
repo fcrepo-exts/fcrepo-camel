@@ -17,7 +17,8 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.junit.Assert.assertNotNull;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_USERNAME;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_PASSWORD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,6 +98,8 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
         txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(FcrepoTestUtils.getFcrepoBaseUrl());
+        txMgr.setAuthUsername(FCREPO_USERNAME);
+        txMgr.setAuthPassword(FCREPO_PASSWORD);
         reg.bind("txManager", txMgr);
 
         final SpringTransactionPolicy txPolicy = new SpringTransactionPolicy();
@@ -304,7 +307,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/three")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "?throwExceptionOnFailure=false")
+                    .to(http4_uri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     .to("mock:transacted");
@@ -317,7 +320,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to("mock:verified");
 
                 from("direct:verifyMissing")
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .filter(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo("404"))
                     .to("mock:notfound");
 
