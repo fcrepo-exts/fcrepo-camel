@@ -24,8 +24,6 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUriWithScheme;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,8 +46,6 @@ import org.junit.Test;
 public class FcrepoContainerGetIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
-
-    private static final String LDP = "http://www.w3.org/ns/ldp#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;

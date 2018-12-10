@@ -77,7 +77,8 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
 
     @Test
     public void testContentTypeTurtle() throws InterruptedException {
-        resultEndpoint.expectedMessagesMatches(e -> e.getIn().getHeader("Content-Type", String.class).contains("text/turtle"));
+        resultEndpoint.expectedMessagesMatches(e -> e.getIn().getHeader("Content-Type", String.class)
+                .contains("text/turtle"));
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "text/turtle");
@@ -88,7 +89,8 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
 
     @Test
     public void testContentTypeN3() throws InterruptedException {
-        resultEndpoint.expectedMessagesMatches(e -> e.getIn().getHeader("Content-Type", String.class).contains("text/rdf+n3"));
+        resultEndpoint.expectedMessagesMatches(e -> e.getIn().getHeader("Content-Type", String.class)
+                .contains("text/rdf+n3"));
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "text/rdf+n3");
