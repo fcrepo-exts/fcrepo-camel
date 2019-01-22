@@ -17,8 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,11 +112,6 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
         titleEndpoint.assertIsSatisfied();
         goneEndpoint.assertIsSatisfied();
         operationEndpoint.assertIsSatisfied();
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
     }
 
     @Override
@@ -157,7 +150,7 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:operation")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };

@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>4.7.0</version>
+    <version>4.7.5</version>
   </parent>
 
   <groupId>org.fcrepo.camel</groupId>
@@ -49,7 +49,7 @@
     <pax-exam.version>4.8.0</pax-exam.version>
     <slf4j.version>1.7.20</slf4j.version>
     <spring.version>4.2.5.RELEASE</spring.version>
-    <fcrepo.version>4.7.0</fcrepo.version>
+    <fcrepo.version>5.0.0-SNAPSHOT</fcrepo.version>
     <fcrepo-java-client.version>0.2.1</fcrepo-java-client.version>
 
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
@@ -60,7 +60,8 @@
     <thrift.version>0.9.2</thrift.version>
     <dexx-collection.version>0.6</dexx-collection.version>
     <!-- plugins -->
-    <jetty.plugin.version>9.2.6.v20141205</jetty.plugin.version>
+    <jetty.plugin.version>9.3.25.v20180904</jetty.plugin.version>
+    <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
     <paxexam.plugin.version>1.2.4</paxexam.plugin.version>
     <!-- osgi bundle configuration -->
     <osgi.export.packages>org.fcrepo.camel.*;version=${project.version}</osgi.export.packages>
@@ -257,6 +258,13 @@
       </resource>
     </resources>
 
+    <testResources>
+        <testResource>
+            <filtering>true</filtering>
+            <directory>src/test/resources</directory>
+        </testResource>
+   </testResources>
+
     <plugins>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
@@ -416,6 +424,10 @@
                 <value>${project.build.directory}/fcrepo-data</value>
               </systemProperty>
               <systemProperty>
+                <name>fcrepo.dynamic.test.port</name>
+                <value>${fcrepo.dynamic.test.port}</value>
+              </systemProperty>
+              <systemProperty>
                 <name>fcrepo.dynamic.jms.port</name>
                 <value>${fcrepo.dynamic.jms.port}</value>
               </systemProperty>
@@ -446,13 +458,11 @@
                 <goal>start</goal>
               </goals>
               <configuration>
-                <httpConnector>
-                  <port>${fcrepo.dynamic.test.port}</port>
-                </httpConnector>
+                <jettyXml>${project.build.directory}/test-classes/jetty-test.xml</jettyXml>
                 <scanIntervalSeconds>0</scanIntervalSeconds>
                 <daemon>true</daemon>
                 <contextHandlers>
-                    <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+                    <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
                       <war>${project.build.directory}/fcrepo.war</war>
                       <contextPath>/fcrepo</contextPath>
                     </contextHandler>

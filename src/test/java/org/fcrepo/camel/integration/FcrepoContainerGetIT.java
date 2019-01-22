@@ -24,8 +24,6 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUriWithScheme;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,8 +46,6 @@ import org.junit.Test;
 public class FcrepoContainerGetIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
-
-    private static final String LDP = "http://www.w3.org/ns/ldp#";
 
     @EndpointInject(uri = "mock:created")
     protected MockEndpoint createdEndpoint;
@@ -128,11 +124,6 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
         // skip first message, as we've already extracted the body
         assertEquals(getFcrepoBaseUrl() + identifier + binary,
                 createdEndpoint.getExchanges().get(1).getIn().getBody(String.class));
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
     }
 
     @Override
@@ -164,7 +155,7 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:deleted")
                     .setHeader(HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };

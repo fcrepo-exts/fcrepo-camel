@@ -18,8 +18,6 @@
 package org.fcrepo.camel.integration;
 
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -130,11 +128,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         // skip first message, as we've already extracted the body
         assertEquals(uri + binary,
                 createdEndpoint.getExchanges().get(1).getIn().getBody(String.class));
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
     }
 
     @Override
@@ -159,11 +152,11 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='" + REPOSITORY + "Binary']", ns)
                     .to("mock:filter")
-                    .to(fcrepo_uri + "?metadata=false")
+                    .to(fcrepo_uri + "&metadata=false")
                     .to("mock:binary");
 
                 from("direct:getFixity")
-                    .to(fcrepo_uri + "?fixity=true")
+                    .to(fcrepo_uri + "&fixity=true")
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='" + PREMIS + "Fixity']", ns)
@@ -182,7 +175,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:deleted")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "?throwExceptionOnFailure=false")
+                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };

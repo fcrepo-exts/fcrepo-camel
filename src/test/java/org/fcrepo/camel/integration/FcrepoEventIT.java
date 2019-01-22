@@ -29,6 +29,7 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_RESOURCE_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.AUTH_QUERY_PARAMS;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
@@ -52,11 +53,8 @@ public class FcrepoEventIT extends CamelTestSupport {
     @EndpointInject(uri = "mock:id")
     protected MockEndpoint idEndpoint;
 
-    @EndpointInject(uri = "mock:isPartOf")
-    protected MockEndpoint isPartOfEndpoint;
-
-    @EndpointInject(uri = "mock:wasAttributedTo")
-    protected MockEndpoint wasAttributedToEndpoint;
+    @EndpointInject(uri = "mock:agent")
+    protected MockEndpoint agentEndpoint;
 
     @EndpointInject(uri = "mock:wasGeneratedBy")
     protected MockEndpoint wasGeneratedByEndpoint;
@@ -74,19 +72,11 @@ public class FcrepoEventIT extends CamelTestSupport {
 
         resetMocks();
 
-        isPartOfEndpoint.expectedMessageCount(5);
-        isPartOfEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
-        isPartOfEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
-        isPartOfEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        isPartOfEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
-        isPartOfEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
-        isPartOfEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
-
         idEndpoint.expectedMessageCount(5);
         idEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         idEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         idEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        idEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        idEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
         idEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         idEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
@@ -94,7 +84,7 @@ public class FcrepoEventIT extends CamelTestSupport {
         typeEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         typeEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         typeEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        typeEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        typeEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
         typeEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         typeEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
@@ -102,17 +92,17 @@ public class FcrepoEventIT extends CamelTestSupport {
         wasGeneratedByEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         wasGeneratedByEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         wasGeneratedByEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        wasGeneratedByEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
         wasGeneratedByEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         wasGeneratedByEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
-        wasAttributedToEndpoint.expectedMessageCount(5);
-        wasAttributedToEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
-        wasAttributedToEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
-        wasAttributedToEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        wasAttributedToEndpoint.allMessages().header(FCREPO_AGENT).contains("bypassAdmin");
-        wasAttributedToEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
-        wasAttributedToEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
+        agentEndpoint.expectedMessageCount(5);
+        agentEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
+        agentEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
+        agentEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
+        agentEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
+        agentEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
+        agentEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
         template.sendBody("direct:setup", null);
         template.sendBodyAndHeader("direct:create", getTurtleDocument(), CONTENT_TYPE, "text/turtle");
@@ -121,8 +111,7 @@ public class FcrepoEventIT extends CamelTestSupport {
         idEndpoint.assertIsSatisfied();
         typeEndpoint.assertIsSatisfied();
         wasGeneratedByEndpoint.assertIsSatisfied();
-        wasAttributedToEndpoint.assertIsSatisfied();
-        isPartOfEndpoint.assertIsSatisfied();
+        agentEndpoint.assertIsSatisfied();
     }
 
     @Override
@@ -135,56 +124,39 @@ public class FcrepoEventIT extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() {
+
                 from("activemq:queue:fedora")
                     .unmarshal().json(Jackson)
                     .process(new EventProcessor())
-                    .filter()
-                    .simple("${body[id]} starts with 'http://localhost:" + webPort + "/fcrepo/rest/" + container + "'")
+                    .filter(header(FCREPO_URI).startsWith("http://localhost:" + webPort + "/fcrepo/rest/" + container))
                     .multicast()
-                    .to("direct:type", "direct:id", "direct:isPartOf", "direct:wasGeneratedBy",
-                            "direct:wasAttributedTo");
+                    .to("direct:type", "direct:id", "direct:wasGeneratedBy",
+                            "direct:agent");
 
                 from("direct:type")
-                    .filter()
-                    .simple("'http://fedora.info/definitions/v4/repository#Resource' in ${body[type]}")
                     .filter(header(FCREPO_RESOURCE_TYPE)
                             .contains("http://fedora.info/definitions/v4/repository#Resource"))
                     .to("mock:type");
 
                 from("direct:id")
-                    .filter()
-                    .simple("${body[id]} starts with 'http://localhost:" + webPort + "/fcrepo/rest'")
-                    .filter(header(FCREPO_URI).startsWith("http://localhost:" + webPort + "/fcrepo/rest"))
                     .filter(header(FCREPO_EVENT_ID).startsWith("urn:uuid:"))
                     .to("mock:id");
 
-                from("direct:isPartOf")
-                    .filter()
-                    .simple("'http://localhost:" + webPort + "/fcrepo/rest' == ${body[isPartOf]}")
-                    .to("mock:isPartOf");
-
-                from("direct:wasAttributedTo")
-                    .split(simple("${body[wasAttributedTo]}"))
-                    .filter()
-                    .simple("'bypassAdmin' == ${body[name]}")
-                    .filter(header(FCREPO_AGENT).contains("bypassAdmin"))
-                    .to("mock:wasAttributedTo");
+                from("direct:agent")
+                    .filter(header(FCREPO_AGENT).regex(".+?bypassAdmin.+?"))
+                    .to("mock:agent");
 
                 from("direct:wasGeneratedBy")
-                    .filter()
-                    .simple(
-                        "'http://fedora.info/definitions/v4/event#ResourceCreation' in ${body[wasGeneratedBy][type]}")
-                    .filter(header(FCREPO_EVENT_TYPE)
-                            .contains("http://fedora.info/definitions/v4/event#ResourceCreation"))
+                    .filter(header(FCREPO_EVENT_TYPE).regex(".+?Creat.+?"))
                     .to("mock:wasGeneratedBy");
 
                 from("direct:setup")
                     .setHeader(HTTP_METHOD).constant("PUT")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container);
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
 
                 from("direct:create")
                     .setHeader(HTTP_METHOD).constant("POST")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container);
+                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
             }
         };
     }

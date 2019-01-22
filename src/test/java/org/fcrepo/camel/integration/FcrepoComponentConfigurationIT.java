@@ -20,8 +20,8 @@ package org.fcrepo.camel.integration;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTextDocument;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_USERNAME;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_PASSWORD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -127,11 +127,6 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
         // skip first message, as we've already extracted the body
         assertEquals(getFcrepoBaseUrl() + identifier + binary,
                 createdEndpoint.getExchanges().get(1).getIn().getBody(String.class));
-
-        // Check deleted container
-        goneEndpoint.getExchanges().forEach(exchange -> {
-            assertTrue(exchange.getIn().getHeader(Exchange.CONTENT_TYPE, String.class).contains("application/rdf+xml"));
-        });
     }
 
     @Override
@@ -139,6 +134,8 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
 
         final FcrepoComponent fcrepo = (FcrepoComponent)context.getComponent("fcrepo");
         fcrepo.setBaseUrl(getFcrepoBaseUrl());
+        fcrepo.setAuthUsername(FCREPO_USERNAME);
+        fcrepo.setAuthPassword(FCREPO_PASSWORD);
 
         return new RouteBuilder() {
             @Override

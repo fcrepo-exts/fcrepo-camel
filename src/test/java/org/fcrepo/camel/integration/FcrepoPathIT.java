@@ -113,7 +113,7 @@ public class FcrepoPathIT extends CamelTestSupport {
                     .to("mock:result");
 
                 from("direct:checkPath")
-                    .to(fcrepo_uri + "/test/a/b/c/d")
+                    .to(fcrepo_uri.replace("?", "/test/a/b/c/d?"))
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='" + REPOSITORY + "Resource']", ns)

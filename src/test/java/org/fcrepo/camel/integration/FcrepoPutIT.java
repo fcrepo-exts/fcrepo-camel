@@ -119,7 +119,7 @@ public class FcrepoPutIT extends CamelTestSupport {
                     .to("mock:created");
 
                 from("direct:setup2")
-                    .to(fcrepo_uri + "?contentType=text/turtle")
+                    .to(fcrepo_uri + "&contentType=text/turtle")
                     .to("mock:created");
 
                 from("direct:start")

@@ -15,11 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.camel.processor;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_AGENT;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_DATE_TIME;
@@ -89,33 +91,41 @@ public class EventProcessor implements Processor {
 
     private Map<String, List<String>> getValuesFromJson(final JsonNode body) {
         final Map<String, List<String>> data = new HashMap<>();
-        getValues(body, "@id").ifPresent(id -> data.put(FCREPO_URI, id));
-        getValues(body, "id").ifPresent(id -> data.putIfAbsent(FCREPO_URI, id));
 
-        getValues(body, "@type").ifPresent(type -> data.put(FCREPO_RESOURCE_TYPE, type));
-        getValues(body, "type").ifPresent(type -> data.putIfAbsent(FCREPO_RESOURCE_TYPE, type));
+        getValues(body, "@id").ifPresent(id -> data.put(FCREPO_EVENT_ID, id));
+        getValues(body, "id").ifPresent(id -> data.putIfAbsent(FCREPO_EVENT_ID, id));
 
-        if (body.has("wasGeneratedBy")) {
-            final JsonNode generatedBy = body.get("wasGeneratedBy");
-            getValues(generatedBy, "type").ifPresent(type -> data.put(FCREPO_EVENT_TYPE, type));
-            getValues(generatedBy, "atTime").ifPresent(time -> data.put(FCREPO_DATE_TIME, time));
-            getValues(generatedBy, "identifier").ifPresent(id -> data.put(FCREPO_EVENT_ID, id));
+        getValues(body, "published").ifPresent(date -> data.putIfAbsent(FCREPO_DATE_TIME, date));
+        getValues(body, "type").map(EventProcessor::toUris).ifPresent(type -> data.put(FCREPO_EVENT_TYPE, type));
+
+        if (body.has("object")) {
+            final JsonNode object = body.get("object");
+            getValues(object, "@id").ifPresent(id -> data.put(FCREPO_URI, id));
+            getValues(object, "id").ifPresent(id -> data.putIfAbsent(FCREPO_URI, id));
+
+            getValues(object, "@type").ifPresent(type -> data.put(FCREPO_RESOURCE_TYPE, type));
+            getValues(object, "type").ifPresent(type -> data.putIfAbsent(FCREPO_RESOURCE_TYPE, type));
         }
 
-        if (body.has("wasAttributedTo")) {
-            final JsonNode attributedTo = body.get("wasAttributedTo");
-            if (attributedTo.isArray()) {
+        if (body.has("actor")) {
+            final JsonNode actor = body.get("actor");
+            if (actor.isArray()) {
                 final List<String> agents = new ArrayList<>();
-                for (final JsonNode agent : attributedTo) {
+                for (final JsonNode agent : actor) {
                     getString(agent, "name").ifPresent(agents::add);
+                    getString(agent, "id").ifPresent(agents::add);
                 }
                 data.put(FCREPO_AGENT, agents);
             } else {
-                getString(attributedTo, "name").ifPresent(name -> data.put(FCREPO_AGENT, singletonList(name)));
+                getString(actor, "name").ifPresent(name -> data.put(FCREPO_AGENT, singletonList(name)));
+                getString(actor, "id").ifPresent(name -> data.put(FCREPO_AGENT, singletonList(name)));
             }
         }
-
         return data;
+    }
+
+    private static List<String> toUris(final List<String> jsonldValues) {
+        return jsonldValues.stream().map(ActivityStreamTerms::expand).collect(toList());
     }
 
     private static Optional<String> getString(final JsonNode node, final String fieldName) {
@@ -151,33 +161,37 @@ public class EventProcessor implements Processor {
         final Map<String, Object> values = (Map<String, Object>)body;
         final Map<String, List<String>> data = new HashMap<>();
         if (values.containsKey("@id")) {
-            data.put(FCREPO_URI, singletonList((String)values.get("@id")));
+            data.put(FCREPO_EVENT_ID, singletonList((String) values.get("@id")));
         }
         if (values.containsKey("id")) {
-            data.putIfAbsent(FCREPO_URI, singletonList((String)values.get("id")));
+            data.putIfAbsent(FCREPO_EVENT_ID, singletonList((String) values.get("id")));
         }
 
         if (values.containsKey("@type")) {
-            data.put(FCREPO_RESOURCE_TYPE, (List<String>)values.get("@type"));
+            data.put(FCREPO_EVENT_TYPE, toUris((List<String>) values.get("@type")));
         }
         if (values.containsKey("type")) {
-            data.putIfAbsent(FCREPO_RESOURCE_TYPE, (List<String>)values.get("type"));
+            data.putIfAbsent(FCREPO_EVENT_TYPE, toUris((List<String>) values.get("type")));
         }
 
-        final Map<String, Object> wasGeneratedBy = (Map<String, Object>)values.get("wasGeneratedBy");
+        if (values.containsKey("published")) {
+            data.putIfAbsent(FCREPO_DATE_TIME, singletonList((String) values.get("published")));
+        }
 
-        if (wasGeneratedBy != null) {
-            if (wasGeneratedBy.containsKey("type")) {
-                data.put(FCREPO_EVENT_TYPE, (List<String>)wasGeneratedBy.get("type"));
+        final Map<String, Object> object = (Map<String, Object>) values.get("object");
+
+        if (object != null) {
+            if (object.containsKey("type")) {
+                data.put(FCREPO_RESOURCE_TYPE, (List<String>) object.get("type"));
             }
-            data.put(FCREPO_EVENT_ID, singletonList((String)wasGeneratedBy.get("identifier")));
-            data.put(FCREPO_DATE_TIME, singletonList((String)wasGeneratedBy.get("atTime")));
+            data.put(FCREPO_URI, singletonList((String) object.get("id")));
         }
 
-        final List<Map<String, String>> wasAttributedTo = (List<Map<String, String>>)values.get("wasAttributedTo");
-        if (wasAttributedTo != null) {
+        final List<Map<String, String>> actor = (List<Map<String, String>>) values.get("actor");
+        if (actor != null) {
             data.put(FCREPO_AGENT,
-                    wasAttributedTo.stream().map(agent -> agent.get("name")).collect(toList()));
+                    actor.stream().map(agent -> ofNullable(agent.get("name")).orElse(agent.get("id")))
+                            .collect(toList()));
         }
 
         return data;
