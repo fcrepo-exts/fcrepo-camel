@@ -38,10 +38,10 @@
 
     <!-- dependencies -->
     <activemq.version>5.14.0</activemq.version>
-    <camel.version>2.18.0</camel.version>
+    <camel.version>2.18.2</camel.version>
     <camel.version.range>[2.18,3)</camel.version.range>
     <commons.io.version>2.4</commons.io.version>
-    <commons.lang3.version>3.4</commons.lang3.version>
+    <commons.lang3.version>3.7</commons.lang3.version>
     <httpclient.version>4.5.2</httpclient.version>
     <karaf.version>4.0.6</karaf.version>
     <jena.version>3.1.1</jena.version>
@@ -49,8 +49,8 @@
     <pax-exam.version>4.8.0</pax-exam.version>
     <slf4j.version>1.7.20</slf4j.version>
     <spring.version>4.2.5.RELEASE</spring.version>
-    <fcrepo.version>5.0.0-SNAPSHOT</fcrepo.version>
-    <fcrepo-java-client.version>0.2.1</fcrepo-java-client.version>
+    <fcrepo.version>5.0.1</fcrepo.version>
+    <fcrepo-java-client.version>0.4.0</fcrepo-java-client.version>
 
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
     <commons.codec.version>1.10</commons.codec.version>
