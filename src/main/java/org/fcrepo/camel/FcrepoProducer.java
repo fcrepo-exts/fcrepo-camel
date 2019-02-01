@@ -166,7 +166,7 @@ public class FcrepoProducer extends DefaultProducer {
 
         LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
 
-        FcrepoResponse response;
+        final FcrepoResponse response;
 
         switch (method) {
         case PATCH:
