@@ -99,7 +99,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      * @return a transaction template
      */
     public TransactionTemplate createTransactionTemplate() {
-        final TransactionTemplate transactionTemplate;
+        TransactionTemplate transactionTemplate;
 
         if (getTransactionManager() != null) {
             transactionTemplate = new TransactionTemplate(getTransactionManager());

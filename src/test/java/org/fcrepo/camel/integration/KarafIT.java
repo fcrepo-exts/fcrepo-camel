@@ -62,20 +62,14 @@ public class KarafIT extends AbstractFeatureTest {
         final String fcrepoCamelBundle = "file:" + getBaseDir() + "/target/" + artifactName + ".jar";
         final String commonsCodecVersion = cm.getProperty("commons.codec.version");
         final String commonsCsvVersion = cm.getProperty("commons.csv.version");
-        final String commonsLang3Version = cm.getProperty("commons.lang3.version");
         final String dexxVersion = cm.getProperty("dexx.version");
         final String httpclientVersion = cm.getProperty("httpclient.version");
         final String httpcoreVersion = cm.getProperty("httpcore.version");
         final String jsonldVersion = cm.getProperty("jsonld.version");
-        final String jenaOsgiVersion = cm.getProperty("jena.osgi.version");
-        final String javaClientVersion = cm.getProperty("fcrepo.client.version");
-
-
         final String thriftVersion = cm.getProperty("thrift.version");
         final String rmiRegistryPort = cm.getProperty("karaf.rmiRegistry.port");
         final String rmiServerPort = cm.getProperty("karaf.rmiServer.port");
         final String sshPort = cm.getProperty("karaf.ssh.port");
-
         return new Option[] {
             karafDistributionConfiguration()
                 .frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf")
@@ -95,13 +89,13 @@ public class KarafIT extends AbstractFeatureTest {
             mavenBundle().groupId("org.apache.camel").artifactId("camel-test-karaf").versionAsInProject(),
             mavenBundle().groupId("commons-codec").artifactId("commons-codec").version(commonsCodecVersion),
             mavenBundle().groupId("org.apache.commons").artifactId("commons-csv").version(commonsCsvVersion),
-            mavenBundle().groupId("org.apache.commons").artifactId("commons-lang3").version(commonsLang3Version),
-            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").version(httpclientVersion),
-            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").version(httpcoreVersion),
-            mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").version(jenaOsgiVersion),
+            mavenBundle().groupId("org.apache.commons").artifactId("commons-lang3").versionAsInProject(),
+            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").versionAsInProject(),
+            mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").versionAsInProject(),
+            mavenBundle().groupId("org.apache.jena").artifactId("jena-osgi").versionAsInProject(),
             mavenBundle().groupId("com.github.jsonld-java").artifactId("jsonld-java").version(jsonldVersion),
             mavenBundle().groupId("org.apache.thrift").artifactId("libthrift").version(thriftVersion),
-            mavenBundle().groupId("org.fcrepo.client").artifactId("fcrepo-java-client").version(javaClientVersion),
+            mavenBundle().groupId("org.fcrepo.client").artifactId("fcrepo-java-client").versionAsInProject(),
             mavenBundle().groupId("com.github.andrewoma.dexx").artifactId("collection").version(dexxVersion),
             bundle(fcrepoCamelBundle).start()
        };
