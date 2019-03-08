@@ -99,7 +99,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
      * @return a transaction template
      */
     public TransactionTemplate createTransactionTemplate() {
-        TransactionTemplate transactionTemplate;
+        final TransactionTemplate transactionTemplate;
 
         if (getTransactionManager() != null) {
             transactionTemplate = new TransactionTemplate(getTransactionManager());
@@ -155,7 +155,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * configuration setter
-     * 
+     *
      * @param config The FcrepoConfiguration
      */
     public void setConfiguration(final FcrepoConfiguration config) {
@@ -222,7 +222,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * contentType setter
-     * 
+     *
      * @param type the mime-type used with Content-Type headers
      */
     @ManagedAttribute(description = "Content-Type: Header")
@@ -242,7 +242,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authUsername setter
-     * 
+     *
      * @param username used for repository authentication
      */
     @ManagedAttribute(description = "Username for authentication")
@@ -262,7 +262,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authPassword setter
-     * 
+     *
      * @param password used for repository authentication
      */
     @ManagedAttribute(description = "Password for authentication")
@@ -282,7 +282,7 @@ public class FcrepoEndpoint extends DefaultEndpoint {
 
     /**
      * authHost setter
-     * 
+     *
      * @param host realm used for repository authentication
      */
     @ManagedAttribute(description = "Hostname for authentication")
