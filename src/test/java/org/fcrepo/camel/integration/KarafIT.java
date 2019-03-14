@@ -85,7 +85,9 @@ public class KarafIT extends AbstractFeatureTest {
             editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
             features(maven().groupId("org.apache.karaf.features").artifactId("standard")
                         .versionAsInProject().classifier("features").type("xml"), "scr"),
-            features(getCamelKarafFeatureUrl(), "camel-blueprint", "camel-spring", "camel-jackson"),
+            features(maven().groupId("org.apache.camel.karaf").artifactId("apache-camel")
+                    .type("xml").classifier("features").versionAsInProject(), "camel",
+                    "camel-blueprint", "camel-spring", "camel-jackson"),
             mavenBundle().groupId("org.apache.camel").artifactId("camel-test-karaf").versionAsInProject(),
             mavenBundle().groupId("commons-codec").artifactId("commons-codec").version(commonsCodecVersion),
             mavenBundle().groupId("org.apache.commons").artifactId("commons-csv").version(commonsCsvVersion),
