@@ -37,20 +37,22 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <activemq.version>5.15.5</activemq.version>
-    <camel.version>2.19.5</camel.version>
-    <camel.version.range>[2.19.5,3)</camel.version.range>
+    <activemq.version>5.14.0</activemq.version>
+    <camel.version>2.20.0</camel.version>
+    <camel.version.range>[2.20,3)</camel.version.range>
     <commons.io.version>2.4</commons.io.version>
-    <commons.lang3.version>3.8.1</commons.lang3.version>
+    <commons.lang3.version>3.7</commons.lang3.version>
     <httpclient.version>4.5.2</httpclient.version>
-    <karaf.version>4.2.2</karaf.version>
+    <karaf.version>4.0.6</karaf.version>
     <jena.version>3.1.1</jena.version>
     <mockito.version>1.10.8</mockito.version>
-    <pax-exam.version>4.13.1</pax-exam.version>
+    <pax-exam.version>4.8.0</pax-exam.version>
     <slf4j.version>1.7.20</slf4j.version>
-    <spring.version>4.3.22.RELEASE</spring.version>
+    <spring.version>4.2.5.RELEASE</spring.version>
     <fcrepo.version>5.0.1</fcrepo.version>
     <fcrepo-java-client.version>0.4.0</fcrepo-java-client.version>
+    <!-- jared's -->
+    <failsafe.plugin.version>2.18.1</failsafe.plugin.version>
 
     <!-- osgi bundle transitive dependencies (for karaf provisioning) -->
     <commons.codec.version>1.10</commons.codec.version>
@@ -206,12 +208,6 @@
       <artifactId>camel-test-karaf</artifactId>
       <version>${camel.version}</version>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.ops4j.pax.exam</groupId>
-          <artifactId>pax-exam</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -345,16 +341,10 @@
             <fcrepo.dynamic.stomp.port>${fcrepo.dynamic.stomp.port}</fcrepo.dynamic.stomp.port>
             <commons.codec.version>${commons.codec.version}</commons.codec.version>
             <commons.csv.version>${commons.csv.version}</commons.csv.version>
-            <commons.lang3.version>${commons.lang3.version}</commons.lang3.version>
-            <camelKarafFeatureVersion>${camel.version}</camelKarafFeatureVersion>
             <dexx.version>${dexx-collection.version}</dexx.version>
             <httpclient.version>${httpclient.version}</httpclient.version>
             <httpcore.version>${httpcore.version}</httpcore.version>
             <jsonld.version>${jsonld.version}</jsonld.version>
-            <jena.osgi.version>${jena.version}</jena.osgi.version>
-            <jsonld.version>${jsonld.version}</jsonld.version>
-            <fcrepo.client.version>${fcrepo-java-client.version}</fcrepo.client.version>
-
             <thrift.version>${thrift.version}</thrift.version>
             <karaf.ssh.port>${karaf.ssh.port}</karaf.ssh.port>
             <karaf.rmiRegistry.port>${karaf.rmiRegistry.port}</karaf.rmiRegistry.port>

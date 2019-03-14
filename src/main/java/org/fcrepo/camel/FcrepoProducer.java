@@ -79,11 +79,11 @@ public class FcrepoProducer extends DefaultProducer {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
-    private FcrepoEndpoint endpoint;
+    private final FcrepoEndpoint endpoint;
 
     private FcrepoClient fcrepoClient;
 
-    private TransactionTemplate transactionTemplate;
+    private final TransactionTemplate transactionTemplate;
 
     public static final Map<String, String> PREFER_PROPERTIES;
 
@@ -141,12 +141,13 @@ public class FcrepoProducer extends DefaultProducer {
     public void process(final Exchange exchange) throws FcrepoOperationFailedException {
         if (exchange.isTransacted()) {
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
                 protected void doInTransactionWithoutResult(final TransactionStatus status) {
                     final DefaultTransactionStatus st = (DefaultTransactionStatus)status;
                     final FcrepoTransactionObject tx = (FcrepoTransactionObject)st.getTransaction();
                     try {
                         doRequest(exchange, tx.getSessionId());
-                    } catch (FcrepoOperationFailedException ex) {
+                    } catch (final FcrepoOperationFailedException ex) {
                         throw new TransactionSystemException(
                             "Error executing fcrepo request in transaction: ", ex);
                     }
@@ -367,7 +368,7 @@ public class FcrepoProducer extends DefaultProducer {
                 IOHelper.copyAndCloseInput(is, cos);
                 // When the InputStream is closed, the CachedOutputStream will be closed
                 return cos.newStreamCache();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 LOGGER.debug("Error extracting body from http request", ex);
                 return null;
             }
