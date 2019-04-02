@@ -39,7 +39,7 @@
     <!-- dependencies -->
     <activemq.version>5.14.0</activemq.version>
     <camel.version>2.20.4</camel.version>
-    <camel.version.range>[2.20.4,3)</camel.version.range>
+    <camel.version.range>[2.20,3)</camel.version.range>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.7</commons.lang3.version>
     <httpclient.version>4.5.2</httpclient.version>
