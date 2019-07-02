@@ -3,7 +3,7 @@ Fcrepo Component
 
 The **fcrepo:** component provides access to an external
 [Fedora4](http://fcrepo.org) Object
-[API](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers)
+[API](https://wiki.duraspace.org/display/FEDORA5x/RESTful+HTTP+API+-+Containers)
 for use with [Apache Camel](https://camel.apache.org).
 
 [![Build Status](https://travis-ci.org/fcrepo4-exts/fcrepo-camel.png?branch=master)](https://travis-ci.org/fcrepo4-exts/fcrepo-camel)
@@ -26,8 +26,8 @@ FcrepoEndpoint options
 | `accept` | `null` | Set the `Accept` header for content negotiation |
 | `fixity` | `false` | Whether GET requests should check the fixity of non-RDF content |
 | `metadata` | `true`  | Whether GET requests should retrieve RDF descriptions of non-RDF content  |
-| `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
-| `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA4x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
+| `preferOmit` | `null` | If set, this populates the `Prefer:` HTTP header with omitted values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA5x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
+| `preferInclude` | `null` | If set, this populates the `Prefer:` HTTP header with included values. For single values, the standard [LDP values](http://www.w3.org/TR/ldp/#prefer-parameters) and the corresponding [Fcrepo extensions](https://wiki.duraspace.org/display/FEDORA5x/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-GETRetrievethecontentoftheresource) can be provided in short form (without the namespace). |
 | `throwExceptionOnFailure` | `true` | Option to disable throwing the HttpOperationFailedException in case of failed responses from the remote server. This allows you to get all responses regardless of the HTTP status code. |
 
 Examples
@@ -41,7 +41,7 @@ A simple example for sending messages to an external Solr service:
     from("activemq:topic:fedora").routeId("triplestore-router")
       .process(new EventProcessor())
       .choice()
-        .when(header(FCREPO_EVENT_TYPE).contains("http://fedora.info/definitions/v4/event#ResourceDeletion"))
+        .when(header(FCREPO_EVENT_TYPE).contains("https://www.w3.org/ns/activitystreams#Delete"))
           .to("direct:remove")
         .when(header(FCREPO_RESOURCE_TYPE).contains("http://fedora.info/definitions/v4/indexing#Indexable"))
           .to("direct:update")
@@ -69,7 +69,7 @@ Or, using the Spring DSL:
         <process ref="eventProcessor"/>
         <choice>
           <when>
-            <simple>${header[CamelFcrepoEventType].contains("http://fedora.info/definitions/v4/event#ResourceDeletion")}</simple>
+            <simple>${header[CamelFcrepoEventType].contains("https://www.w3.org/ns/activitystreams#Delete")}</simple>
             <to uri="direct:remove"/>
           </when>
           <when>
@@ -313,12 +313,13 @@ header values:
   * `org.fcrepo.jms.userAgent`
 
 Both `eventType` and `resourceType` are comma-delimited lists of values.
-The `eventType` values follow the [Fedora Event Type ontology](http://fedora.info/definitions/v4/event#):
+The `eventType` uses the following terms from the [ActivityStreams 2.0](https://www.w3.org/ns/activitystreams) Activities vocabulary:
 
-  * `http://fedora.info/definitions/v4/event#ResourceCreation`
-  * `http://fedora.info/definitions/v4/event#ResourceDeletion`
-  * `http://fedora.info/definitions/v4/event#ResourceModification`
-  * `http://fedora.info/definitions/v4/event#ResourceRelocation`
+  * `https://www.w3.org/ns/activitystreams#Create`
+  * `https://www.w3.org/ns/activitystreams#Delete`
+  * `https://www.w3.org/ns/activitystreams#Update`
+  * `https://www.w3.org/ns/activitystreams#Move`
+  * `https://www.w3.org/ns/activitystreams#Follow`
 
 The `resourceType` values will include any `rdf:type` values for the resource in question.
 
@@ -344,7 +345,7 @@ For projects that use `fcrepo-camel`, please refer to the [`fcrepo-camel-toolbox
 
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
-[fedora project wiki](https://wiki.duraspace.org/display/FEDORA4x/Setup+Camel+Message+Integrations).
+[fedora project wiki](https://wiki.duraspace.org/display/FEDORA5x/Setup+Camel+Message+Integrations).
 
 Maintainers
 -----------
