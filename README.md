@@ -6,7 +6,7 @@ The **fcrepo:** component provides access to an external
 [API](https://wiki.duraspace.org/display/FEDORA5x/RESTful+HTTP+API+-+Containers)
 for use with [Apache Camel](https://camel.apache.org).
 
-[![Build Status](https://travis-ci.com/fcrepo4-exts/fcrepo-camel.svg?branch=master)](https://travis-ci.com/fcrepo4-exts/fcrepo-camel)
+[![Build Status](https://travis-ci.com/fcrepo-exts/fcrepo-camel.svg?branch=master)](https://travis-ci.com/fcrepo-exts/fcrepo-camel)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.camel/fcrepo-camel/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.camel/fcrepo-camel/)
 
 URI format
@@ -341,7 +341,7 @@ If you don't need further access to the message body, it is possible to omit the
 Examples and more information
 -----------------------------
 
-For projects that use `fcrepo-camel`, please refer to the [`fcrepo-camel-toolbox`](https://github.com/fcrepo4-exts/fcrepo-camel-toolbox) project.
+For projects that use `fcrepo-camel`, please refer to the [`fcrepo-camel-toolbox`](https://github.com/fcrepo-exts/fcrepo-camel-toolbox) project.
 
 Furthermore, additional information about designing and deploying **fcrepo**-based message routes along
 with configuration options for Fedora's ActiveMQ broker can be found on the
