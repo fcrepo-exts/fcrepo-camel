@@ -38,6 +38,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoComponent;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -45,6 +46,7 @@ import org.junit.Test;
  * @author Aaron Coburn
  * @since Dec 26, 2014
  */
+@Ignore
 public class FcrepoComponentConfigurationIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
