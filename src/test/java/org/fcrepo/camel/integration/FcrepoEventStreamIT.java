@@ -39,6 +39,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.processor.EventProcessor;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -46,6 +47,7 @@ import org.junit.Test;
  * @author Aaron Coburn
  * @since September 14, 2016
  */
+@Ignore
 public class FcrepoEventStreamIT extends CamelTestSupport {
 
     @EndpointInject(uri = "mock:results")
