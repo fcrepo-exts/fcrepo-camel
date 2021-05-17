@@ -17,11 +17,11 @@
 
   <name>Fcrepo Camel Component</name>
   <description>Camel Component for interacting with a Fedora Repository</description>
-  <url>http://fcrepo.org</url>
+  <url>https://fcrepo.org</url>
 
   <organization>
-    <name>DuraSpace, Inc.</name>
-    <url>http://www.duraspace.org/</url>
+    <name>Lyrasis, Inc.</name>
+    <url>http://www.lyrasis.org/</url>
   </organization>
 
   <properties>
@@ -72,7 +72,7 @@
   <repositories>
     <repository>
       <id>snapshots-repo</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
@@ -435,7 +435,7 @@
       <name>Daniel Berntein</name>
       <email>daniel.bernstein@lyrasis.org</email>
       <organization>Lyrasis</organization>
-      <organizationUrl>http://www.lyrasis.org</organizationUrl>
+      <organizationUrl>https://www.lyrasis.org</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -447,7 +447,7 @@
       <name>Danny Lamb</name>
       <email>dlamb@islandora.ca</email>
       <organization>Islandora Foundation</organization>
-      <organizationUrl>http://islandora.ca</organizationUrl>
+      <organizationUrl>https://islandora.ca</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
