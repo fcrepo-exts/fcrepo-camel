@@ -34,6 +34,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -41,6 +42,7 @@ import org.junit.Test;
  * @author Aaron Coburn
  * @since Dec 26, 2014
  */
+@Ignore
 public class FcrepoStreamIT extends CamelTestSupport {
 
     final private int children = 200;
