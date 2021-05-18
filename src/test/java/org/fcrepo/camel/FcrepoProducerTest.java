@@ -118,7 +118,6 @@ public class FcrepoProducerTest {
         when(mockClient2.get(any(URI.class))).thenReturn(mockGetBuilder);
         when(mockClient2.head(any(URI.class))).thenReturn(mockHeadBuilder);
         when(mockGetBuilder.accept(any(String.class))).thenReturn(mockGetBuilder);
-        when(mockGetBuilder.preferMinimal()).thenReturn(mockGetBuilder);
         when(mockGetBuilder.preferRepresentation(any(List.class), any(List.class))).thenReturn(mockGetBuilder);
         when(mockGetBuilder2.accept(any(String.class))).thenReturn(mockGetBuilder2);
         when(mockGetBuilder3.accept(any(String.class))).thenReturn(mockGetBuilder3);
