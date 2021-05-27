@@ -18,9 +18,9 @@
 package org.fcrepo.camel.integration;
 
 import static java.util.UUID.randomUUID;
-import static org.apache.activemq.camel.component.ActiveMQComponent.activeMQComponent;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.apache.camel.component.activemq.ActiveMQComponent.activeMQComponent;
 import static org.apache.camel.model.dataformat.JsonLibrary.Jackson;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_AGENT;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_DATE_TIME;
