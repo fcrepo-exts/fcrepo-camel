@@ -37,16 +37,15 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <camel.version>2.24.2</camel.version>
-    <activemq.version>5.16.0</activemq.version>
-    <camel.version.range>[2.24.2,3)</camel.version.range>
+    <camel.version>3.9.0</camel.version>
+    <camel.version.range>[3.9.0,4)</camel.version.range>
     <commons.io.version>2.8.0</commons.io.version>
     <commons.lang3.version>3.11</commons.lang3.version>
     <httpclient.version>4.5.13</httpclient.version>
     <jena.version>3.17.0</jena.version>
     <mockito.version>1.10.8</mockito.version>
     <slf4j.version>1.7.20</slf4j.version>
-    <spring.version>5.3.4</spring.version>
+    <spring.version>5.3.7</spring.version>
     <fcrepo.version>6.0.0-SNAPSHOT</fcrepo.version>
     <fcrepo-java-client.version>6.0.0-SNAPSHOT</fcrepo-java-client.version>
     <jaxb.core.version>2.3.0.1</jaxb.core.version>
@@ -85,6 +84,12 @@
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>
+      <version>${camel.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-support</artifactId>
       <version>${camel.version}</version>
     </dependency>
 
@@ -172,15 +177,8 @@
 
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-http4</artifactId>
+      <artifactId>camel-activemq</artifactId>
       <version>${camel.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>activemq-camel</artifactId>
-      <version>${activemq.version}</version>
       <scope>test</scope>
     </dependency>
 

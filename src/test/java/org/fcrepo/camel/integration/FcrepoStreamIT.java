@@ -22,14 +22,14 @@ import java.util.Map;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.camel.language.xpath.XPathBuilder;
+import org.apache.camel.support.builder.Namespaces;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.xml.Namespaces;
-import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.FcrepoHeaders;
