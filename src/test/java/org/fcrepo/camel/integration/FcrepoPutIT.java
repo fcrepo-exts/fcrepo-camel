@@ -17,11 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static java.util.UUID.randomUUID;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -35,6 +30,11 @@ import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.UUID.randomUUID;
+
 /**
  * Test adding an RDF resource with PUT
  * @author Aaron Coburn
@@ -45,16 +45,16 @@ public class FcrepoPutIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:deleted")
+    @EndpointInject("mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @EndpointInject(uri = "mock:result")
+    @EndpointInject("mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "direct:start")
+    @Produce("direct:start")
     protected ProducerTemplate template;
 
     @Test

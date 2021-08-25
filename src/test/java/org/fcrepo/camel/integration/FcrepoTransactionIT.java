@@ -48,8 +48,10 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @author Aaron Coburn
  * @since November 7, 2014
  */
+
+//TODO Renable this test once transactional support for 6.x has been updated in the fcrepo-java-client
 @Ignore
-public class FcrepoTransactionIT extends  CamelTestSupport {
+public class FcrepoTransactionIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 

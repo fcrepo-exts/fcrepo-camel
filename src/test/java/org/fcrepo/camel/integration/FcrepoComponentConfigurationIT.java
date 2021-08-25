@@ -17,15 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getTextDocument;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_USERNAME;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_PASSWORD;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -38,15 +29,22 @@ import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoComponent;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_PASSWORD;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_USERNAME;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getTextDocument;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
 
 /**
  * Test adding an RDF resource
  * @author Aaron Coburn
  * @since Dec 26, 2014
  */
-@Ignore
 public class FcrepoComponentConfigurationIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";

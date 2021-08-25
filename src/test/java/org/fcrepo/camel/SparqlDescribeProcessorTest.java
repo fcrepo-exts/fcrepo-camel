@@ -34,6 +34,7 @@ import java.io.IOException;
 import static java.net.URLEncoder.encode;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 
@@ -64,18 +65,17 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         final String uri = "http://localhost/rest/path/a/b/c/d";
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("query=" + encode("DESCRIBE <" + uri + ">", "UTF-8"));
+        final var expectedBody = "query=" + encode("DESCRIBE <" + uri + ">", "UTF-8");
+        resultEndpoint.expectedBodiesReceived(expectedBody, expectedBody);
         resultEndpoint.expectedHeaderReceived(CONTENT_TYPE, "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(HTTP_METHOD, "POST");
 
         // Test
         template.sendBodyAndHeader(null, FCREPO_URI, uri);
-        //FIXME Not sure whyt this line is blowing things up but commenting out for now.
-        //template.sendBodyAndHeader(null, FCREPO_BASE_URL, uri);
+        template.sendBodyAndHeader(null, FCREPO_BASE_URL, uri);
 
         // Confirm that assertions passed
-        //resultEndpoint.expectedMessageCount(2);
-        resultEndpoint.expectedMessageCount(1);
+        resultEndpoint.expectedMessageCount(2);
         resultEndpoint.assertIsSatisfied();
     }
 

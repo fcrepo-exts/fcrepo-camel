@@ -44,25 +44,25 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
 
     private static final String PREMIS = "http://www.loc.gov/premis/rdf/v1#";
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:filter")
+    @EndpointInject("mock:filter")
     protected MockEndpoint filteredEndpoint;
 
-    @EndpointInject(uri = "mock:binary")
+    @EndpointInject("mock:binary")
     protected MockEndpoint binaryEndpoint;
 
-    @EndpointInject(uri = "mock:verifyGone")
+    @EndpointInject("mock:verifyGone")
     protected MockEndpoint goneEndpoint;
 
-    @EndpointInject(uri = "mock:deleted")
+    @EndpointInject("mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @EndpointInject(uri = "mock:fixity")
+    @EndpointInject("mock:fixity")
     protected MockEndpoint fixityEndpoint;
 
-    @Produce(uri = "direct:filter")
+    @Produce("direct:filter")
     protected ProducerTemplate template;
 
     @Test
@@ -71,7 +71,8 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(2);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        binaryEndpoint.expectedBodiesReceived(FcrepoTestUtils.getTextDocument());
+        final var expectedMessage = FcrepoTestUtils.getTextDocument();
+        binaryEndpoint.expectedBodiesReceived(expectedMessage, expectedMessage);
         binaryEndpoint.expectedMessageCount(1);
         binaryEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "text/plain");
         binaryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
@@ -87,7 +88,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         goneEndpoint.expectedMessageCount(2);
         goneEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 410);
 
-        fixityEndpoint.expectedMessageCount(1);
+        fixityEndpoint.expectedMessageCount(3);
         fixityEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
         final String binary = "/file";
@@ -156,19 +157,20 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to("mock:binary");
 
                 from("direct:getFixity")
-                    .to(fcrepo_uri + "&fixity=true")
-                    .filter().xpath(
+                        .to(fcrepo_uri + "&fixity=true")
+                        .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + PREMIS + "Fixity']", ns)
-                    .to("mock:fixity")
-                    .filter().xpath(
+                            "[@rdf:resource='" + PREMIS + "Fixity']", ns)
+                        .to("mock:fixity")
+                        .filter().xpath(
                         "/rdf:RDF/rdf:Description/premis:hasMessageDigest" +
-                        "[@rdf:resource='urn:sha1:12f68888e3beff267deae42ea86058c9c0565e36']", ns)
-                    .to("mock:fixity")
-                    .filter().xpath(
+                            "[@rdf:resource='urn:sha-512:5c3898de261ad170e7dcc83c6966c1788553b64a1f8dcd15d3aaffff0c" +
+                            "10095e44eb8fe986bb6b23baebe4949e966814142cba4cbe8eba004a1f8dcb16056a5c']", ns)
+                        .to("mock:fixity")
+                        .filter().xpath(
                         "/rdf:RDF/rdf:Description/premis:hasEventOutcome" +
-                        "[text()='SUCCESS']", ns)
-                    .to("mock:fixity");
+                            "[text()='SUCCESS']", ns)
+                        .to("mock:fixity");
 
                 from("direct:delete")
                     .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))

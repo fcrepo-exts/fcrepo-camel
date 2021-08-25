@@ -17,9 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -30,15 +27,16 @@ import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test adding an RDF resource
  * @author Aaron Coburn
  * @since Dec 26, 2014
  */
-@Ignore
 public class FcrepoContainerHeadIT extends CamelTestSupport {
 
     @EndpointInject("mock:created")

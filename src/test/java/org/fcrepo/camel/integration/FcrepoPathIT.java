@@ -17,9 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -30,29 +27,30 @@ import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test adding a resource at a specific path
  * @author Aaron Coburn
  * @since November 7, 2014
  */
-@Ignore
 public class FcrepoPathIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
-    @EndpointInject(uri = "mock:deleted")
+    @EndpointInject("mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:result")
+    @EndpointInject("mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "direct:check")
+    @Produce("direct:check")
     protected ProducerTemplate template;
 
     @Test

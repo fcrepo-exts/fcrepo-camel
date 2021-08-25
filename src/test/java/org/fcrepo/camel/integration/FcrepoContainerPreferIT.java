@@ -17,9 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -30,15 +27,16 @@ import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test adding an RDF resource
  * @author Aaron Coburn
  * @since Dec 26, 2014
  */
-@Ignore
 public class FcrepoContainerPreferIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
@@ -69,11 +67,11 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(2);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        containerEndpoint.expectedMessageCount(1);
+        containerEndpoint.expectedMessageCount(2);
         containerEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         containerEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        filteredEndpoint.expectedMessageCount(4);
+        filteredEndpoint.expectedMessageCount(5);
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
@@ -123,13 +121,13 @@ public class FcrepoContainerPreferIT extends CamelTestSupport {
         headers.clear();
         headers.put(FcrepoHeaders.FCREPO_IDENTIFIER, identifier);
         headers.put(FcrepoHeaders.FCREPO_PREFER, "return=representation; " +
-                    "omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"; " +
+                    "omit=\"http://fedora.info/definitions/fcrepo#ServerManaged\"; " +
                     "include=\"http://www.w3.org/ns/ldp#PreferContainment\";");
         template.sendBodyAndHeaders("direct:preferHeadersCheckContainment", null, headers);
         template.sendBodyAndHeaders("direct:preferHeadersCheckServerManaged", null, headers);
 
         headers.put(FcrepoHeaders.FCREPO_PREFER, "return=representation; " +
-                    "omit=\"http://fedora.info/definitions/v4/repository#ServerManaged " +
+                    "omit=\"http://fedora.info/definitions/fcrepo#ServerManaged\";" +
                     "http://www.w3.org/ns/ldp#PreferContainment\"");
         template.sendBodyAndHeaders("direct:preferHeadersCheckContainment", null, headers);
         template.sendBodyAndHeaders("direct:preferHeadersCheckServerManaged", null, headers);

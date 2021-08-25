@@ -17,17 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUriWithScheme;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -36,15 +25,24 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUriWithScheme;
 
 /**
  * Test adding an RDF resource
  * @author Aaron Coburn
  * @since Dec 26, 2014
  */
-@Ignore
 public class FcrepoContainerGetIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";

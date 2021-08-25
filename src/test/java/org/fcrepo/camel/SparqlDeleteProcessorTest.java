@@ -27,7 +27,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.processor.SparqlDeleteProcessor;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -60,7 +59,6 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
     }
 
     @Test
-    @Ignore
     public void testDelete() throws IOException, InterruptedException {
         final String base = "http://localhost/rest/";
         final String uri = "path/book3";
@@ -90,15 +88,15 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
             "</rdf:RDF>";
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("update=" +
-                encode("DELETE WHERE { <" + uri + "> ?p ?o }", "UTF-8"));
+        final var expectedBody = "update=" +
+                encode("DELETE WHERE { <" + uri + "> ?p ?o }", "UTF-8");
+        resultEndpoint.expectedBodiesReceived(expectedBody, expectedBody);
         resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE,
                 "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");
 
         // Test
         template.sendBodyAndHeader(incomingDoc, FCREPO_URI, uri);
-        //@FIXME Not sure why this is blowing up with the camel upgrade.
         template.sendBodyAndHeader(incomingDoc, FCREPO_BASE_URL, uri);
 
         // Confirm that assertions passed
