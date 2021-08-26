@@ -72,8 +72,7 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
         final var expectedMessage = FcrepoTestUtils.getTextDocument();
-        binaryEndpoint.expectedBodiesReceived(expectedMessage, expectedMessage);
-        binaryEndpoint.expectedMessageCount(1);
+        binaryEndpoint.expectedBodiesReceived(expectedMessage);
         binaryEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "text/plain");
         binaryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
@@ -81,7 +80,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedBodiesReceived(null, null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 

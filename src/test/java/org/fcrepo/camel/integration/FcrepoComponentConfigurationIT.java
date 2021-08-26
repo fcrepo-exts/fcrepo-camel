@@ -86,7 +86,6 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedBodiesReceived(null, null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 

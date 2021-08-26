@@ -65,7 +65,6 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(1);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        operationEndpoint.expectedMessageCount(2);
         operationEndpoint.expectedBodiesReceived(null, null);
         operationEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
