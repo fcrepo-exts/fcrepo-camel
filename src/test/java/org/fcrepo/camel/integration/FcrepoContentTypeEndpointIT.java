@@ -17,9 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -27,6 +24,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
+
+import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 
 /**
  * Test the retrieved content-type from a fcrepo endpoint
@@ -36,10 +36,10 @@ import org.junit.Test;
  */
 public class FcrepoContentTypeEndpointIT extends CamelTestSupport {
 
-    @EndpointInject(uri = "mock:result")
+    @EndpointInject("mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "direct:start")
+    @Produce("direct:start")
     public ProducerTemplate template;
 
     @Test

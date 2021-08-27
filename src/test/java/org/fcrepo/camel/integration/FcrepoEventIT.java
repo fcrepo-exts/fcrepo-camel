@@ -17,20 +17,6 @@
  */
 package org.fcrepo.camel.integration;
 
-import static java.util.UUID.randomUUID;
-import static org.apache.activemq.camel.component.ActiveMQComponent.activeMQComponent;
-import static org.apache.camel.Exchange.CONTENT_TYPE;
-import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.camel.model.dataformat.JsonLibrary.Jackson;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_AGENT;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_DATE_TIME;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_ID;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_TYPE;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_RESOURCE_TYPE;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
-import static org.fcrepo.camel.integration.FcrepoTestUtils.AUTH_QUERY_PARAMS;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -40,6 +26,20 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.processor.EventProcessor;
 import org.junit.Test;
 
+import static java.util.UUID.randomUUID;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+import static org.apache.camel.Exchange.HTTP_METHOD;
+import static org.apache.camel.component.activemq.ActiveMQComponent.activeMQComponent;
+import static org.apache.camel.model.dataformat.JsonLibrary.Jackson;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_AGENT;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_DATE_TIME;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_ID;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_EVENT_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_RESOURCE_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.AUTH_QUERY_PARAMS;
+import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
+
 /**
  * Test handling a Fedora Event
  * @author Aaron Coburn
@@ -47,19 +47,19 @@ import org.junit.Test;
  */
 public class FcrepoEventIT extends CamelTestSupport {
 
-    @EndpointInject(uri = "mock:type")
+    @EndpointInject("mock:type")
     protected MockEndpoint typeEndpoint;
 
-    @EndpointInject(uri = "mock:id")
+    @EndpointInject("mock:id")
     protected MockEndpoint idEndpoint;
 
-    @EndpointInject(uri = "mock:agent")
+    @EndpointInject("mock:agent")
     protected MockEndpoint agentEndpoint;
 
-    @EndpointInject(uri = "mock:wasGeneratedBy")
+    @EndpointInject("mock:wasGeneratedBy")
     protected MockEndpoint wasGeneratedByEndpoint;
 
-    @Produce(uri = "direct:create")
+    @Produce("direct:create")
     protected ProducerTemplate template;
 
     private final String container = randomUUID().toString();
@@ -72,19 +72,19 @@ public class FcrepoEventIT extends CamelTestSupport {
 
         resetMocks();
 
-        idEndpoint.expectedMessageCount(5);
+        idEndpoint.expectedMessageCount(3);
         idEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         idEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         idEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        idEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
+        idEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?fedoraAdmin.+?");
         idEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         idEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
-        typeEndpoint.expectedMessageCount(5);
+        typeEndpoint.expectedMessageCount(3);
         typeEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         typeEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         typeEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        typeEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
+        typeEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?fedoraAdmin.+?");
         typeEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         typeEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
@@ -92,15 +92,15 @@ public class FcrepoEventIT extends CamelTestSupport {
         wasGeneratedByEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         wasGeneratedByEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         wasGeneratedByEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        wasGeneratedByEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
+        wasGeneratedByEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?fedoraAdmin.+?");
         wasGeneratedByEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         wasGeneratedByEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
-        agentEndpoint.expectedMessageCount(5);
+        agentEndpoint.expectedMessageCount(3);
         agentEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
         agentEndpoint.allMessages().header(FCREPO_RESOURCE_TYPE).contains(fcrepoResource);
         agentEndpoint.allMessages().header(FCREPO_EVENT_TYPE).isNotNull();
-        agentEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?bypassAdmin.+?");
+        agentEndpoint.allMessages().header(FCREPO_AGENT).regex(".+?fedoraAdmin.+?");
         agentEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         agentEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
@@ -143,7 +143,7 @@ public class FcrepoEventIT extends CamelTestSupport {
                     .to("mock:id");
 
                 from("direct:agent")
-                    .filter(header(FCREPO_AGENT).regex(".+?bypassAdmin.+?"))
+                    .filter(header(FCREPO_AGENT).regex(".+?fedoraAdmin.+?"))
                     .to("mock:agent");
 
                 from("direct:wasGeneratedBy")
@@ -152,11 +152,11 @@ public class FcrepoEventIT extends CamelTestSupport {
 
                 from("direct:setup")
                     .setHeader(HTTP_METHOD).constant("PUT")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
+                    .to("http:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
 
                 from("direct:create")
                     .setHeader(HTTP_METHOD).constant("POST")
-                    .to("http4:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
+                    .to("http:localhost:" + webPort + "/fcrepo/rest/" + container + AUTH_QUERY_PARAMS);
             }
         };
     }

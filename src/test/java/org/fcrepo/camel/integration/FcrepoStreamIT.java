@@ -17,24 +17,23 @@
  */
 package org.fcrepo.camel.integration;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.transform.stream.StreamSource;
-
-import org.apache.jena.vocabulary.RDF;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.xml.Namespaces;
-import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.language.xpath.XPathBuilder;
+import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.xml.transform.stream.StreamSource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test adding an RDF resource
@@ -45,19 +44,19 @@ public class FcrepoStreamIT extends CamelTestSupport {
 
     final private int children = 200;
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:child")
+    @EndpointInject("mock:child")
     protected MockEndpoint childEndpoint;
 
-    @EndpointInject(uri = "mock:verifyGone")
+    @EndpointInject("mock:verifyGone")
     protected MockEndpoint goneEndpoint;
 
-    @EndpointInject(uri = "mock:deleted")
+    @EndpointInject("mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @Produce(uri = "direct:filter")
+    @Produce("direct:filter")
     protected ProducerTemplate template;
 
     @Test

@@ -17,20 +17,20 @@
  */
 package org.fcrepo.camel.integration;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test adding an RDF resource
@@ -41,22 +41,22 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:filter")
+    @EndpointInject("mock:filter")
     protected MockEndpoint filteredEndpoint;
 
-    @EndpointInject(uri = "mock:title")
+    @EndpointInject("mock:title")
     protected MockEndpoint titleEndpoint;
 
-    @EndpointInject(uri = "mock:verifyGone")
+    @EndpointInject("mock:verifyGone")
     protected MockEndpoint goneEndpoint;
 
-    @EndpointInject(uri = "mock:operation")
+    @EndpointInject("mock:operation")
     protected MockEndpoint operationEndpoint;
 
-    @Produce(uri = "direct:filter")
+    @Produce("direct:filter")
     protected ProducerTemplate template;
 
     @Test
@@ -65,13 +65,12 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(1);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        operationEndpoint.expectedMessageCount(2);
         operationEndpoint.expectedBodiesReceived(null, null);
         operationEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
         titleEndpoint.expectedMessageCount(3);
         titleEndpoint.expectedBodiesReceivedInAnyOrder(
-                "some title &amp; other", "some title &amp; other", "some other title");
+                "some title & other", "some title & other", "some other title");
         titleEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         titleEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
@@ -120,22 +119,22 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
             @Override
             public void configure() {
 
-                final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
+                final String fcrepoUri = FcrepoTestUtils.getFcrepoEndpointUri();
 
                 final Namespaces ns = new Namespaces("rdf", RDF.uri);
                 ns.add("dc", "http://purl.org/dc/elements/1.1/");
 
                 from("direct:create")
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .to("mock:created");
 
                 from("direct:patch")
                     .setHeader(Exchange.HTTP_METHOD, constant("PATCH"))
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .to("mock:operation");
 
                 from("direct:title")
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .convertBodyTo(org.w3c.dom.Document.class)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
@@ -147,10 +146,10 @@ public class FcrepoContainerPatchIT extends CamelTestSupport {
 
                 from("direct:delete")
                     .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .to("mock:operation")
                     .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
+                    .to(fcrepoUri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };

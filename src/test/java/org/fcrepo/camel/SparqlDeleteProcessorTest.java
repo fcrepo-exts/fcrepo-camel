@@ -17,14 +17,6 @@
  */
 package org.fcrepo.camel;
 
-import static java.net.URLEncoder.encode;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.NoSuchHeaderException;
@@ -32,10 +24,17 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.impl.DefaultExchange;
+import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.fcrepo.camel.processor.SparqlDeleteProcessor;
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static java.net.URLEncoder.encode;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 
 /**
  * Test adding a non-RDF resource
@@ -44,10 +43,10 @@ import org.junit.Test;
  */
 public class SparqlDeleteProcessorTest extends CamelTestSupport {
 
-    @EndpointInject(uri = "mock:result")
+    @EndpointInject("mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "direct:start")
+    @Produce("direct:start")
     protected ProducerTemplate template;
 
     @Test
@@ -89,8 +88,9 @@ public class SparqlDeleteProcessorTest extends CamelTestSupport {
             "</rdf:RDF>";
 
         // Assertions
-        resultEndpoint.expectedBodiesReceived("update=" +
-                encode("DELETE WHERE { <" + uri + "> ?p ?o }", "UTF-8"));
+        final var expectedBody = "update=" +
+                encode("DELETE WHERE { <" + uri + "> ?p ?o }", "UTF-8");
+        resultEndpoint.expectedBodiesReceived(expectedBody, expectedBody);
         resultEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE,
                 "application/x-www-form-urlencoded; charset=utf-8");
         resultEndpoint.expectedHeaderReceived(Exchange.HTTP_METHOD, "POST");

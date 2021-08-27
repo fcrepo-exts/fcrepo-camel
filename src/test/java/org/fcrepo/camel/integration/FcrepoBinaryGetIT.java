@@ -17,21 +17,21 @@
  */
 package org.fcrepo.camel.integration;
 
-import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.xml.Namespaces;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 
 /**
  * Test adding a non-RDF resource
@@ -44,25 +44,25 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
 
     private static final String PREMIS = "http://www.loc.gov/premis/rdf/v1#";
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:filter")
+    @EndpointInject("mock:filter")
     protected MockEndpoint filteredEndpoint;
 
-    @EndpointInject(uri = "mock:binary")
+    @EndpointInject("mock:binary")
     protected MockEndpoint binaryEndpoint;
 
-    @EndpointInject(uri = "mock:verifyGone")
+    @EndpointInject("mock:verifyGone")
     protected MockEndpoint goneEndpoint;
 
-    @EndpointInject(uri = "mock:deleted")
+    @EndpointInject("mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @EndpointInject(uri = "mock:fixity")
+    @EndpointInject("mock:fixity")
     protected MockEndpoint fixityEndpoint;
 
-    @Produce(uri = "direct:filter")
+    @Produce("direct:filter")
     protected ProducerTemplate template;
 
     @Test
@@ -71,8 +71,8 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         createdEndpoint.expectedMessageCount(2);
         createdEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 201);
 
-        binaryEndpoint.expectedBodiesReceived(FcrepoTestUtils.getTextDocument());
-        binaryEndpoint.expectedMessageCount(1);
+        final var expectedMessage = FcrepoTestUtils.getTextDocument();
+        binaryEndpoint.expectedBodiesReceived(expectedMessage);
         binaryEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "text/plain");
         binaryEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
@@ -80,7 +80,6 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
         filteredEndpoint.expectedHeaderReceived(Exchange.CONTENT_TYPE, "application/rdf+xml");
         filteredEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 200);
 
-        deletedEndpoint.expectedMessageCount(2);
         deletedEndpoint.expectedBodiesReceived(null, null);
         deletedEndpoint.expectedHeaderReceived(Exchange.HTTP_RESPONSE_CODE, 204);
 
@@ -156,19 +155,20 @@ public class FcrepoBinaryGetIT extends CamelTestSupport {
                     .to("mock:binary");
 
                 from("direct:getFixity")
-                    .to(fcrepo_uri + "&fixity=true")
-                    .filter().xpath(
+                        .to(fcrepo_uri + "&fixity=true")
+                        .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
-                        "[@rdf:resource='" + PREMIS + "Fixity']", ns)
-                    .to("mock:fixity")
-                    .filter().xpath(
+                            "[@rdf:resource='" + PREMIS + "Fixity']", ns)
+                        .to("mock:fixity")
+                        .filter().xpath(
                         "/rdf:RDF/rdf:Description/premis:hasMessageDigest" +
-                        "[@rdf:resource='urn:sha1:12f68888e3beff267deae42ea86058c9c0565e36']", ns)
-                    .to("mock:fixity")
-                    .filter().xpath(
+                            "[@rdf:resource='urn:sha-512:5c3898de261ad170e7dcc83c6966c1788553b64a1f8dcd15d3aaffff0c" +
+                            "10095e44eb8fe986bb6b23baebe4949e966814142cba4cbe8eba004a1f8dcb16056a5c']", ns)
+                        .to("mock:fixity")
+                        .filter().xpath(
                         "/rdf:RDF/rdf:Description/premis:hasEventOutcome" +
-                        "[text()='SUCCESS']", ns)
-                    .to("mock:fixity");
+                            "[text()='SUCCESS']", ns)
+                        .to("mock:fixity");
 
                 from("direct:delete")
                     .setHeader(Exchange.HTTP_METHOD, constant("DELETE"))

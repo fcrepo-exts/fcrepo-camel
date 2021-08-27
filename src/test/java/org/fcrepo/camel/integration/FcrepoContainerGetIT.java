@@ -17,6 +17,19 @@
  */
 package org.fcrepo.camel.integration;
 
+import org.apache.camel.EndpointInject;
+import org.apache.camel.Produce;
+import org.apache.camel.ProducerTemplate;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.support.builder.Namespaces;
+import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.jena.vocabulary.RDF;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
@@ -24,19 +37,6 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoBaseUrl;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUriWithScheme;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.camel.EndpointInject;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.xml.Namespaces;
-import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.junit4.CamelTestSupport;
-import org.apache.jena.vocabulary.RDF;
-import org.junit.Test;
 
 /**
  * Test adding an RDF resource
@@ -47,22 +47,22 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
-    @EndpointInject(uri = "mock:created")
+    @EndpointInject("mock:created")
     protected MockEndpoint createdEndpoint;
 
-    @EndpointInject(uri = "mock:filter")
+    @EndpointInject("mock:filter")
     protected MockEndpoint filteredEndpoint;
 
-    @EndpointInject(uri = "mock:container")
+    @EndpointInject("mock:container")
     protected MockEndpoint containerEndpoint;
 
-    @EndpointInject(uri = "mock:verifyGone")
+    @EndpointInject("mock:verifyGone")
     protected MockEndpoint goneEndpoint;
 
-    @EndpointInject(uri = "mock:deleted")
+    @EndpointInject("mock:deleted")
     protected MockEndpoint deletedEndpoint;
 
-    @Produce(uri = "direct:filter")
+    @Produce("direct:filter")
     protected ProducerTemplate template;
 
     @Test
@@ -132,30 +132,30 @@ public class FcrepoContainerGetIT extends CamelTestSupport {
             @Override
             public void configure() {
 
-                final String fcrepo_uri = getFcrepoEndpointUriWithScheme();
+                final String fcrepoUri = getFcrepoEndpointUriWithScheme();
 
                 final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
                 from("direct:create")
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .to("mock:created");
 
                 // use an explicit scheme with the fcrepo: endpoint
                 from("direct:get")
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .filter().xpath(
                         "/rdf:RDF/rdf:Description/rdf:type" +
                         "[@rdf:resource='" + REPOSITORY + "Container']", ns)
                     .to("mock:filter")
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .to("mock:container");
 
                 from("direct:delete")
                     .setHeader(HTTP_METHOD, constant("DELETE"))
-                    .to(fcrepo_uri)
+                    .to(fcrepoUri)
                     .to("mock:deleted")
                     .setHeader(HTTP_METHOD, constant("GET"))
-                    .to(fcrepo_uri + "&throwExceptionOnFailure=false")
+                    .to(fcrepoUri + "&throwExceptionOnFailure=false")
                     .to("mock:verifyGone");
             }
         };
