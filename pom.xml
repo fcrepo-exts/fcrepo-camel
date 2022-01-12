@@ -57,6 +57,8 @@
     <!-- plugins -->
     <jetty.version>9.4.34.v20201102</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
+
+     <sonatype.host>s01.oss.sonatype.org</sonatype.host>
   </properties>
 
   <scm>
@@ -69,7 +71,7 @@
   <repositories>
     <repository>
       <id>sonatype-nexus-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://${sonatype.host}/content/repositories/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
