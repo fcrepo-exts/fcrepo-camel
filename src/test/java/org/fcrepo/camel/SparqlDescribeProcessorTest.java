@@ -13,9 +13,9 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.support.DefaultExchange;
-import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.camel.test.junit5.CamelTestSupport;
 import org.fcrepo.camel.processor.SparqlDescribeProcessor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
@@ -25,6 +25,8 @@ import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_URI;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test adding a non-RDF resource
@@ -45,7 +47,7 @@ public class SparqlDescribeProcessorTest extends CamelTestSupport {
         in.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
         final Exchange out = template.send(in);
         assertTrue(out.isFailed());
-        assertTrue(out.getException() instanceof NoSuchHeaderException);
+        assertInstanceOf(NoSuchHeaderException.class, out.getException());
     }
 
     @Test

@@ -41,7 +41,8 @@
     <commons.io.version>2.21.0</commons.io.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
     <jena.version>4.10.0</jena.version>
-    <mockito.version>1.10.19</mockito.version>
+    <junit.version>5.10.2</junit.version>
+    <mockito.version>5.11.0</mockito.version>
     <slf4j.version>1.7.32</slf4j.version>
     <spring.version>5.3.39</spring.version>
     <fcrepo.version>6.5.1</fcrepo.version>
@@ -50,8 +51,7 @@
     <javaee-api.version>8.0.1</javaee-api.version>
     <javaee.xml.version>2.3.1</javaee.xml.version>
 
-    <!-- jared's -->
-    <failsafe.plugin.version>2.18.1</failsafe.plugin.version>
+    <failsafe.plugin.version>3.5.5</failsafe.plugin.version>
 
     <!-- plugins -->
     <jetty.version>9.4.34.v20201102</jetty.version>
@@ -161,8 +161,20 @@
 
     <!-- testing -->
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
@@ -188,7 +200,7 @@
 
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-test</artifactId>
+      <artifactId>camel-test-junit5</artifactId>
       <version>${camel.version}</version>
       <scope>test</scope>
     </dependency>

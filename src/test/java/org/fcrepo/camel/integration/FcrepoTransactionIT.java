@@ -7,6 +7,7 @@ package org.fcrepo.camel.integration;
 
 import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_USERNAME;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_PASSWORD;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,14 +21,14 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.language.xpath.XPathBuilder;
 import org.apache.camel.spring.spi.SpringTransactionPolicy;
 import org.apache.camel.support.builder.Namespaces;
-import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.FcrepoTransactionManager;
 import org.fcrepo.client.FcrepoOperationFailedException;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.Before;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -38,7 +39,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 
 //TODO Renable this test once transactional support for 6.x has been updated in the fcrepo-java-client
-@Ignore
+@Disabled
 public class FcrepoTransactionIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
@@ -74,7 +75,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
     @Produce("direct:create")
     protected ProducerTemplate template;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
 

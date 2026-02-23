@@ -18,10 +18,13 @@ import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
 import static org.fcrepo.camel.FcrepoProducer.PREFER_PROPERTIES;
 import static org.fcrepo.camel.TestUtils.N_TRIPLES;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,16 +53,19 @@ import org.fcrepo.client.HttpMethods;
 import org.fcrepo.client.PatchBuilder;
 import org.fcrepo.client.PostBuilder;
 import org.fcrepo.client.PutBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author acoburn
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FcrepoProducerTest {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
@@ -93,7 +99,7 @@ public class FcrepoProducerTest {
     @Mock
     private PutBuilder mockPutBuilder;
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         final FcrepoComponent mockComponent = mock(FcrepoComponent.class);
@@ -116,9 +122,9 @@ public class FcrepoProducerTest {
         when(mockClient.post(any(URI.class))).thenReturn(mockPostBuilder);
         when(mockClient.put(any(URI.class))).thenReturn(mockPutBuilder);
         when(mockPatchBuilder.body(any(InputStream.class))).thenReturn(mockPatchBuilder);
-        when(mockPostBuilder.body(any(InputStream.class), any(String.class))).thenReturn(mockPostBuilder);
-        when(mockPostBuilder2.body(any(InputStream.class), any(String.class))).thenReturn(mockPostBuilder2);
-        when(mockPostBuilder3.body(any(InputStream.class), any(String.class))).thenReturn(mockPostBuilder3);
+        when(mockPostBuilder.body(nullable(InputStream.class), nullable(String.class))).thenReturn(mockPostBuilder);
+        when(mockPostBuilder2.body(nullable(InputStream.class), nullable(String.class))).thenReturn(mockPostBuilder2);
+        when(mockPostBuilder3.body(nullable(InputStream.class), nullable(String.class))).thenReturn(mockPostBuilder3);
         when(mockPutBuilder.body(any(InputStream.class), any(String.class))).thenReturn(mockPutBuilder);
     }
 
@@ -493,8 +499,8 @@ public class FcrepoProducerTest {
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(), null);
-        assertEquals(testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE), status);
+        assertNull(testExchange.getIn().getBody());
+        assertEquals(status, testExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
     }
 
     @Test
@@ -509,15 +515,16 @@ public class FcrepoProducerTest {
 
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
         testExchange.getIn().setHeader(HTTP_METHOD, HttpMethods.PUT);
-        testExchange.getIn().setBody(null);
+        testExchange.getIn().setHeader(CONTENT_TYPE, TestUtils.TEXT_PLAIN);
+        testExchange.getIn().setBody(new ByteArrayInputStream("Test".getBytes()));
 
         when(mockPutBuilder.perform()).thenReturn(putResponse);
 
         testProducer.process(testExchange);
 
-        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.baseUrl);
-        assertEquals(testExchange.getIn().getHeader(HTTP_RESPONSE_CODE), status);
-        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE), TestUtils.TEXT_PLAIN);
+        assertEquals(TestUtils.baseUrl, testExchange.getIn().getBody(String.class));
+        assertEquals(status, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+        assertEquals(TestUtils.TEXT_PLAIN, testExchange.getIn().getHeader(CONTENT_TYPE));
     }
 
     @Test
@@ -672,7 +679,7 @@ public class FcrepoProducerTest {
         assertEquals(TestUtils.rdfTriples, testExchange.getIn().getBody(String.class));
     }
 
-    @Test (expected = RuntimeException.class)
+    @Test
     public void testTransactedProducerWithError() throws Exception {
         final String baseUrl = "http://localhost:8080/rest";
         final String path = "/transact";
@@ -694,9 +701,11 @@ public class FcrepoProducerTest {
         init();
         TestUtils.setField(txMgr, "fcrepoClient", mockClient2);
 
-        uow.beginTransactedBy((Object)tx);
+        uow.beginTransactedBy(tx);
 
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
+        testExchange.getIn().setHeader(CONTENT_TYPE, TestUtils.TEXT_PLAIN);
+        testExchange.getIn().setBody(new ByteArrayInputStream("Test".getBytes()));
         testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
 
         when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
@@ -724,7 +733,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, N_TRIPLES);
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path2);
         testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
-        testProducer.process(testExchange);
+        assertThrows(RuntimeException.class, () -> testProducer.process(testExchange));
     }
 
     @Test
