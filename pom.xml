@@ -55,7 +55,7 @@
     <central-publishing-plugin.version>0.9.0</central-publishing-plugin.version>
 
     <!-- plugins -->
-    <jetty.version>9.4.34.v20201102</jetty.version>
+    <jetty.version>9.4.58.v20250814</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
 
   </properties>
