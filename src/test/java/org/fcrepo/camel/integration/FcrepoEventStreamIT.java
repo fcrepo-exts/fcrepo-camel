@@ -10,9 +10,9 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.camel.test.junit5.CamelTestSupport;
 import org.fcrepo.camel.processor.EventProcessor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
@@ -49,8 +49,6 @@ public class FcrepoEventStreamIT extends CamelTestSupport {
         final String webPort = System.getProperty("fcrepo.dynamic.test.port", "8080");
         final String baseContainer = "http://localhost:" + webPort + "/fcrepo/rest/" + container;
         final String fcrepoResource = "http://fedora.info/definitions/v4/repository#Resource";
-
-        resetMocks();
 
         resultsEndpoint.expectedMessageCount(6);
         resultsEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);

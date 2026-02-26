@@ -10,9 +10,9 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.camel.test.junit5.CamelTestSupport;
 import org.fcrepo.camel.processor.EventProcessor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.UUID.randomUUID;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
@@ -35,6 +35,8 @@ import static org.fcrepo.camel.integration.FcrepoTestUtils.getTurtleDocument;
  */
 public class FcrepoEventIT extends CamelTestSupport {
 
+    private final String container = randomUUID().toString();
+
     @EndpointInject("mock:type")
     protected MockEndpoint typeEndpoint;
 
@@ -47,10 +49,11 @@ public class FcrepoEventIT extends CamelTestSupport {
     @EndpointInject("mock:wasGeneratedBy")
     protected MockEndpoint wasGeneratedByEndpoint;
 
-    @Produce("direct:create")
-    protected ProducerTemplate template;
+    @Produce("direct:setup")
+    protected ProducerTemplate setupTemplate;
 
-    private final String container = randomUUID().toString();
+    @Produce("direct:create")
+    protected ProducerTemplate createTemplate;
 
     @Test
     public void testGetMessage() throws Exception {
@@ -58,7 +61,6 @@ public class FcrepoEventIT extends CamelTestSupport {
         final String baseContainer = "http://localhost:" + webPort + "/fcrepo/rest/" + container;
         final String fcrepoResource = "http://fedora.info/definitions/v4/repository#Resource";
 
-        resetMocks();
 
         idEndpoint.expectedMessageCount(3);
         idEndpoint.allMessages().header(FCREPO_URI).startsWith(baseContainer);
@@ -92,9 +94,9 @@ public class FcrepoEventIT extends CamelTestSupport {
         agentEndpoint.allMessages().header(FCREPO_EVENT_ID).startsWith("urn:uuid:");
         agentEndpoint.allMessages().header(FCREPO_DATE_TIME).isNotNull();
 
-        template.sendBody("direct:setup", null);
-        template.sendBodyAndHeader("direct:create", getTurtleDocument(), CONTENT_TYPE, "text/turtle");
-        template.sendBodyAndHeader("direct:create", getTurtleDocument(), CONTENT_TYPE, "text/turtle");
+        setupTemplate.sendBody(null);
+        createTemplate.sendBodyAndHeader(getTurtleDocument(), CONTENT_TYPE, "text/turtle");
+        createTemplate.sendBodyAndHeader(getTurtleDocument(), CONTENT_TYPE, "text/turtle");
 
         idEndpoint.assertIsSatisfied();
         typeEndpoint.assertIsSatisfied();

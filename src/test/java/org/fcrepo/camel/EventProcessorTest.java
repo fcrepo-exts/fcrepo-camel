@@ -24,9 +24,9 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.camel.test.junit5.CamelTestSupport;
 import org.fcrepo.camel.processor.EventProcessor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author acoburn

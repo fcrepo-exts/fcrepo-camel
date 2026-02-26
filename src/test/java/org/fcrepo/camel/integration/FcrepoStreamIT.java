@@ -5,6 +5,8 @@
  */
 package org.fcrepo.camel.integration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -13,11 +15,10 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.language.xpath.XPathBuilder;
 import org.apache.camel.support.builder.Namespaces;
-import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class FcrepoStreamIT extends CamelTestSupport {
         deletedEndpoint.assertIsSatisfied();
 
         for (Exchange exchange : childEndpoint.getExchanges()) {
-            Assert.assertTrue(exchange.getIn().getBody(String.class).contains("/stream/"));
+            assertTrue(exchange.getIn().getBody(String.class).contains("/stream/"));
         }
     }
 
