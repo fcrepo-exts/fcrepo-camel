@@ -35,6 +35,8 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
       run: mvn -B -U clean install org.jacoco:jacoco-maven-plugin:0.8.12:report
+    - name: Debug
+      run: find . -name "*.exec"
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
