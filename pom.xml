@@ -314,10 +314,28 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
-
+      
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prepare-unit</id>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+          <execution>
+            <id>prepare-it</id>
+            <goals><goal>prepare-agent-integration</goal></goals>
+            <configuration>
+              <propertyName>jacoco.agent.it.arg</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals><goal>report</goal></goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
