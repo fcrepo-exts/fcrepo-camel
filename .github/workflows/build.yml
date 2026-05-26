@@ -36,7 +36,6 @@ jobs:
     - name: Build with Maven
       run: mvn -B -U clean install
     - name: Debug
-      if: always()
       run:  find . -name "*.exec" -ls
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
