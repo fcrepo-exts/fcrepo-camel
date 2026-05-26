@@ -41,13 +41,13 @@ jobs:
         install
         org.jacoco:jacoco-maven-plugin:0.8.12:report
         -Djacoco.dataFile=$GITHUB_WORKSPACE/target/jacoco.exec
-        - name: Debug Codecov
-          run:  find . -name "*.exec" -ls
-        - name: Upload coverage to Codecov
-          uses: codecov/codecov-action@v5
-          with:
-            token: ${{ secrets.CODECOV_TOKEN }}
-            
+    - name: Debug Codecov
+      run:  find . -name "*.exec" -ls
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: [build]
