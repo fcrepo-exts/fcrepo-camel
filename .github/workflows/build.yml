@@ -40,7 +40,7 @@ jobs:
         -Djacoco.destFile=$GITHUB_WORKSPACE/target/jacoco.exec
         install
         org.jacoco:jacoco-maven-plugin:0.8.12:report
-        -Djacoco.dataFile=$GITHUB_WOR
+        -Djacoco.dataFile=$GITHUB_WORKSPACE/target/jacoco.exec
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v5
