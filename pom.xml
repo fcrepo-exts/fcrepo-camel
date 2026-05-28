@@ -327,6 +327,7 @@
             <id>prepare-it</id>
             <goals><goal>prepare-agent-integration</goal></goals>
             <configuration>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
               <propertyName>jacoco.agent.it.arg</propertyName>
             </configuration>
           </execution>
@@ -334,6 +335,9 @@
             <id>report</id>
             <phase>verify</phase>
             <goals><goal>report</goal></goals>
+            <configuration>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
+            </configuration>
           </execution>
         </executions>
       </plugin>
