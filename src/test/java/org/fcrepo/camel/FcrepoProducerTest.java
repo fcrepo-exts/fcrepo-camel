@@ -14,6 +14,7 @@ import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.DISABLE_HTTP_STREAM_CACHE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
 import static org.fcrepo.camel.FcrepoProducer.PREFER_PROPERTIES;
@@ -199,6 +200,74 @@ public class FcrepoProducerTest {
 
         assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
         assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferMinimalHeaderProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, emptyMap(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                singletonMap(CONTENT_TYPE, singletonList(N_TRIPLES)), body);
+
+        init();
+
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        testExchange.getIn().setHeader(FCREPO_PREFER, "return=minimal");
+
+        when(mockHeadBuilder.perform()).thenReturn(headResponse);
+        when(mockGetBuilder.perform()).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), N_TRIPLES);
+    }
+
+    @Test
+    public void testGetPreferOtherHeaderProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfTriples.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, emptyMap(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                singletonMap(CONTENT_TYPE, singletonList(N_TRIPLES)), body);
+
+        init();
+
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+        // a Prefer header that is neither minimal nor a representation request
+        testExchange.getIn().setHeader(FCREPO_PREFER, "handling=lenient");
+
+        when(mockHeadBuilder.perform()).thenReturn(headResponse);
+        when(mockGetBuilder.perform()).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfTriples);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), N_TRIPLES);
+    }
+
+    @Test
+    public void testGetWithBaseUrlHeaderProducer() throws Exception {
+        final URI uri = create(TestUtils.baseUrl);
+        final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
+        final FcrepoResponse headResponse = new FcrepoResponse(uri, 200, emptyMap(), null);
+        final FcrepoResponse getResponse = new FcrepoResponse(uri, 200,
+                singletonMap(CONTENT_TYPE, singletonList(TestUtils.RDF_XML)), body);
+
+        init();
+
+        // supply the base url via a header rather than the endpoint configuration
+        testExchange.getIn().setHeader(FCREPO_BASE_URL, "http://localhost:8080/rest");
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, "/foo");
+
+        when(mockHeadBuilder.perform()).thenReturn(headResponse);
+        when(mockGetBuilder.perform()).thenReturn(getResponse);
+
+        testProducer.process(testExchange);
+
+        assertEquals(testExchange.getIn().getBody(String.class), TestUtils.rdfXml);
+        assertEquals(testExchange.getIn().getHeader(CONTENT_TYPE, String.class), TestUtils.RDF_XML);
     }
 
     @Test
