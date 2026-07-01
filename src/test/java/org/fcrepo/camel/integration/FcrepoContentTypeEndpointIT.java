@@ -13,7 +13,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.ACCEPT_CONTENT_TYPE;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.getFcrepoEndpointUri;
 
 /**

@@ -16,7 +16,6 @@ import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoComponent;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -55,11 +54,6 @@ public class FcrepoComponentConfigurationIT extends CamelTestSupport {
 
     @Produce("direct:filter")
     protected ProducerTemplate template;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        super.setUp();
-    }
 
     @Test
     public void testGetContainer() throws InterruptedException {

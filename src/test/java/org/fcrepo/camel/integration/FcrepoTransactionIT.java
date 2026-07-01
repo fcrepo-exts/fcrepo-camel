@@ -75,10 +75,10 @@ public class FcrepoTransactionIT extends CamelTestSupport {
     @Produce("direct:create")
     protected ProducerTemplate template;
 
+    // Camel 4 makes CamelTestSupport.setUp() final; a subclass @BeforeEach runs after
+    // the framework's own setup, matching the previous super.setUp()-first ordering.
     @BeforeEach
-    public void setUp() throws Exception {
-        super.setUp();
-
+    public void setUpTransaction() throws Exception {
         txTemplate = new TransactionTemplate(txMgr);
         txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         txTemplate.afterPropertiesSet();
