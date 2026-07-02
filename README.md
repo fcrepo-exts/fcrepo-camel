@@ -8,6 +8,7 @@ for use with [Apache Camel](https://camel.apache.org).
 
 [![Build Status](https://travis-ci.com/fcrepo-exts/fcrepo-camel.svg?branch=master)](https://travis-ci.com/fcrepo-exts/fcrepo-camel)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.camel/fcrepo-camel/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.camel/fcrepo-camel/)
+[![codecov](https://codecov.io/gh/fcrepo-exts/fcrepo-camel/branch/main/graph/badge.svg)](https://codecov.io/gh/fcrepo-exts/fcrepo-camel)
 
 URI format
 ----------

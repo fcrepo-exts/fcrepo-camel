@@ -67,4 +67,36 @@ public class FcrepoPreferTest {
         assertTrue(prefer.getOmit().contains(create(containment)));
         assertEquals(emptyList(), prefer.getInclude());
     }
+
+    @Test
+    public void testPreferMinimal() {
+        final FcrepoPrefer prefer = new FcrepoPrefer("return=minimal");
+        assertTrue(prefer.isMinimal());
+        assertFalse(prefer.isRepresentation());
+        assertEquals(emptyList(), prefer.getInclude());
+        assertEquals(emptyList(), prefer.getOmit());
+    }
+
+    @Test
+    public void testPreferNoReturnType() {
+        final FcrepoPrefer prefer = new FcrepoPrefer("include=\"" + embed + "\"");
+        assertFalse(prefer.isMinimal());
+        assertFalse(prefer.isRepresentation());
+        assertEquals(singletonList(create(embed)), prefer.getInclude());
+        assertEquals(emptyList(), prefer.getOmit());
+    }
+
+    @Test
+    public void testPreferNull() {
+        final FcrepoPrefer prefer = new FcrepoPrefer(null);
+        assertFalse(prefer.isMinimal());
+        assertFalse(prefer.isRepresentation());
+    }
+
+    @Test
+    public void testPreferEmptyValue() {
+        final FcrepoPrefer prefer = new FcrepoPrefer("return=representation; include=\"  \"");
+        assertTrue(prefer.isRepresentation());
+        assertEquals(emptyList(), prefer.getInclude());
+    }
 }
