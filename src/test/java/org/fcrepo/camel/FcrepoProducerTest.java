@@ -694,9 +694,10 @@ public class FcrepoProducerTest {
         final String path = "/transact";
         final String path2 = "/transact2";
         final String tx = "tx:12345";
-        final URI uri = create(baseUrl + "/" + tx + path);
-        final URI uri2 = create(baseUrl + "/" + tx + path2);
-        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final String txUri = baseUrl + FcrepoConstants.TRANSACTION + "/12345";
+        final URI uri = create(baseUrl + path);
+        final URI uri2 = create(baseUrl + path2);
+        final URI commitUri = create(txUri);
         final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
@@ -708,7 +709,7 @@ public class FcrepoProducerTest {
         testEndpoint.setTransactionManager(txMgr);
 
         when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
-        when(mockClient2.post(eq(commitUri))).thenReturn(mockPostBuilder2);
+        when(mockClient2.put(eq(commitUri))).thenReturn(mockPutBuilder);
 
         init();
         TestUtils.setField(txMgr, "fcrepoClient", mockClient2);
@@ -719,9 +720,9 @@ public class FcrepoProducerTest {
         testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
 
         when(mockPostBuilder2.perform()).thenReturn(
-                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(baseUrl + "/" + tx)), null));
-        when(mockPostBuilder3.perform()).thenReturn(
-                new FcrepoResponse(commitUri, 201, emptyMap(), null));
+                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(txUri)), null));
+        when(mockPutBuilder.perform()).thenReturn(
+                new FcrepoResponse(commitUri, 204, emptyMap(), null));
 
         when(mockHeadBuilder.perform()).thenReturn(new FcrepoResponse(uri, 200, emptyMap(), null));
         when(mockClient.get(eq(uri))).thenReturn(mockGetBuilder2);
@@ -754,9 +755,11 @@ public class FcrepoProducerTest {
         final String path = "/transact";
         final String path2 = "/transact2";
         final String tx = "tx:12345";
-        final URI uri = create(baseUrl + "/" + tx + path);
-        final URI uri2 = create(baseUrl + "/" + tx + path2);
-        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final String txUri = baseUrl + FcrepoConstants.TRANSACTION + "/12345";
+        final URI uri = create(baseUrl + path);
+        final URI uri2 = create(baseUrl + path2);
+        final URI commitUri = create(txUri);
+        final URI rollbackUri = create(txUri);
         final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
@@ -778,11 +781,14 @@ public class FcrepoProducerTest {
         testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
 
         when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
-        when(mockClient2.post(eq(commitUri))).thenReturn(mockPostBuilder3);
+        when(mockClient2.put(eq(commitUri))).thenReturn(mockPutBuilder);
+        when(mockClient2.delete(eq(rollbackUri))).thenReturn(mockDeleteBuilder);
         when(mockPostBuilder2.perform()).thenReturn(
-                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(baseUrl + "/" + tx)), null));
-        when(mockPostBuilder3.perform()).thenReturn(
-                new FcrepoResponse(commitUri, 201, emptyMap(), null));
+                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(txUri)), null));
+        when(mockPutBuilder.perform()).thenReturn(
+                new FcrepoResponse(commitUri, 204, emptyMap(), null));
+        when(mockDeleteBuilder.perform()).thenReturn(
+                new FcrepoResponse(rollbackUri, 204, emptyMap(), null));
 
         when(mockHeadBuilder.perform()).thenReturn(new FcrepoResponse(uri, 200, emptyMap(), null));
         when(mockClient.get(eq(uri))).thenReturn(mockGetBuilder2);
