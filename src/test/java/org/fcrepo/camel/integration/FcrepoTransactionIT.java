@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
@@ -28,7 +29,6 @@ import org.fcrepo.camel.FcrepoTransactionManager;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -38,7 +38,13 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since November 7, 2014
  */
 
-//TODO Renable this test once transactional support for 6.x has been updated in the fcrepo-java-client
+// TODO Re-enable once FcrepoTransactionManager/FcrepoProducer are updated for the
+// Fedora 6/7 transaction API. The routes now build against Fedora 7 (the policy is
+// registered in createCamelContext below), but the tests fail at runtime with HTTP
+// 400/404 because the manager still uses the legacy Fedora 4/5 path-prefixed model
+// ({baseUrl}/{txId}/... and POST .../fcr:tx/fcr:commit). Fedora 6/7 instead expects a
+// transaction created via POST /fcr:tx, an "Atomic-ID: {tx-uri}" header on each request,
+// commit via PUT {tx-uri} and rollback via DELETE {tx-uri}.
 @Disabled
 public class FcrepoTransactionIT extends CamelTestSupport {
 
@@ -75,13 +81,12 @@ public class FcrepoTransactionIT extends CamelTestSupport {
     @Produce("direct:create")
     protected ProducerTemplate template;
 
-    // Camel 4 makes CamelTestSupport.setUp() final; a subclass @BeforeEach runs after
-    // the framework's own setup, matching the previous super.setUp()-first ordering.
-    @BeforeEach
-    public void setUpTransaction() throws Exception {
-        txTemplate = new TransactionTemplate(txMgr);
-        txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        txTemplate.afterPropertiesSet();
+    // Bind the transaction manager and policy before the routes are built. In Camel 4
+    // the framework creates routes during its own setup (before any @BeforeEach), so a
+    // route referencing the "required" policy fails to build unless it is registered here.
+    @Override
+    protected CamelContext createCamelContext() throws Exception {
+        final CamelContext context = super.createCamelContext();
 
         txMgr = new FcrepoTransactionManager();
         txMgr.setBaseUrl(FcrepoTestUtils.getFcrepoBaseUrl());
@@ -93,6 +98,11 @@ public class FcrepoTransactionIT extends CamelTestSupport {
         txPolicy.setTransactionManager(txMgr);
         txPolicy.setPropagationBehaviorName("PROPAGATION_REQUIRED");
         context.getRegistry().bind("required", txPolicy);
+
+        txTemplate = new TransactionTemplate(txMgr);
+        txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        txTemplate.afterPropertiesSet();
+        return context;
     }
 
     @Test
@@ -199,7 +209,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
             @Override
             public void configure() {
                 final String fcrepo_uri = FcrepoTestUtils.getFcrepoEndpointUri();
-                final String http4_uri = fcrepo_uri.replaceAll("fcrepo:", "http4:");
+                final String httpUri = fcrepo_uri.replaceAll("fcrepo:", "http:");
 
                 final Namespaces ns = new Namespaces("rdf", RDF.uri);
 
@@ -224,7 +234,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     .setHeader(FcrepoHeaders.FCREPO_IDENTIFIER).simple("${headers.TestIdentifierBase}/two")
@@ -234,11 +244,11 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/two")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     // this should throw an error
@@ -259,7 +269,7 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     .setHeader(FcrepoHeaders.FCREPO_IDENTIFIER).simple("${headers.TestIdentifierBase}/two")
@@ -269,11 +279,11 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/two")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     .setHeader(FcrepoHeaders.FCREPO_IDENTIFIER).simple("${headers.TestIdentifierBase}/three")
@@ -283,16 +293,16 @@ public class FcrepoTransactionIT extends CamelTestSupport {
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/one")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/two")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     .setHeader(Exchange.HTTP_PATH).simple("/fcrepo/rest${headers.TestIdentifierBase}/three")
                     .setHeader(Exchange.HTTP_METHOD).constant("GET")
-                    .to(http4_uri + "&throwExceptionOnFailure=false")
+                    .to(httpUri + "&throwExceptionOnFailure=false")
                     .to("mock:notfound")
 
                     .to("mock:transacted");
