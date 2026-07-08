@@ -6,7 +6,6 @@
 package org.fcrepo.camel.integration;
 
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -14,6 +13,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
+import static org.fcrepo.camel.FcrepoHeaders.ACCEPT_CONTENT_TYPE;
 import static org.fcrepo.camel.FcrepoProducer.DEFAULT_CONTENT_TYPE;
 
 /**
@@ -36,7 +36,7 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "application/ld+json");
-        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "application/ld+json");
+        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "application/ld+json");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -47,7 +47,7 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "application/rdf+xml");
-        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "application/rdf+xml");
+        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "application/rdf+xml");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -58,7 +58,7 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "application/n-triples");
-        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "application/n-triples");
+        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "application/n-triples");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -70,7 +70,7 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "text/turtle");
-        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "text/turtle");
+        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "text/turtle");
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -82,7 +82,7 @@ public class FcrepoContentTypeHeaderIT extends CamelTestSupport {
         resultEndpoint.expectedMessageCount(2);
 
         template.sendBodyAndHeader(null, "Accept", "text/rdf+n3");
-        template.sendBodyAndHeader(null, Exchange.ACCEPT_CONTENT_TYPE, "text/rdf+n3");
+        template.sendBodyAndHeader(null, ACCEPT_CONTENT_TYPE, "text/rdf+n3");
 
         resultEndpoint.assertIsSatisfied();
     }
