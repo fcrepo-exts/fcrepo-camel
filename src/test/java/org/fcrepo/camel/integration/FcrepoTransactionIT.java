@@ -8,6 +8,8 @@ package org.fcrepo.camel.integration;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_USERNAME;
 import static org.fcrepo.camel.integration.FcrepoTestUtils.FCREPO_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,7 @@ import org.fcrepo.camel.FcrepoHeaders;
 import org.fcrepo.camel.FcrepoTransactionManager;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
  * Test adding a new resource with POST
@@ -179,13 +182,12 @@ public class FcrepoTransactionIT extends CamelTestSupport {
         final String identifier = fullPath.replaceAll(FcrepoTestUtils.getFcrepoBaseUrl(), "");
 
         // Test the creation of several objects. The failing operation marks the
-        // fcrepo transaction rollback-only, so the transacted route completes with
-        // an UnexpectedRollbackException once the transaction is rolled back.
-        try {
-            template.sendBodyAndHeader("direct:transactWithError", null, "TestIdentifierBase", identifier);
-        } catch (final CamelExecutionException ex) {
-            // expected: the transaction was rolled back
-        }
+        // fcrepo transaction rollback-only, so the transacted route must complete
+        // with an UnexpectedRollbackException once the transaction is rolled back.
+        final CamelExecutionException ex = assertThrows(CamelExecutionException.class, () ->
+                template.sendBodyAndHeader("direct:transactWithError", null, "TestIdentifierBase", identifier));
+        assertTrue(ex.getCause() instanceof UnexpectedRollbackException,
+                "expected the transaction to be rolled back");
 
         // Test the object
         template.sendBodyAndHeader("direct:verifyMissing", null, FcrepoHeaders.FCREPO_IDENTIFIER, identifier + "/one");
@@ -224,6 +226,9 @@ public class FcrepoTransactionIT extends CamelTestSupport {
                     .to(fcrepo_uri)
                     .to("mock:created");
 
+                // The interleaved raw HTTP GETs below leave their (404) response body and
+                // text/html Content-Type on the exchange; reset both before each fcrepo write
+                // so the container-creating PUT/POST is not sent that leftover payload.
                 from("direct:transactWithError")
                     .transacted("required")
                     .setHeader(FcrepoHeaders.FCREPO_IDENTIFIER).simple("${headers.TestIdentifierBase}/one")

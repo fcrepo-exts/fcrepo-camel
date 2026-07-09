@@ -15,7 +15,6 @@ import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.jena.vocabulary.RDF;
 import org.fcrepo.camel.FcrepoHeaders;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import static java.util.UUID.randomUUID;
  * @author Aaron Coburn
  * @since November 7, 2014
  */
-@Disabled
 public class FcrepoPutIT extends CamelTestSupport {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";

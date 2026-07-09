@@ -11,13 +11,13 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.Exchange.DISABLE_HTTP_STREAM_CACHE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.fcrepo.camel.FcrepoConstants.FIXITY;
+import static org.fcrepo.camel.FcrepoHeaders.ACCEPT_CONTENT_TYPE;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_PREFER;
@@ -323,7 +323,7 @@ public class FcrepoProducer extends DefaultProducer {
     /**
      * Given an exchange, extract the value for use with an Accept header. The order of preference is:
      * 1) whether an accept value is set on the endpoint 2) a value set on
-     * the Exchange.ACCEPT_CONTENT_TYPE header 3) a value set on an "Accept" header
+     * the FcrepoHeaders.ACCEPT_CONTENT_TYPE header 3) a value set on an "Accept" header
      * 4) the endpoint DEFAULT_CONTENT_TYPE (i.e. application/rdf+xml)
      *
      * @param exchange the incoming message exchange

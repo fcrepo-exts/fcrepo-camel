@@ -6,14 +6,14 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>6.5.1</version>
+    <version>7.0.0</version>
   </parent>
 
   <groupId>org.fcrepo.camel</groupId>
   <artifactId>fcrepo-camel</artifactId>
   <packaging>jar</packaging>
 
-  <version>6.1.0-SNAPSHOT</version>
+  <version>7.0.0-SNAPSHOT</version>
 
   <name>Fcrepo Camel Component</name>
   <description>Camel Component for interacting with a Fedora Repository</description>
@@ -37,28 +37,28 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <camel.version>3.22.4</camel.version>
-    <commons.io.version>2.21.0</commons.io.version>
+    <camel.version>4.20.0</camel.version>
+    <commons.io.version>2.22.0</commons.io.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
-    <jena.version>4.10.0</jena.version>
-    <junit.version>5.10.2</junit.version>
-    <mockito.version>5.11.0</mockito.version>
-    <slf4j.version>1.7.36</slf4j.version>
-    <spring.version>5.3.39</spring.version>
-    <fcrepo.version>6.5.1</fcrepo.version>
+    <jena.version>6.1.0</jena.version>
+    <junit.version>6.1.1</junit.version>
+    <mockito.version>5.23.0</mockito.version>
+    <slf4j.version>2.0.17</slf4j.version>
+    <spring.version>7.0.8</spring.version>
+    <fcrepo.version>7.0.0</fcrepo.version>
     <fcrepo-java-client.version>6.2.0</fcrepo-java-client.version>
-    <jaxb.core.version>2.3.0.1</jaxb.core.version>
-    <javaee-api.version>8.0.1</javaee-api.version>
-    <javaee.xml.version>2.3.1</javaee.xml.version>
+    <jakarta.xml.bind.version>4.0.2</jakarta.xml.bind.version>
+    <jaxb.runtime.version>4.0.5</jaxb.runtime.version>
+    <pooled.jms.version>3.2.2</pooled.jms.version>
 
-    <logback.version>1.2.13</logback.version>
+    <logback.version>1.5.37</logback.version>
 
-    <failsafe.plugin.version>3.5.5</failsafe.plugin.version>
     <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
     <central-publishing-plugin.version>0.9.0</central-publishing-plugin.version>
 
     <!-- plugins -->
-    <jetty.version>9.4.58.v20250814</jetty.version>
+    <!-- Jetty 12 / EE10 to match the Fedora 7 webapp used in integration tests -->
+    <jetty.version>12.0.32</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
 
   </properties>
@@ -138,22 +138,19 @@
       <version>${fcrepo-java-client.version}</version>
     </dependency>
 
+    <!-- Jakarta XML Binding (JAXB) API + Glassfish runtime. Replaces the legacy
+      javax.xml.bind/com.sun JAXB shims now that the stack (Camel 4, Spring 7,
+      Jena 6) is Jakarta EE based. jaxb-runtime pulls in Jakarta Activation. -->
     <dependency>
-      <groupId>com.sun.activation</groupId>
-      <artifactId>javax.activation</artifactId>
-      <version>1.2.0</version>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>${jakarta.xml.bind.version}</version>
     </dependency>
-
-   <dependency>
-     <groupId>javax.xml.bind</groupId>
-     <artifactId>jaxb-api</artifactId>
-     <version>${javaee.xml.version}</version>
-   </dependency>
-   <dependency>
-     <groupId>com.sun.xml.bind</groupId>
-     <artifactId>jaxb-core</artifactId>
-     <version>${jaxb.core.version}</version>
-   </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>${jaxb.runtime.version}</version>
+    </dependency>
 
     <!-- logging -->
     <dependency>
@@ -212,6 +209,15 @@
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-activemq</artifactId>
       <version>${camel.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Camel 4's ActiveMQ component pools connections via messaginghub pooled-jms,
+      which is no longer pulled in transitively. Version aligned with camel-parent. -->
+    <dependency>
+      <groupId>org.messaginghub</groupId>
+      <artifactId>pooled-jms</artifactId>
+      <version>${pooled.jms.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -388,40 +394,38 @@
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
 
-        <!-- Launch jetty for integration testing with fedora -->
+        <!-- Launch jetty (EE10) for integration testing with the Fedora 7 webapp.
+          Connector and login service are configured here instead of a jetty.xml,
+          mirroring the fcrepo-webapp's own jetty-ee10-maven-plugin setup. -->
         <plugin>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-maven-plugin</artifactId>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-maven-plugin</artifactId>
           <version>${jetty.version}</version>
           <configuration>
-            <supportedPackagings>jar</supportedPackagings>
-            <systemProperties>
-              <force>true</force>
-              <systemProperty>
-                <name>fcrepo.home</name>
-                <value>${project.build.directory}/fcrepo-data</value>
-              </systemProperty>
-              <systemProperty>
-                <name>fcrepo.dynamic.test.port</name>
-                <value>${fcrepo.dynamic.test.port}</value>
-              </systemProperty>
-              <systemProperty>
-                <name>fcrepo.dynamic.jms.port</name>
-                <value>${fcrepo.dynamic.jms.port}</value>
-              </systemProperty>
-              <systemProperty>
-                <name>fcrepo.dynamic.stomp.port</name>
-                <value>${fcrepo.dynamic.stomp.port}</value>
-              </systemProperty>
-              <systemProperty>
-                <name>fcrepo.activemq.configuration</name>
-                <value>file:${project.build.directory}/test-classes/config/test_activemq.xml</value>
-              </systemProperty>
-            </systemProperties>
-            <scanIntervalSeconds>10</scanIntervalSeconds>
+            <supportedPackagings>
+              <supportedPackaging>jar</supportedPackaging>
+            </supportedPackagings>
             <stopKey>STOP</stopKey>
             <stopPort>${jetty.dynamic.stop.port}</stopPort>
-            <daemon>true</daemon>
+            <httpConnector>
+              <port>${fcrepo.dynamic.test.port}</port>
+              <idleTimeout>60000</idleTimeout>
+            </httpConnector>
+            <loginServices>
+              <loginService implementation="org.eclipse.jetty.security.HashLoginService">
+                <name>fcrepo</name>
+                <config implementation="org.eclipse.jetty.maven.MavenResource">
+                  <resourceAsString>${jetty.users.file}</resourceAsString>
+                </config>
+              </loginService>
+            </loginServices>
+            <systemProperties>
+              <fcrepo.home>${project.build.directory}/fcrepo-data</fcrepo.home>
+              <fcrepo.dynamic.test.port>${fcrepo.dynamic.test.port}</fcrepo.dynamic.test.port>
+              <fcrepo.dynamic.jms.port>${fcrepo.dynamic.jms.port}</fcrepo.dynamic.jms.port>
+              <fcrepo.dynamic.stomp.port>${fcrepo.dynamic.stomp.port}</fcrepo.dynamic.stomp.port>
+              <fcrepo.activemq.configuration>file:${project.build.directory}/test-classes/config/test_activemq.xml</fcrepo.activemq.configuration>
+            </systemProperties>
           </configuration>
           <executions>
             <execution>
@@ -431,11 +435,8 @@
                 <goal>start</goal>
               </goals>
               <configuration>
-                <jettyXml>${project.build.directory}/test-classes/jetty-test.xml</jettyXml>
-                <scanIntervalSeconds>0</scanIntervalSeconds>
-                <daemon>true</daemon>
                 <contextHandlers>
-                    <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
+                    <contextHandler implementation="org.eclipse.jetty.ee10.maven.plugin.MavenWebAppContext">
                       <war>${project.build.directory}/fcrepo.war</war>
                       <contextPath>/fcrepo</contextPath>
                     </contextHandler>

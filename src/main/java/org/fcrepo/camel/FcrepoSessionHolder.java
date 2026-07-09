@@ -10,8 +10,6 @@ package org.fcrepo.camel;
  * the current thread while a transaction is open so that a participating
  * (nested) transaction and the transaction that opened it share the same
  * session and rollback-only flag.
- *
- * @author Aaron Coburn
  */
 class FcrepoSessionHolder {
 

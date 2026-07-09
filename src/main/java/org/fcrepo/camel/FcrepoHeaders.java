@@ -30,6 +30,13 @@ public final class FcrepoHeaders {
 
     public static final String FCREPO_EVENT_ID = "CamelFcrepoEventId";
 
+    /**
+     * The requested response content type. Replaces the {@code ACCEPT_CONTENT_TYPE}
+     * constant removed from {@code org.apache.camel.Exchange} in Camel 4, keeping the
+     * original {@code "CamelAcceptContentType"} value so existing routes continue to work.
+     */
+    public static final String ACCEPT_CONTENT_TYPE = "CamelAcceptContentType";
+
     private FcrepoHeaders() {
         // prevent instantiation
     }

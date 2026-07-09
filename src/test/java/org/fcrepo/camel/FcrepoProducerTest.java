@@ -9,7 +9,7 @@ import static java.net.URI.create;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.apache.camel.Exchange.ACCEPT_CONTENT_TYPE;
+import static org.fcrepo.camel.FcrepoHeaders.ACCEPT_CONTENT_TYPE;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.DISABLE_HTTP_STREAM_CACHE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.converter.stream.InputStreamCache;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.engine.DefaultUnitOfWork;
@@ -717,7 +716,7 @@ public class FcrepoProducerTest {
         uow.beginTransactedBy((Object)tx);
 
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
-        testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
 
         when(mockPostBuilder2.perform()).thenReturn(
                 new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(txUri)), null));
@@ -742,7 +741,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(HTTP_METHOD, "GET");
         testExchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, N_TRIPLES);
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path2);
-        testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
         testProducer.process(testExchange);
         assertEquals(status, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
         assertEquals(N_TRIPLES, testExchange.getIn().getHeader(CONTENT_TYPE, String.class));
@@ -778,7 +777,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
         testExchange.getIn().setHeader(CONTENT_TYPE, TestUtils.TEXT_PLAIN);
         testExchange.getIn().setBody(new ByteArrayInputStream("Test".getBytes()));
-        testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
 
         when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
         when(mockClient2.put(eq(commitUri))).thenReturn(mockPutBuilder);
@@ -807,7 +806,7 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(HTTP_METHOD, "GET");
         testExchange.getIn().setHeader(ACCEPT_CONTENT_TYPE, N_TRIPLES);
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path2);
-        testExchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
         assertThrows(RuntimeException.class, () -> testProducer.process(testExchange));
     }
 
