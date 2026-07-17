@@ -257,6 +257,12 @@
     <plugins>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <!-- release-plugin 3.x no longer sets performRelease itself; the
+            property activates the parent's release-sign-artifacts (GPG)
+            profile in the forked release:perform build -->
+          <arguments>-DperformRelease=true</arguments>
+        </configuration>
       </plugin>
 
       <!-- Publish releases to Maven Central via Sonatype Central Portal -->
@@ -392,6 +398,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <!-- Attach a sources jar (execution inherited from fcrepo-parent's
+        pluginManagement); required by the Central Portal for releases -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
         <!-- Launch jetty (EE10) for integration testing with the Fedora 7 webapp.
