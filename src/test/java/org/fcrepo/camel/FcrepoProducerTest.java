@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -693,9 +694,10 @@ public class FcrepoProducerTest {
         final String path = "/transact";
         final String path2 = "/transact2";
         final String tx = "tx:12345";
-        final URI uri = create(baseUrl + "/" + tx + path);
-        final URI uri2 = create(baseUrl + "/" + tx + path2);
-        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final String txUri = baseUrl + FcrepoConstants.TRANSACTION + "/12345";
+        final URI uri = create(baseUrl + path);
+        final URI uri2 = create(baseUrl + path2);
+        final URI commitUri = create(txUri);
         final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
@@ -707,7 +709,7 @@ public class FcrepoProducerTest {
         testEndpoint.setTransactionManager(txMgr);
 
         when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
-        when(mockClient2.post(eq(commitUri))).thenReturn(mockPostBuilder2);
+        when(mockClient2.put(eq(commitUri))).thenReturn(mockPutBuilder);
 
         init();
         TestUtils.setField(txMgr, "fcrepoClient", mockClient2);
@@ -718,9 +720,9 @@ public class FcrepoProducerTest {
         testExchange.getExchangeExtension().setUnitOfWork(uow);
 
         when(mockPostBuilder2.perform()).thenReturn(
-                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(baseUrl + "/" + tx)), null));
-        when(mockPostBuilder3.perform()).thenReturn(
-                new FcrepoResponse(commitUri, 201, emptyMap(), null));
+                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(txUri)), null));
+        when(mockPutBuilder.perform()).thenReturn(
+                new FcrepoResponse(commitUri, 204, emptyMap(), null));
 
         when(mockHeadBuilder.perform()).thenReturn(new FcrepoResponse(uri, 200, emptyMap(), null));
         when(mockClient.get(eq(uri))).thenReturn(mockGetBuilder2);
@@ -753,9 +755,11 @@ public class FcrepoProducerTest {
         final String path = "/transact";
         final String path2 = "/transact2";
         final String tx = "tx:12345";
-        final URI uri = create(baseUrl + "/" + tx + path);
-        final URI uri2 = create(baseUrl + "/" + tx + path2);
-        final URI commitUri = URI.create(baseUrl + "/" + tx + FcrepoConstants.COMMIT);
+        final String txUri = baseUrl + FcrepoConstants.TRANSACTION + "/12345";
+        final URI uri = create(baseUrl + path);
+        final URI uri2 = create(baseUrl + path2);
+        final URI commitUri = create(txUri);
+        final URI rollbackUri = create(txUri);
         final URI beginUri = URI.create(baseUrl + FcrepoConstants.TRANSACTION);
         final int status = 200;
         final ByteArrayInputStream body = new ByteArrayInputStream(TestUtils.rdfXml.getBytes());
@@ -777,11 +781,14 @@ public class FcrepoProducerTest {
         testExchange.getExchangeExtension().setUnitOfWork(uow);
 
         when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
-        when(mockClient2.post(eq(commitUri))).thenReturn(mockPostBuilder3);
+        when(mockClient2.put(eq(commitUri))).thenReturn(mockPutBuilder);
+        when(mockClient2.delete(eq(rollbackUri))).thenReturn(mockDeleteBuilder);
         when(mockPostBuilder2.perform()).thenReturn(
-                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(baseUrl + "/" + tx)), null));
-        when(mockPostBuilder3.perform()).thenReturn(
-                new FcrepoResponse(commitUri, 201, emptyMap(), null));
+                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(txUri)), null));
+        when(mockPutBuilder.perform()).thenReturn(
+                new FcrepoResponse(commitUri, 204, emptyMap(), null));
+        when(mockDeleteBuilder.perform()).thenReturn(
+                new FcrepoResponse(rollbackUri, 204, emptyMap(), null));
 
         when(mockHeadBuilder.perform()).thenReturn(new FcrepoResponse(uri, 200, emptyMap(), null));
         when(mockClient.get(eq(uri))).thenReturn(mockGetBuilder2);
@@ -802,6 +809,61 @@ public class FcrepoProducerTest {
         testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path2);
         testExchange.getExchangeExtension().setUnitOfWork(uow);
         assertThrows(RuntimeException.class, () -> testProducer.process(testExchange));
+    }
+
+    @Test
+    public void testTransactedWriteProducer() throws Exception {
+        final String baseUrl = "http://localhost:8080/rest";
+        final String path = "/transact";
+        final String tx = "tx:12345";
+        final String txUri = baseUrl + FcrepoConstants.TRANSACTION + "/12345";
+        final URI uri = create(baseUrl + path);
+        final URI commitUri = create(txUri);
+        final URI beginUri = create(baseUrl + FcrepoConstants.TRANSACTION);
+        final DefaultUnitOfWork uow = new DefaultUnitOfWork(testExchange);
+        final FcrepoTransactionManager txMgr = new FcrepoTransactionManager();
+        txMgr.setBaseUrl(baseUrl);
+
+        testEndpoint.setTransactionManager(txMgr);
+
+        when(mockClient2.post(eq(beginUri))).thenReturn(mockPostBuilder2);
+        when(mockClient2.put(eq(commitUri))).thenReturn(mockPutBuilder);
+
+        init();
+        TestUtils.setField(txMgr, "fcrepoClient", mockClient2);
+
+        when(mockPostBuilder2.perform()).thenReturn(
+                new FcrepoResponse(beginUri, 201, singletonMap("Location", singletonList(txUri)), null));
+        when(mockPutBuilder.perform()).thenReturn(new FcrepoResponse(commitUri, 204, emptyMap(), null));
+
+        // The HEAD builder serves both the HEAD request and the metadata lookup used by PATCH.
+        when(mockHeadBuilder.perform()).thenReturn(new FcrepoResponse(uri, 200, emptyMap(), null));
+        when(mockDeleteBuilder.perform()).thenReturn(new FcrepoResponse(uri, 204, emptyMap(), null));
+        when(mockPatchBuilder.perform()).thenReturn(new FcrepoResponse(uri, 204, emptyMap(), null));
+
+        // DELETE within a transaction: sends the Atomic-ID header, no path prefixing.
+        uow.beginTransactedBy((Object)tx);
+        testExchange.getIn().setHeader(FCREPO_IDENTIFIER, path);
+        testExchange.getIn().setHeader(HTTP_METHOD, "DELETE");
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
+        testProducer.process(testExchange);
+        assertEquals(204, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+
+        // HEAD within a transaction.
+        testExchange.getIn().setHeader(HTTP_METHOD, "HEAD");
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
+        testProducer.process(testExchange);
+        assertEquals(200, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+
+        // PATCH within a transaction, which also exercises the transactional metadata HEAD lookup.
+        testExchange.getIn().setBody(new ByteArrayInputStream("sparql".getBytes()));
+        testExchange.getIn().setHeader(HTTP_METHOD, "PATCH");
+        testExchange.getExchangeExtension().setUnitOfWork(uow);
+        testProducer.process(testExchange);
+        assertEquals(204, testExchange.getIn().getHeader(HTTP_RESPONSE_CODE));
+
+        verify(mockDeleteBuilder).addTransaction(create(txUri));
+        verify(mockPatchBuilder).addTransaction(create(txUri));
     }
 
     @Test

@@ -5,8 +5,6 @@
  */
 package org.fcrepo.camel;
 
-import static org.fcrepo.camel.FcrepoConstants.COMMIT;
-import static org.fcrepo.camel.FcrepoConstants.ROLLBACK;
 import static org.fcrepo.camel.FcrepoConstants.TRANSACTION;
 import static org.fcrepo.client.FcrepoClient.client;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -23,6 +21,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * A Transaction Manager for interacting with fedora-based transactions
@@ -141,27 +140,30 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
             }
 
             if (response != null && response.getLocation() != null) {
-                tx.setSessionId(response.getLocation().toString().substring(baseUrl.length() + 1));
+                // The Location header holds the full transaction URI, which is
+                // used as the value of the Atomic-ID header on subsequent requests.
+                tx.setSessionId(response.getLocation().toString());
             } else {
                 throw new CannotCreateTransactionException("Invalid response while creating transaction");
             }
         }
+
+        // Bind the transaction to the current thread so that in-transaction
+        // operations (and any nested PROPAGATION_REQUIRED templates) participate
+        // in this single fcrepo transaction rather than starting their own.
+        TransactionSynchronizationManager.bindResource(this, tx.getHolder());
     }
 
     @Override
     protected void doCommit(final DefaultTransactionStatus status) {
         final FcrepoTransactionObject tx = (FcrepoTransactionObject)status.getTransaction();
-        final InputStream is = null;
-        final String contentType = null;
 
         try {
-            getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + COMMIT))
-                .body(is, contentType).perform();
+            // Commit the transaction with a PUT to the transaction URI.
+            getClient().put(URI.create(tx.getSessionId())).perform();
         } catch (final FcrepoOperationFailedException ex) {
             LOGGER.debug("Transaction commit failed: ", ex);
             throw new TransactionSystemException("Could not commit fcrepo transaction");
-        } finally {
-            tx.setSessionId(null);
         }
     }
 
@@ -170,18 +172,49 @@ public class FcrepoTransactionManager extends AbstractPlatformTransactionManager
         final FcrepoTransactionObject tx = (FcrepoTransactionObject)status.getTransaction();
 
         try {
-            getClient().post(URI.create(baseUrl + "/" + tx.getSessionId() + ROLLBACK)).perform();
+            // Roll back the transaction with a DELETE to the transaction URI.
+            getClient().delete(URI.create(tx.getSessionId())).perform();
         } catch (final FcrepoOperationFailedException ex) {
             LOGGER.debug("Transaction rollback failed: ", ex);
             throw new TransactionSystemException("Could not rollback fcrepo transaction");
-        } finally {
-            tx.setSessionId(null);
         }
     }
 
     @Override
     protected Object doGetTransaction() {
-        return new FcrepoTransactionObject();
+        // Reuse the session bound to the current thread, if any, so that nested
+        // transaction templates participate in the active fcrepo transaction.
+        final FcrepoTransactionObject tx = new FcrepoTransactionObject();
+        final FcrepoSessionHolder holder =
+            (FcrepoSessionHolder) TransactionSynchronizationManager.getResource(this);
+        if (holder != null) {
+            tx.setHolder(holder);
+        }
+        return tx;
+    }
+
+    @Override
+    protected boolean isExistingTransaction(final Object transaction) {
+        return ((FcrepoTransactionObject)transaction).getSessionId() != null;
+    }
+
+    @Override
+    protected void doSetRollbackOnly(final DefaultTransactionStatus status) {
+        // Mark the shared session holder rollback-only so that the transaction
+        // that opened it rolls back when it completes.
+        final FcrepoSessionHolder holder = ((FcrepoTransactionObject)status.getTransaction()).getHolder();
+        if (holder != null) {
+            holder.setRollbackOnly(true);
+        }
+    }
+
+    @Override
+    protected void doCleanupAfterCompletion(final Object transaction) {
+        // Unbind the thread-bound session once the transaction has completed.
+        if (TransactionSynchronizationManager.hasResource(this)) {
+            TransactionSynchronizationManager.unbindResource(this);
+        }
+        ((FcrepoTransactionObject)transaction).setSessionId(null);
     }
 
     private FcrepoClient getClient() {

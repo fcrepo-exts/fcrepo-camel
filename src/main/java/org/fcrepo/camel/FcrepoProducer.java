@@ -43,8 +43,13 @@ import org.apache.camel.util.IOHelper;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
+import org.fcrepo.client.DeleteBuilder;
 import org.fcrepo.client.GetBuilder;
+import org.fcrepo.client.HeadBuilder;
 import org.fcrepo.client.HttpMethods;
+import org.fcrepo.client.PatchBuilder;
+import org.fcrepo.client.PostBuilder;
+import org.fcrepo.client.PutBuilder;
 import org.slf4j.Logger;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
@@ -152,7 +157,10 @@ public class FcrepoProducer extends DefaultProducer {
         final HttpMethods method = getMethod(exchange);
         final String contentType = getContentType(exchange);
         final String accept = getAccept(exchange);
-        final String url = getUrl(exchange, transaction);
+        final String url = getUrl(exchange);
+        // When running inside a transaction, the session id holds the full transaction
+        // URI that must be sent as the Atomic-ID header on each request.
+        final URI txUri = isBlank(transaction) ? null : URI.create(transaction);
 
         LOGGER.debug("Fcrepo Request [{}] with method [{}]", url, method);
 
@@ -160,28 +168,53 @@ public class FcrepoProducer extends DefaultProducer {
 
         switch (method) {
         case PATCH:
-            response = fcrepoClient.patch(getMetadataUri(url)).body(in.getBody(InputStream.class)).perform();
+            final PatchBuilder patch = fcrepoClient.patch(getMetadataUri(url, txUri))
+                .body(in.getBody(InputStream.class));
+            if (txUri != null) {
+                patch.addTransaction(txUri);
+            }
+            response = patch.perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case PUT:
-            response = fcrepoClient.put(URI.create(url)).body(in.getBody(InputStream.class), contentType).perform();
+            final PutBuilder put = fcrepoClient.put(URI.create(url)).body(in.getBody(InputStream.class), contentType);
+            if (txUri != null) {
+                put.addTransaction(txUri);
+            }
+            response = put.perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case POST:
-            response = fcrepoClient.post(URI.create(url)).body(in.getBody(InputStream.class), contentType).perform();
+            final PostBuilder post = fcrepoClient.post(URI.create(url))
+                .body(in.getBody(InputStream.class), contentType);
+            if (txUri != null) {
+                post.addTransaction(txUri);
+            }
+            response = post.perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case DELETE:
-            response = fcrepoClient.delete(URI.create(url)).perform();
+            final DeleteBuilder delete = fcrepoClient.delete(URI.create(url));
+            if (txUri != null) {
+                delete.addTransaction(txUri);
+            }
+            response = delete.perform();
             exchange.getIn().setBody(extractResponseBodyAsStream(response.getBody(), exchange));
             break;
         case HEAD:
-            response = fcrepoClient.head(URI.create(url)).perform();
+            final HeadBuilder head = fcrepoClient.head(URI.create(url));
+            if (txUri != null) {
+                head.addTransaction(txUri);
+            }
+            response = head.perform();
             exchange.getIn().setBody(null);
             break;
         case GET:
         default:
-            final GetBuilder get = fcrepoClient.get(getUri(endpoint, url)).accept(accept);
+            final GetBuilder get = fcrepoClient.get(getUri(endpoint, url, txUri)).accept(accept);
+            if (txUri != null) {
+                get.addTransaction(txUri);
+            }
             final String preferHeader = in.getHeader(FCREPO_PREFER, "", String.class);
             if (!preferHeader.isEmpty()) {
                 final FcrepoPrefer prefer = new FcrepoPrefer(preferHeader);
@@ -210,11 +243,12 @@ public class FcrepoProducer extends DefaultProducer {
         exchange.getIn().setHeader(HTTP_RESPONSE_CODE, response.getStatusCode());
     }
 
-    private URI getUri(final FcrepoEndpoint endpoint, final String url) throws FcrepoOperationFailedException {
+    private URI getUri(final FcrepoEndpoint endpoint, final String url, final URI txUri)
+            throws FcrepoOperationFailedException {
         if (endpoint.getFixity()) {
             return URI.create(url + FIXITY);
         } else if (endpoint.getMetadata()) {
-            return getMetadataUri(url);
+            return getMetadataUri(url, txUri);
         }
         return URI.create(url);
     }
@@ -238,9 +272,13 @@ public class FcrepoProducer extends DefaultProducer {
     /**
      * Retrieve the resource location from a HEAD request.
      */
-    private URI getMetadataUri(final String url)
+    private URI getMetadataUri(final String url, final URI txUri)
             throws FcrepoOperationFailedException {
-        final FcrepoResponse headResponse = fcrepoClient.head(URI.create(url)).perform();
+        final HeadBuilder head = fcrepoClient.head(URI.create(url));
+        if (txUri != null) {
+            head.addTransaction(txUri);
+        }
+        final FcrepoResponse headResponse = head.perform();
         if (headResponse.getLocation() != null) {
             return headResponse.getLocation();
         } else {
@@ -326,7 +364,7 @@ public class FcrepoProducer extends DefaultProducer {
      *
      * @param exchange the incoming message exchange
      */
-    private String getUrl(final Exchange exchange, final String transaction) {
+    private String getUrl(final Exchange exchange) {
         final String uri = exchange.getIn().getHeader(FCREPO_URI, "", String.class);
         if (!uri.isEmpty()) {
             return uri;
@@ -334,10 +372,6 @@ public class FcrepoProducer extends DefaultProducer {
 
         final String baseUrl = exchange.getIn().getHeader(FCREPO_BASE_URL, "", String.class);
         final StringBuilder url = new StringBuilder(baseUrl.isEmpty() ? endpoint.getBaseUrlWithScheme() : baseUrl);
-        if (transaction != null) {
-            url.append("/");
-            url.append(transaction);
-        }
         url.append(exchange.getIn().getHeader(FCREPO_IDENTIFIER, "", String.class));
 
         return url.toString();
