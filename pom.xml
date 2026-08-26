@@ -37,7 +37,7 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <camel.version>4.20.0</camel.version>
+    <camel.version>4.21.0</camel.version>
     <commons.io.version>2.22.0</commons.io.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
     <jena.version>6.1.0</jena.version>
