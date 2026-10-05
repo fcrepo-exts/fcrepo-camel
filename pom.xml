@@ -46,7 +46,7 @@
     <slf4j.version>2.0.17</slf4j.version>
     <spring.version>7.0.8</spring.version>
     <fcrepo.version>7.0.0</fcrepo.version>
-    <fcrepo-java-client.version>6.2.0</fcrepo-java-client.version>
+    <fcrepo-java-client.version>7.0.0</fcrepo-java-client.version>
     <jakarta.xml.bind.version>4.0.2</jakarta.xml.bind.version>
     <jaxb.runtime.version>4.0.5</jaxb.runtime.version>
     <pooled.jms.version>3.2.2</pooled.jms.version>

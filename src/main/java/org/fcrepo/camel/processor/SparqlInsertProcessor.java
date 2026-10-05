@@ -7,7 +7,7 @@ package org.fcrepo.camel.processor;
 
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 import static org.apache.camel.Exchange.HTTP_METHOD;
-import static org.apache.http.entity.ContentType.parse;
+import static org.apache.hc.core5.http.ContentType.parse;
 import static org.apache.jena.rdf.model.ModelFactory.createDefaultModel;
 import static org.apache.jena.riot.RDFDataMgr.read;
 import static org.apache.jena.riot.RDFLanguages.contentTypeToLang;
